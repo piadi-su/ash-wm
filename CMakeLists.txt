@@ -20,6 +20,7 @@ target_compile_options(ash-wm PRIVATE
 
 target_link_libraries(ash-wm PRIVATE
     X11
+	Xinerama
     # Xft
     # fontconfig
     # freetype

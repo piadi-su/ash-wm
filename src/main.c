@@ -4,8 +4,11 @@
 #include <X11/XF86keysym.h>
 #include <X11/keysym.h>
 #include <X11/XKBlib.h>
-#include <stdlib.h>
+
+#include <X11/extensions/Xinerama.h>
+
 #include <signal.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
 
@@ -13,8 +16,27 @@
 #include "config.h"
 
 
+//miei define
+
+#define MAX_MONITORS 4
+
+
+
+// strcut per definere monitors,
+typedef struct {
+	int id;
+	int x,y;
+	int width,height;
+} Monitors ;
+
+static Monitors monitors[MAX_MONITORS];
+static int monitors_count = {0};
+
+
+//strcut per client/finestre
 typedef struct Client {
 	Window id;
+	int monitor_id;
 	struct Client *next;
 	struct Client *prev;
 
@@ -22,12 +44,16 @@ typedef struct Client {
 
 static Client *list_Cl = NULL;
 
+
+
+
+
 /*
  * add a new window to the list 
  * from the Ev Ev.xmaprequest.window
  * */
 void 
-AddWindowList(Window w)
+AddWindowList(Display *disp, Window w, Window root)
 {
 	//creo nuovo client e tolgo il garbage
 	Client *new_window = calloc(1, sizeof(Client));
@@ -36,6 +62,28 @@ AddWindowList(Window w)
 	
 	//aggiungimo la window nel id della strct 
 	new_window->id = w;
+	new_window->monitor_id = 0;
+	
+	
+	//le usiamo per capire dove sta il mouse sullo schemro
+	Window dummy_win;
+    int dummy_int;
+    unsigned int dummy_mask;
+    int mouse_x, mouse_y;
+
+	//chiediamo a x11 le cordinate del cursore
+	XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
+
+
+	for (int i = 0; i < monitors_count; i++) {
+		if (mouse_x >= monitors[i].x && mouse_x < (monitors[i].x + monitors[i].width) &&
+				mouse_y >= monitors[i].y && mouse_y < (monitors[i].y + monitors[i].height)) {
+			new_window->monitor_id = i; // Trovato!
+			break;
+		}
+	}
+
+	printf("[ASH-WM] Finestra %lu assegnata al Monitor %d\n", w, new_window->monitor_id);
 
 		
 	//se la lista é nulla la inizializzo con il nuovo client
@@ -98,13 +146,50 @@ int main(void)
 	// svuota il buffer dove stanno le finestre in coda perche x11 e asincrono 
 	XSync(disp, False);
 
-
+	
+	//for per leggere tasti da config.h
 	for(int i = 0 ; i < num_keys; i++)
 	{
 		// immagino prenda il codice di ogni keybinds nel array di struct KeYBinds
 		KeyCode code = XKeysymToKeycode(disp, keys[i].keysym);
 		XGrabKey(disp, code, keys[i].mod, root, True, GrabModeAsync, GrabModeAsync); // prende i tasti/sequesta dalla root win
 	}
+	
+
+	if(XineramaIsActive(disp))
+	{
+		int n;
+		XineramaScreenInfo *info = XineramaQueryScreens(disp, &n);
+
+		monitors_count = n < MAX_MONITORS ? n : MAX_MONITORS;
+
+		
+		for(int i = 0; i < monitors_count; i++)
+		{
+			monitors[i].id = info[i].screen_number;
+			monitors[i].x = info[i].x_org;
+			monitors[i].y = info[i].y_org;
+			monitors[i].width = info[i].width;
+			monitors[i].height = info[i].height;
+
+
+			printf("[ASH-WM] Salvato Monitor %d: X=%d, Y=%d, W=%d, H=%d\n", 
+               i, monitors[i].x, monitors[i].y, monitors[i].width, monitors[i].height);
+		}
+		XFree(info);
+	}
+	else
+	{
+		monitors_count = 1;
+		monitors[0].id = 0;
+		monitors[0].x = 0;
+		monitors[0].y = 0;
+		monitors[0].width = DisplayWidth(disp, sc);
+		monitors[0].height = DisplayHeight(disp, sc);
+	}
+	
+
+
 
 	while(1)
 	{
@@ -114,7 +199,7 @@ int main(void)
 		switch (Ev.type) {
 
 			case MapRequest:	 
-				AddWindowList(Ev.xmaprequest.window);
+				AddWindowList(disp, Ev.xmaprequest.window, root );
 
 				printf("[+] nuova finestra id: %lu\n", Ev.xmaprequest.window);
 
