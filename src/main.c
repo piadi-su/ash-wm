@@ -103,7 +103,7 @@ int main(void)
 	{
 		// immagino prenda il codice di ogni keybinds nel array di struct KeYBinds
 		KeyCode code = XKeysymToKeycode(disp, keys[i].keysym);
-		XGrabKey(Display *, int, unsigned int, Window, int, int, int)
+		XGrabKey(disp, code, keys[i].mod, root, True, GrabModeAsync, GrabModeAsync); // prende i tasti/sequesta dalla root win
 	}
 
 	while(1)
@@ -123,6 +123,23 @@ int main(void)
 				break;
 
 				
+			
+			case KeyPress:
+				for(int i = 0 ; i < num_keys; i++)
+				{
+				    if(	(Ev.xkey.keycode == XKeysymToKeycode(disp, keys[i].keysym)) 
+						&& (Ev.xkey.state & keys[i].mod))
+					{
+						if(fork() == 0)
+						{
+							execvp(keys[i].cmd[0], keys[i].cmd);
+							exit(0);
+						}
+					}
+				}
+
+				break;
+
 
 			case DestroyNotify:	 // questo é Window w
 				break;
