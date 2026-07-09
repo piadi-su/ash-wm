@@ -57,7 +57,7 @@ AddWindowList(Window w)
 		new_window->next = list_Cl; // l'ultima finesta ha come next la prima
 		new_window->prev = list_Cl->prev; // l'ultima  ha come prev la penutlima
 		list_Cl->prev->next = new_window; // dicimao alla pen ultima che era il suo next é la ultima creata
-		list_Cl->next = new_window; // diciamo alla prima che come precendeta ha l'ultima
+		list_Cl->prev = new_window; // diciamo alla prima che come precendeta ha l'ultima
 	}
 
 
@@ -93,7 +93,7 @@ int main(void)
 
 
 	//serve ad un programma a registrarsi in coda 
-	XSelectInput(disp, root, SubstructureRedirectMask | SubstructureNotifyMask);
+	XSelectInput(disp, root, SubstructureRedirectMask | SubstructureNotifyMask | KeyPressMask);
 
 	// svuota il buffer dove stanno le finestre in coda perche x11 e asincrono 
 	XSync(disp, False);

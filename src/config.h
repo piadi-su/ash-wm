@@ -17,7 +17,7 @@ typedef struct {
 //tutti i conandi
 static char *term_cmd[] = {"alacritty", NULL};
 static char *clock_cmd[] = {"xclock", NULL};
-static char *firefox_cmd[] = {"firefox", NULL};
+// static char *firefox_cmd[] = {"firefox", NULL};
 static char *rofi_cmd[] = {"rofi", "-show", "drun", NULL};
 static char *close_wm[] = {"killall", "ash-wm", NULL};
 
