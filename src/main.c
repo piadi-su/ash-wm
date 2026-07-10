@@ -293,14 +293,25 @@ void MoveToWorkspace(Display *disp, Window root, int target_local_id) {
     if(source_ws == -1) return;
 
 
+	
+	// Chiedi a X11 dove si trova il mouse per capire su quale monitor vuoi mandare la finestra
+    Window dummy_win;
+    int dummy_int;
+    unsigned int dummy_mask;
+    int mouse_x, mouse_y;
+    int target_monitor = 0;
 
-    int current_monitor_of_window = source_ws / WORKSPACES_X_MONITOR;
-    int target_monitor = current_monitor_of_window;
-    
-    if (monitors_count > 1) {
-        target_monitor = (current_monitor_of_window == 0) ? 1 : 0;
+    XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
+
+    for (int i = 0; i < monitors_count; i++) {
+        if (mouse_x >= monitors[i].x && mouse_x < (monitors[i].x + monitors[i].width) &&
+            mouse_y >= monitors[i].y && mouse_y < (monitors[i].y + monitors[i].height)) {
+            target_monitor = i;
+            break;
+        }
     }
 
+    // Calcola il workspace di destinazione corretto in base al monitor del mouse
     int ws_target = (target_monitor * WORKSPACES_X_MONITOR) + (target_local_id % WORKSPACES_X_MONITOR);
     if(source_ws == ws_target) return;
 
