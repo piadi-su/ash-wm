@@ -78,13 +78,55 @@ static Workspace workspaces[WORKSPACES];
 
 
 //func to change worksapce focus
-void 
-FocusWindow(Display *disp, Window w) {
-    if (w != None) {
-        XSetInputFocus(disp, w, RevertToParent, CurrentTime);
-        // Opzionale: porta la finestra in cima visivamente
-        XRaiseWindow(disp, w); 
+// Funzione corretta per gestire il focus e aggiornare i bordi
+void FocusWindow(Display *disp, Window w) {
+    if (w == None) return;
+
+    // 1. Assegna il focus reale di X11
+    XSetInputFocus(disp, w, RevertToParent, CurrentTime);
+    XRaiseWindow(disp, w);
+
+    // 2. Trova in quale workspace si trova la finestra per aggiornare i bordi di quel WS
+    int target_ws = -1;
+    Client *found = NULL;
+
+    for (int i = 0; i < WORKSPACES; i++) {
+        Client *cursor = workspaces[i].list_Cl;
+        if (cursor != NULL) {
+            do {
+                if (cursor->id == w) {
+                    target_ws = i;
+                    found = cursor;
+                    break;
+                }
+                cursor = cursor->next;
+            } while (cursor != workspaces[i].list_Cl);
+        }
+        if (target_ws != -1) break;
     }
+
+    // Se non abbiamo trovato la finestra nei nostri workspace, usciamo
+    if (target_ws == -1 || found == NULL) return;
+
+    // 3. Aggiorna visivamente i bordi di tutte le finestre SOLO nel workspace della finestra focalizzata
+    Client *curr = workspaces[target_ws].list_Cl;
+    if (curr == NULL) return;
+
+    do {
+        // Applica lo spessore del bordo prima di colorarlo
+        XSetWindowBorderWidth(disp, curr->id, BORDER_WIDTH);
+        
+        if (curr->id == w) {
+            // Colore Focus
+            XSetWindowBorder(disp, curr->id, GetXColor(disp, COLOR_FOCUS));
+        } else {
+            // Colore Unfocus
+            XSetWindowBorder(disp, curr->id, GetXColor(disp, COLOR_UNFOCUS));
+        }
+        curr = curr->next;
+    } while (curr != workspaces[target_ws].list_Cl);
+
+    XFlush(disp);
 }
 
 /*
@@ -668,7 +710,65 @@ MoveWindowToMonitor(Display *disp, Window root)
     XSync(disp, False);
 }
 
+unsigned long GetXColor(Display *disp, unsigned long hex_color)
+{
+	XColor col;
+	col.red   = ((hex_color >> 16) & 0xFF) * 257;
+    col.green = ((hex_color >> 8)  & 0xFF) * 257;
+    col.blue  = (hex_color         & 0xFF) * 257;
+    col.flags = DoRed | DoGreen | DoBlue;
+    XAllocColor(disp, DefaultColormap(disp, DefaultScreen(disp)), &col);
+    return col.pixel;
+}
 
+
+void CycleFocus(Display *disp, int direction) {
+    Window dummy_win;
+    int dummy_int;
+    unsigned int dummy_mask;
+    int mouse_x, mouse_y;
+    int mon_idx = 0;
+
+    // FIX: Troviamo il monitor attivo tramite puntatore per ottenere il Workspace corrente
+    XQueryPointer(disp, DefaultRootWindow(disp), &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
+    for (int i = 0; i < monitors_count; i++) {
+        if (mouse_x >= monitors[i].x && mouse_x < (monitors[i].x + monitors[i].width) &&
+            mouse_y >= monitors[i].y && mouse_y < (monitors[i].y + monitors[i].height)) {
+            mon_idx = i;
+            break;
+        }
+    }
+
+    int ws = monitors[mon_idx].current_ws; 
+    Client *head = workspaces[ws].list_Cl;
+    if (head == NULL) return; 
+
+    Window current_focus;
+    int revert_to;
+    XGetInputFocus(disp, &current_focus, &revert_to);
+
+    Client *curr = head;
+    Client *target = NULL;
+
+    do {
+        if (curr->id == current_focus) {
+            target = curr;
+            break;
+        }
+        curr = cursor->next; // Nota: avevi usato curr in precedenza, uniformato qui
+    } while (curr != head);
+
+    if (target == NULL) {
+        FocusWindow(disp, head->id);
+        return;
+    }
+
+    Client *next_node = (direction == 1) ? target->next : target->prev;
+
+    if (next_node != NULL) {
+        FocusWindow(disp, next_node->id);
+    }
+}
 
 
 

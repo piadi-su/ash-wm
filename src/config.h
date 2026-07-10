@@ -13,8 +13,8 @@ typedef struct {
 	int arg;
 }KeyBinds;
 
-// #define MODIFIER Mod4Mask
-#define MODIFIER Mod1Mask
+#define MODIFIER Mod4Mask
+// #define MODIFIER Mod1Mask
 #define WS_MODIFIER ShiftMask
 
 //macro per genereare i workaspce nel chill
@@ -26,7 +26,12 @@ typedef struct {
 //----------------------//
 
 #define N_MONITORS 2
+
 #define GAPS 10
+
+#define BORDER_WIDTH 2
+#define COLOR_FOCUS   0x5294E2      
+#define COLOR_UNFOCUS 0x000000
 
 //tutti i conandi
 static char *term_cmd[] = {"alacritty", NULL};

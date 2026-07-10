@@ -21,5 +21,8 @@ void KillWindow(Display  *disp, Window root);
 void Dwindle(Display *disp, int ws_index);
 void UpdateCurrentMonitor(Display *disp, Window root);
 void MoveWindowToMonitor(Display *disp, Window root);
+unsigned long GetXColor(Display *disp, unsigned long hex_color);
+void CycleFocus(Display *disp, int direction);
+void FocusWindow(Display *disp, Window w);
 
 #endif
