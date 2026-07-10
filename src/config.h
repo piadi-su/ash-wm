@@ -33,6 +33,9 @@ typedef struct {
 #define COLOR_FOCUS   0x5294E2      
 #define COLOR_UNFOCUS 0x000000
 
+
+
+
 //tutti i conandi
 static char *term_cmd[] = {"alacritty", NULL};
 static char *clock_cmd[] = {"xclock", NULL};
@@ -50,12 +53,13 @@ static KeyBinds keys[] = {
 	{MODIFIER, XK_d, rofi_cmd, -1},
 	// {MODIFIER, XK_u, close_wm, -1},
 
-	{MODIFIER, XK_q, NULL, -1},
-
 
 	// Nella tua lista dei keybinds (es. struct Key keys[])
 
-	WORKSPACE_KEYS(XK_m, -2),
+	{MODIFIER,              XK_q,      NULL,      -1}, // Chiude la finestra focalizzata
+    {MODIFIER|ShiftMask,    XK_m,      NULL,      -2}, // Sposta la finestra sul monitor opposto
+    {MODIFIER,              XK_j,      NULL,      -3}, // Focus Finestra Successiva
+    {MODIFIER,              XK_k,      NULL,      -4},
 
 	//bind per tutti i workspace
 	WORKSPACE_KEYS(XK_1, 0),

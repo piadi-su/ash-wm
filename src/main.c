@@ -82,11 +82,20 @@ static Workspace workspaces[WORKSPACES];
 void FocusWindow(Display *disp, Window w) {
     if (w == None) return;
 
-    // 1. Assegna il focus reale di X11
+    // Controllo di sicurezza: la finestra è davvero visibile a schermo in questo millisecondo?
+    XWindowAttributes attrs;
+    if (XGetWindowAttributes(disp, w, &attrs)) {
+        if (attrs.map_state != IsViewable) {
+            // Se non è visibile, non chiamiamo XSetInputFocus o X11 crasherà con BadMatch
+            return; 
+        }
+    }
+
+    // 1. Assegna il focus reale di X11 in sicurezza
     XSetInputFocus(disp, w, RevertToParent, CurrentTime);
     XRaiseWindow(disp, w);
 
-    // 2. Trova in quale workspace si trova la finestra per aggiornare i bordi di quel WS
+    // 2. Trova in quale workspace si trova la finestra
     int target_ws = -1;
     Client *found = NULL;
 
@@ -105,22 +114,17 @@ void FocusWindow(Display *disp, Window w) {
         if (target_ws != -1) break;
     }
 
-    // Se non abbiamo trovato la finestra nei nostri workspace, usciamo
     if (target_ws == -1 || found == NULL) return;
 
-    // 3. Aggiorna visivamente i bordi di tutte le finestre SOLO nel workspace della finestra focalizzata
+    // 3. Aggiorna visivamente i bordi
     Client *curr = workspaces[target_ws].list_Cl;
     if (curr == NULL) return;
 
     do {
-        // Applica lo spessore del bordo prima di colorarlo
         XSetWindowBorderWidth(disp, curr->id, BORDER_WIDTH);
-        
         if (curr->id == w) {
-            // Colore Focus
             XSetWindowBorder(disp, curr->id, GetXColor(disp, COLOR_FOCUS));
         } else {
-            // Colore Unfocus
             XSetWindowBorder(disp, curr->id, GetXColor(disp, COLOR_UNFOCUS));
         }
         curr = curr->next;
@@ -240,61 +244,42 @@ ChangeWorkspace(Display *disp, Window root, int target_local_id) // riceve l'ind
     printf("[ASH-WM] Monitor %d cambia da WS %d a WS %d\n", mon_idx, old_ws, new_ws);
 
     // Nascondi le finestre del vecchio workspace
-    Client *cursor = workspaces[old_ws].list_Cl;
-    if(cursor != NULL) {
-        do {
-            XUnmapWindow(disp, cursor->id);
-            cursor = cursor->next;
-        } while(cursor != workspaces[old_ws].list_Cl);
-    }
     workspaces[old_ws].monitor_id = -1; 
-
+	Dwindle(disp, old_ws);
     // Attiva il nuovo workspace sul monitor corrente
     monitors[mon_idx].current_ws = new_ws;
     workspaces[new_ws].monitor_id = mon_idx;
 
     // Mostra le finestre del nuovo workspace
-    cursor = workspaces[new_ws].list_Cl;
-    if(cursor != NULL) {
-        do {
-            XMapWindow(disp, cursor->id);
-            cursor = cursor->next;
-        } while(cursor != workspaces[new_ws].list_Cl);
-        
-        Dwindle(disp, new_ws);
-        FocusWindow(disp, workspaces[new_ws].list_Cl->id);
-    } else {
-        XSetInputFocus(disp, root, RevertToParent, CurrentTime);
-    }
+	Dwindle(disp, new_ws);
+
+	if(workspaces[new_ws].list_Cl != NULL) {
+		FocusWindow(disp, workspaces[new_ws].list_Cl->id);
+	} else {
+		XSetInputFocus(disp, root, RevertToParent, CurrentTime);
+	}
 
     XSync(disp, False);
 }
 
 //func per muove una window ad un workspace (anche cross-monitor)
-void 
-MoveToWorkspace(Display *disp, Window root, int target_local_id) // target_local_id riceve il tasto premuto (es. 0-9)
-{
+void MoveToWorkspace(Display *disp, Window root, int target_local_id) {
     Window focused_win;
     int revert_to;
 
     XGetInputFocus(disp, &focused_win, &revert_to);
-
-    if(focused_win == None || focused_win == root)
-        return;
+    if(focused_win == None || focused_win == root) return;
     
     int source_ws = -1;
     Client *cursor = NULL;
     Client *found = NULL;
 
-    // 1. Trova in quale workspace si trova attualmente la finestra
-    for(int i = 0; i < WORKSPACES; i++)
-    {
+    // 1. Trova il workspace di origine
+    for(int i = 0; i < WORKSPACES; i++) {
         cursor = workspaces[i].list_Cl;
-        if(cursor != NULL)
-        {
+        if(cursor != NULL) {
             do {
-                if(cursor->id == focused_win)
-                {
+                if(cursor->id == focused_win) {
                     source_ws = i;
                     found = cursor;
                     break;
@@ -302,71 +287,51 @@ MoveToWorkspace(Display *disp, Window root, int target_local_id) // target_local
                 cursor = cursor->next;
             } while(cursor != workspaces[i].list_Cl);
         }
-        if(source_ws != -1)
-            break;
+        if(source_ws != -1) break;
     }
 
-    if(source_ws == -1)
-        return;
+    if(source_ws == -1) return;
 
-    // 2. Trova il monitor ATTUALE in cui si trova la finestra basandoti sul source_ws
+
+
     int current_monitor_of_window = source_ws / WORKSPACES_X_MONITOR;
-
-    // 3. Calcola il workspace di destinazione REALE
-    // Vogliamo mandarla sul monitor OPPOSTO? Oppure su quello indicato dal mouse?
-    // Per fare il salto diretto 0-9 <-> 10-19, decidiamo il monitor di destinazione:
     int target_monitor = current_monitor_of_window;
     
-    // Se hai più di un monitor, mandala sull'altro!
     if (monitors_count > 1) {
-        // Se era sul Monitor 0 va al Monitor 1, se era sul Monitor 1 va al Monitor 0
         target_monitor = (current_monitor_of_window == 0) ? 1 : 0;
     }
 
-    // Calcolo del workspace assoluto finale (es: Monitor 1 * 10 + 3 = 13)
     int ws_target = (target_monitor * WORKSPACES_X_MONITOR) + (target_local_id % WORKSPACES_X_MONITOR);
-
-    if(source_ws == ws_target)
-        return;
+    if(source_ws == ws_target) return;
 
     printf("[ASH-WM] Sposto la finestra %lu dal WS %d al WS %d (Monitor %d)\n", focused_win, source_ws, ws_target, target_monitor);
 
-    // 4. Rimuovi dal vecchio workspace
-    if(found->next == found)
-    {
-        workspaces[source_ws].list_Cl = NULL; // Era l'unica
-    }
-    else
-    {
+    // 2. Rimuovi dal vecchio workspace
+    if(found->next == found) {
+        workspaces[source_ws].list_Cl = NULL;
+    } else {
         found->prev->next = found->next;
         found->next->prev = found->prev;
-
-        if(workspaces[source_ws].list_Cl == found)
-        {
+        if(workspaces[source_ws].list_Cl == found) {
             workspaces[source_ws].list_Cl = found->next;
         }
     }
 
-    // 5. Gestione visibilità: se il workspace di destinazione NON è visibile, nascondi la finestra
-    if(workspaces[ws_target].monitor_id == -1)
-    {
-        XUnmapWindow(disp, focused_win);
-    }
-    else
-    {
-        // Altrimenti se l'altro monitor sta mostrando quel workspace, rendila visibile immediatamente
-        XMapWindow(disp, focused_win);
-    }
+    // 3. AGGIORNAMENTO GEOMETRICO CRITICO: Sposta la finestra nel nuovo monitor fisicamente
+    // Spostiamo le coordinate logiche della struct dentro i confini del nuovo monitor
+    found->x = monitors[target_monitor].x + GAPS;
+    found->y = monitors[target_monitor].y + GAPS;
+    // Spiazziamo momentaneamente la finestra su X11 per evitare sovrapposizioni errate
+    XMoveWindow(disp, focused_win, found->x, found->y);
 
-    // 6. Inserisci nel nuovo workspace
-    if(workspaces[ws_target].list_Cl == NULL)
-    {
+
+
+    // 5. Inserisci nel nuovo workspace
+    if(workspaces[ws_target].list_Cl == NULL) {
         workspaces[ws_target].list_Cl = found;
         found->next = found;
         found->prev = found;
-    }
-    else
-    {
+    } else {
         Client *head = workspaces[ws_target].list_Cl;
         Client *tail = head->prev;
         
@@ -376,7 +341,14 @@ MoveToWorkspace(Display *disp, Window root, int target_local_id) // target_local
         head->prev = found;
     }
 
-    // 7. Gestione Focus protetta
+    // 6. Ricalcola i layout prima di dare i focus
+	Dwindle(disp, ws_target);
+	Dwindle(disp, source_ws);
+
+    // Forza X11 ad applicare le modifiche geometriche e le mappature ADESSO
+    XSync(disp, False);
+
+    // 7. Gestione Focus Protetta
     if(workspaces[ws_target].monitor_id != -1) {
         FocusWindow(disp, found->id);
     } else {
@@ -387,12 +359,6 @@ MoveToWorkspace(Display *disp, Window root, int target_local_id) // target_local
         }
     }
     
-    // 8. Ricalcola i layout geometrici per entrambi i workspace
-    if(workspaces[ws_target].monitor_id != -1) {
-        Dwindle(disp, ws_target);
-    }
-    Dwindle(disp, source_ws);
-
     XSync(disp, False);
 }
 
@@ -496,15 +462,24 @@ Dwindle(Display *disp, int ws_index)
     } while(cursor != head);
 
     int mod_index = workspaces[ws_index].monitor_id;
+    
+    // CASO 1: Il workspace NON è attivo su nessun monitor -> NASCONDI TUTTO
     if(mod_index == -1)
+    {
+        cursor = head;
+        do {
+            XUnmapWindow(disp, cursor->id);
+            cursor = cursor->next;
+        } while(cursor != head);
         return;
+    }
 
+    // CASO 2: Il workspace è attivo -> CALCOLA, POSIZIONA E MAPPA (RENDI VISIBILE)
     int mx = monitors[mod_index].x;
     int my = monitors[mod_index].y;
     int mw = monitors[mod_index].width;
     int mh = monitors[mod_index].height;
 
-    // Dimensione minima assoluta per non far crashare X11
     const unsigned int MIN_WIDTH = 60;
     const unsigned int MIN_HEIGHT = 60;
 
@@ -520,6 +495,7 @@ Dwindle(Display *disp, int ws_index)
         head->h = target_h < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)target_h;
 
         XMoveResizeWindow(disp, head->id, head->x, head->y, head->w, head->h);
+        XMapWindow(disp, head->id); // Forza la visibilità
         return;
     }
 
@@ -533,7 +509,6 @@ Dwindle(Display *disp, int ws_index)
     {
         if(i == count_ws - 1)
         {
-            // Ultima finestra: si prende tutto lo spazio rimasto
             int target_x = wx + GAPS;
             int target_y = wy + GAPS;
             int target_w = ww - (GAPS * 2);
@@ -549,7 +524,6 @@ Dwindle(Display *disp, int ws_index)
             if(i % 2 == 0)
             {
                 ww /= 2;
-                // Previene il collasso dello spazio disponibile al giro successivo
                 if (ww < (int)MIN_WIDTH) ww = MIN_WIDTH; 
 
                 int target_w = ww - (GAPS * 2);
@@ -562,7 +536,6 @@ Dwindle(Display *disp, int ws_index)
             else
             {
                 wh /= 2;
-                // Previene il collasso dello spazio disponibile al giro successivo
                 if (wh < (int)MIN_HEIGHT) wh = MIN_HEIGHT;
 
                 int target_h = wh - (GAPS * 2);
@@ -574,15 +547,15 @@ Dwindle(Display *disp, int ws_index)
             }
         }
 
-        // Controllo finale di allineamento sui bordi fisici del monitor
         if (cursor->x + (int)cursor->w > mx + mw) cursor->x = (mx + mw) - (int)cursor->w;
         if (cursor->y + (int)cursor->h > my + mh) cursor->y = (my + mh) - (int)cursor->h;
 
-        // Sicurezza estrema: costringiamo le coordinate a non andare oltre l'origine del monitor
         if (cursor->x < mx) cursor->x = mx;
         if (cursor->y < my) cursor->y = my;
 
         XMoveResizeWindow(disp, cursor->id, cursor->x, cursor->y, cursor->w, cursor->h);
+        XMapWindow(disp, cursor->id); // Forza la visibilità per ogni finestra della spirale
+        
         cursor = cursor->next;
     }
 }
@@ -755,7 +728,7 @@ void CycleFocus(Display *disp, int direction) {
             target = curr;
             break;
         }
-        curr = cursor->next; // Nota: avevi usato curr in precedenza, uniformato qui
+        curr = curr->next; // Nota: avevi usato curr in precedenza, uniformato qui
     } while (curr != head);
 
     if (target == NULL) {
@@ -862,81 +835,83 @@ int main(void)
 	{
 
 		XNextEvent(disp, &Ev);
-		
+
 		switch (Ev.type) {
 
 			case MapRequest:	 
 				AddWindowList(disp, Ev.xmaprequest.window, root );
 
 				printf("[+] nuova finestra id: %lu\n", Ev.xmaprequest.window);
-	
-				                    // questo é Window w
-				XMapWindow(disp, Ev.xmaprequest.window); //mappa/ fa vedere la finestra intercettata 
+
+				// questo é Window w
 				FocusWindow(disp, Ev.xmaprequest.window); // focussa la window
 				break;
 
-				
-			
+
+
 			case KeyPress:
-				// Puliamo lo stato da NumLock (Mod2Mask) o CapsLock (LockMask) se attivi
 				clean_state = Ev.xkey.state & ~(LockMask | Mod2Mask);
 
 				for(int i = 0 ; i < num_keys; i++)
 				{
-					// Controlliamo prima se il tasto premuto corrisponde ESATTAMENTE a quello registrato
 					if((Ev.xkey.keycode == XKeysymToKeycode(disp, keys[i].keysym)) 
 							&& (clean_state == keys[i].mod))
 					{
-						// Se corrisponde, separiamo i due comportamenti possibili:
+						// 1. Comando di sistema (se cmd non è NULL, esegui ed esci)
 						if(keys[i].cmd != NULL)
 						{
-							// Comando di sistema (Term, Rofi, ecc.)
 							if(fork() == 0)
 							{
+								if (disp) close(ConnectionNumber(disp)); // Buona pratica nei WM
 								execvp(keys[i].cmd[0], keys[i].cmd);
 								exit(0);
 							}
 						}
-						else
-						{	
-							
-							if(keys[i].arg == -1)
+						// 2. Comandi interni del Window Manager
+						else 
+						{    
+							if(keys[i].arg == -1) 
 							{
 								KillWindow(disp, root);
 							}
-
-							else if (keys[i].arg == -2) { // Immaginando -2 come identificativo per spostare monitor
+							else if (keys[i].arg == -2) 
+							{ 
 								MoveWindowToMonitor(disp, root);
 							}
-
-							else {
-								// Prende il tasto premuto (0-9)
+							else if (keys[i].arg == -3) // Focus del prossimo client (J)
+							{
+								CycleFocus(disp, 1);
+							}
+							else if (keys[i].arg == -4) // Focus del client precedente (K)
+							{
+								CycleFocus(disp, -1);
+							}
+							else 
+							{
 								int ws_target = keys[i].arg % WORKSPACES_X_MONITOR; 
 
 								if(keys[i].mod & WS_MODIFIER)
 								{
-									// Questa farà saltare la finestra nell'altro range (es. da 3 a 13)
 									MoveToWorkspace(disp, root, ws_target);
 								}
 								else
 								{
-									// Questa cambierà workspace restando nel range del monitor corrente
 									ChangeWorkspace(disp, root, ws_target);
 								}
 							}
 						}
-						break; // Abbiamo trovato la chiave, interrompiamo il ciclo for
+						break; 
 					}
 				}
 				break;
 
-			
+
 			case MotionNotify:
 				// Il mouse si sta muovendo sullo sfondo o tra i monitor: aggiorna la mappa dei monitor
 				UpdateCurrentMonitor(disp, root);
 				break;
-			
-			//gestisce sopostamento mouse
+
+				//gestisce sopostamento mouse
 			case EnterNotify:
 				if (Ev.xcrossing.mode != NotifyNormal || Ev.xcrossing.detail == NotifyInferior)
 					break;
@@ -959,10 +934,10 @@ int main(void)
 
 
 
-		
+
 			default:
 				break;
-		
+
 		}
 
 	}
