@@ -10,9 +10,17 @@ typedef struct {
 	unsigned int mod;
 	KeySym keysym;
 	char **cmd;
+	int arg;
 }KeyBinds;
 
 #define MODIFIER Mod4Mask
+
+//macro per genereare i workaspce nel chill
+#define WORKSPACE_KEYS(KEY, WS_INDEX) \
+    { MODIFIER,             KEY, NULL, WS_INDEX }, \
+    { MODIFIER|ShiftMask,   KEY, NULL, WS_INDEX }
+
+
 
 //tutti i conandi
 static char *term_cmd[] = {"alacritty", NULL};
@@ -25,11 +33,24 @@ static char *close_wm[] = {"killall", "ash-wm", NULL};
 static KeyBinds keys[] = {
 // Modificatore | Tasto | Comando
 
-	{MODIFIER, XK_Return, term_cmd},
+	{MODIFIER, XK_Return, term_cmd, -1},
 	// {MODIFIER, XK_o, firefox_cmd},
-	{MODIFIER, XK_o, clock_cmd},
-	{MODIFIER, XK_d, rofi_cmd},
-	{MODIFIER, XK_u, close_wm},
+	{MODIFIER, XK_o, clock_cmd, -1},
+	{MODIFIER, XK_d, rofi_cmd, -1},
+	{MODIFIER, XK_u, close_wm, -1},
+
+
+	//bind per tutti i workspace
+	WORKSPACE_KEYS(XK_1, 0),
+    WORKSPACE_KEYS(XK_2, 1),
+    WORKSPACE_KEYS(XK_3, 2),
+    WORKSPACE_KEYS(XK_4, 3),
+    WORKSPACE_KEYS(XK_5, 4),
+    WORKSPACE_KEYS(XK_6, 5),
+    WORKSPACE_KEYS(XK_7, 6),
+    WORKSPACE_KEYS(XK_8, 7),
+    WORKSPACE_KEYS(XK_9, 8),
+    WORKSPACE_KEYS(XK_0, 9),
 
 };
 
