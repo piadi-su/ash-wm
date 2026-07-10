@@ -14,7 +14,7 @@ typedef struct {
 }KeyBinds;
 
 // #define MODIFIER Mod4Mask
-#define MODIFIER Mod4Mask
+#define MODIFIER Mod1Mask
 #define WS_MODIFIER ShiftMask
 
 //macro per genereare i workaspce nel chill
@@ -23,6 +23,7 @@ typedef struct {
     { MODIFIER|WS_MODIFIER,   KEY, NULL, WS_INDEX }
 
 
+#define GAPS 10
 
 //tutti i conandi
 static char *term_cmd[] = {"alacritty", NULL};
@@ -40,6 +41,8 @@ static KeyBinds keys[] = {
 	{MODIFIER, XK_o, clock_cmd, -1},
 	{MODIFIER, XK_d, rofi_cmd, -1},
 	{MODIFIER, XK_u, close_wm, -1},
+
+	{MODIFIER, XK_q, NULL, -1},
 
 
 	//bind per tutti i workspace

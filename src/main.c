@@ -58,6 +58,16 @@ typedef struct{
 static Workspace workspaces[WORKSPACES];
 
 
+//func to change worksapce focus
+void 
+FocusWindow(Display *disp, Window w) {
+    if (w != None) {
+        XSetInputFocus(disp, w, RevertToParent, CurrentTime);
+        // Opzionale: porta la finestra in cima visivamente
+        XRaiseWindow(disp, w); 
+    }
+}
+
 /*
  * add a new window to the list 
  * from the Ev Ev.xmaprequest.window
@@ -194,9 +204,18 @@ ChangeWorksapce(Display *disp, Window root, int new_ws)
 		}while(cursor != workspaces[new_ws].list_Cl);
 	}
 
+
+	if(workspaces[new_ws].list_Cl != NULL)
+    {
+        FocusWindow(disp, workspaces[new_ws].list_Cl->id);
+    }
+
 	//svuoto il buffer che uso per alloracare spostamenti
 	XSync(disp, False);
 }
+
+
+//func per muove una window ad un workspace
 void 
 MoveToWorkspace(Display *disp, Window root, int ws_target)
 {
@@ -257,6 +276,8 @@ MoveToWorkspace(Display *disp, Window root, int ws_target)
 		{
 			workspaces[source_ws].list_Cl = found->next;
 		}
+
+		FocusWindow(disp, workspaces[source_ws].list_Cl->id);
 	}
 
 	if(workspaces[ws_target].monitor_id == -1)
@@ -274,19 +295,101 @@ MoveToWorkspace(Display *disp, Window root, int ws_target)
 	else
 	{
 		Client *head = workspaces[ws_target].list_Cl;
+		Client *tail = head->prev;
+		
 		found->next = head;
-		found->prev = head->prev;
-		head->prev->next = found;
+		found->prev = head;
+		tail->next = found;
 		head->prev = found;
 
 	}
 
+	if(workspaces[ws_target].monitor_id != -1) {
+        FocusWindow(disp, found->id);
+    } else {
+        XSetInputFocus(disp, root, RevertToParent, CurrentTime);
+    }
 
 	XSync(disp, False);
 
 }
 
+// server praticamente per freeare la memory quando una finestra o crusha o code simili
+void 
+RemoveWindowList(Window w)
+{
+	Client *found = NULL;
+	int ws_index = -1;
+	
+	//cerca in quale worksapce sta la finestra
+	for(int i = 0; i < WORKSPACES; i++)
+	{
+		Client *cursor = workspaces[i].list_Cl;
 
+		if(cursor != NULL){
+
+			do{
+				if(cursor->id == w)
+				{
+					found = cursor;
+					ws_index = i;
+				}
+
+				cursor = cursor->next;
+			}while(cursor != workspaces[i].list_Cl);
+
+		}
+
+		if(found != NULL)
+			break;
+
+
+	}
+
+	//se non sta la finestra esci
+	if(found == NULL)
+		return;
+
+
+	//se é l'unica
+	if(found->next == found)
+	{
+		workspaces[ws_index].list_Cl = NULL;
+	}
+	else
+	{
+		found->prev->next = found->next;
+		found->next->prev = found->prev;
+
+		if(workspaces[ws_index].list_Cl == found)
+		{
+			workspaces[ws_index].list_Cl = found->next;
+		}
+	}
+
+	printf("[-] Finestra %lu rimossa (WS %d)\n", w, ws_index);
+	free(found);
+
+}
+
+// kill di window alla mod + q
+void
+KillWindow(Display  *disp, Window root)
+{
+
+	Window focused_win;
+	int revert_to;
+
+	XGetInputFocus(disp, &focused_win, &revert_to);
+
+	if (focused_win == None || focused_win == root)
+        return;
+
+    printf("[ASH-WM] Uccido la finestra hardware: %lu\n", focused_win);
+    
+    // Ordiniamo a X11 di distruggere la finestra
+    XDestroyWindow(disp, focused_win);
+}
 
 
 int main(void)
@@ -383,19 +486,23 @@ int main(void)
 				AddWindowList(disp, Ev.xmaprequest.window, root );
 
 				printf("[+] nuova finestra id: %lu\n", Ev.xmaprequest.window);
-
+	
 				                    // questo é Window w
 				XMapWindow(disp, Ev.xmaprequest.window); //mappa/ fa vedere la finestra intercettata 
+				FocusWindow(disp, Ev.xmaprequest.window); // focussa la window
 				break;
 
 				
 			
 			case KeyPress:
+				// Puliamo lo stato da NumLock (Mod2Mask) o CapsLock (LockMask) se attivi
+				unsigned int clean_state = Ev.xkey.state & ~(LockMask | Mod2Mask);
+
 				for(int i = 0 ; i < num_keys; i++)
 				{
 					// Controlliamo prima se il tasto premuto corrisponde ESATTAMENTE a quello registrato
 					if((Ev.xkey.keycode == XKeysymToKeycode(disp, keys[i].keysym)) 
-							&& (Ev.xkey.state & keys[i].mod))
+							&& (clean_state == keys[i].mod))
 					{
 						// Se corrisponde, separiamo i due comportamenti possibili:
 						if(keys[i].cmd != NULL)
@@ -408,18 +515,26 @@ int main(void)
 							}
 						}
 						else
-						{
-							// Gestione Workspace (cmd è NULL)
-							int ws_target = keys[i].arg;
-
-							if(keys[i].mod != MODIFIER)
+						{	
+							
+							if(keys[i].arg == -1)
 							{
-								printf("[ASH-WM] Richiesto spostamento finestra nel WS %d\n", ws_target);
-								MoveToWorkspace(disp, root, ws_target);
+								KillWindow(disp, root);
 							}
-							else
-							{
-								ChangeWorksapce(disp, root, ws_target);
+
+							else{
+								// Gestione Workspace (cmd è NULL)
+								int ws_target = keys[i].arg;
+
+								if(keys[i].mod & WS_MODIFIER)
+								{
+									printf("[ASH-WM] Richiesto spostamento finestra nel WS %d\n", ws_target);
+									MoveToWorkspace(disp, root, ws_target);
+								}
+								else
+								{
+									ChangeWorksapce(disp, root, ws_target);
+								}
 							}
 						}
 						break; // Abbiamo trovato la chiave, interrompiamo il ciclo for
@@ -428,7 +543,11 @@ int main(void)
 				break;
 
 
+
+
+
 			case DestroyNotify:	 // questo é Window w
+				RemoveWindowList(Ev.xdestroywindow.window);
 				break;
 
 
