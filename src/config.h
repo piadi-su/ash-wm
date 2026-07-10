@@ -13,12 +13,14 @@ typedef struct {
 	int arg;
 }KeyBinds;
 
+// #define MODIFIER Mod4Mask
 #define MODIFIER Mod4Mask
+#define WS_MODIFIER ShiftMask
 
 //macro per genereare i workaspce nel chill
 #define WORKSPACE_KEYS(KEY, WS_INDEX) \
     { MODIFIER,             KEY, NULL, WS_INDEX }, \
-    { MODIFIER|ShiftMask,   KEY, NULL, WS_INDEX }
+    { MODIFIER|WS_MODIFIER,   KEY, NULL, WS_INDEX }
 
 
 

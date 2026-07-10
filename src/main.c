@@ -160,7 +160,7 @@ ChangeWorksapce(Display *disp, Window root, int new_ws)
 	int old_ws = monitors[mon_idx].current_ws;
 
 	// esce se volgio cambiare worksapce ma ci sono gia dentro
-	if(old_ws == monitors[mon_idx].current_ws)
+	if(old_ws == new_ws)
 		return;
 		
 	printf("[ASH-WM] Monitor %d: cambio da WS %d a WS %d\n", mon_idx, old_ws, new_ws);
@@ -196,7 +196,96 @@ ChangeWorksapce(Display *disp, Window root, int new_ws)
 
 	//svuoto il buffer che uso per alloracare spostamenti
 	XSync(disp, False);
-}	
+}
+void 
+MoveToWorkspace(Display *disp, Window root, int ws_target)
+{
+	
+	Window focused_win;
+	int revert_to;
+
+	XGetInputFocus(disp, &focused_win, &revert_to);
+
+	if(focused_win == None || focused_win == root)
+		return;
+	
+	int source_ws = -1;
+	Client *cursor = NULL;
+	Client *found = NULL;
+
+
+	for(int i = 0; i < WORKSPACES; i++)
+	{
+		cursor = workspaces[i].list_Cl;
+		
+		if(cursor != NULL)
+		{
+			do{
+				if(cursor->id == focused_win)
+				{
+					source_ws = i;
+					found = cursor;
+					break;
+				}
+				
+				cursor = cursor->next; // come se fosse un i++
+			}while(cursor != workspaces[i].list_Cl);
+
+		}
+
+		if(source_ws != -1)
+			break;
+
+	}
+
+	if(source_ws == -1 || source_ws == ws_target)
+		return;
+
+	printf("[ASH-WM] Sposto la finestra %lu dal WS %d al WS %d\n", focused_win, source_ws, ws_target);
+
+	if(found->next == found)
+	{
+		workspaces[source_ws].list_Cl = NULL;// era l'unica del ws
+	}
+
+	else
+	{
+		found->prev->next = found->next;
+		found->next->prev = found->prev;
+
+		if(workspaces[source_ws].list_Cl == found)
+		{
+			workspaces[source_ws].list_Cl = found->next;
+		}
+	}
+
+	if(workspaces[ws_target].monitor_id == -1)
+	{
+		XUnmapWindow(disp, focused_win);
+	}
+
+	if(workspaces[ws_target].list_Cl == NULL)
+	{
+		workspaces[ws_target].list_Cl = found;
+		found->next = found;
+		found->prev = found;
+
+	}
+	else
+	{
+		Client *head = workspaces[ws_target].list_Cl;
+		found->next = head;
+		found->prev = head->prev;
+		head->prev->next = found;
+		head->prev = found;
+
+	}
+
+
+	XSync(disp, False);
+
+}
+
 
 
 
@@ -304,33 +393,38 @@ int main(void)
 			case KeyPress:
 				for(int i = 0 ; i < num_keys; i++)
 				{
-					if(	(Ev.xkey.keycode == XKeysymToKeycode(disp, keys[i].keysym)) 
+					// Controlliamo prima se il tasto premuto corrisponde ESATTAMENTE a quello registrato
+					if((Ev.xkey.keycode == XKeysymToKeycode(disp, keys[i].keysym)) 
 							&& (Ev.xkey.state & keys[i].mod))
 					{
-						if(fork() == 0)
+						// Se corrisponde, separiamo i due comportamenti possibili:
+						if(keys[i].cmd != NULL)
 						{
-							execvp(keys[i].cmd[0], keys[i].cmd);
-							exit(0);
-						}
-					}
-
-					else
-					{
-						int ws_target = keys[i].arg;
-
-						if(Ev.xkey.state & ShiftMask)
-						{
-							printf("[ASH-WM] Richiesto spostamento finestra nel WS %d (da fare)\n", ws_target);
-							//temporaneo
+							// Comando di sistema (Term, Rofi, ecc.)
+							if(fork() == 0)
+							{
+								execvp(keys[i].cmd[0], keys[i].cmd);
+								exit(0);
+							}
 						}
 						else
 						{
-							ChangeWorksapce(disp, root, ws_target);
-						}
+							// Gestione Workspace (cmd è NULL)
+							int ws_target = keys[i].arg;
 
+							if(keys[i].mod != MODIFIER)
+							{
+								printf("[ASH-WM] Richiesto spostamento finestra nel WS %d\n", ws_target);
+								MoveToWorkspace(disp, root, ws_target);
+							}
+							else
+							{
+								ChangeWorksapce(disp, root, ws_target);
+							}
+						}
+						break; // Abbiamo trovato la chiave, interrompiamo il ciclo for
 					}
 				}
-
 				break;
 
 
