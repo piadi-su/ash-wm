@@ -7,20 +7,20 @@
 
 #include <X11/extensions/Xinerama.h>
 
-#include <signal.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <signal.h>
 #include <stdio.h>
+
 
 //miei file
 #include "config.h"
 #include  "func.h"
 
 //miei define
-
-#define MAX_MONITORS 4
-#define WORKSPACES 10
+#define WORKSPACES_X_MONITOR 10
+#define WORKSPACES (WORKSPACES_X_MONITOR * N_MONITORS)
 
 
 
@@ -67,7 +67,7 @@ typedef struct{
 	Client *list_Cl;
 }Workspace ;
 
-static Monitors monitors[MAX_MONITORS];
+static Monitors monitors[N_MONITORS];
 static int monitors_count = {0};
 static Workspace workspaces[WORKSPACES];
 
@@ -168,19 +168,18 @@ AddWindowList(Display *disp, Window w, Window root)
 
 //cambia il worksapce che vediamo
 void
-ChangeWorksapce(Display *disp, Window root, int new_ws)
+ChangeWorkspace(Display *disp, Window root, int target_local_id) // riceve l'indice del tasto (0-9)
 {
-	Window dummy_win;
+    Window dummy_win;
     int dummy_int;
     unsigned int dummy_mask;
     int mouse_x, mouse_y;
     int mon_idx = 0;
 
+    // Trova il monitor in cui si trova il mouse
+    XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
 
-	//chiediamo a x11 le cordinate del cursore
-	XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
-
-	for (int i = 0; i < monitors_count; i++) {
+    for (int i = 0; i < monitors_count; i++) {
         if (mouse_x >= monitors[i].x && mouse_x < (monitors[i].x + monitors[i].width) &&
             mouse_y >= monitors[i].y && mouse_y < (monitors[i].y + monitors[i].height)) {
             mon_idx = i;
@@ -188,151 +187,171 @@ ChangeWorksapce(Display *disp, Window root, int new_ws)
         }
     }
 
-	int ws = monitors[mon_idx].current_ws;
+    int old_ws = monitors[mon_idx].current_ws;
+    
+    // Calcola il workspace REALE del monitor corrente (0-9 per mon 0, 10-19 per mon 1)
+    int new_ws = (mon_idx * WORKSPACES_X_MONITOR) + (target_local_id % WORKSPACES_X_MONITOR);
 
-	// esce se volgio cambiare worksapce ma ci sono gia dentro
-	if(ws == new_ws)
-		return;
-		
-	printf("[ASH-WM] Monitor %d: cambio da WS %d a WS %d\n", mon_idx, ws, new_ws);
+    if(old_ws == new_ws)
+        return;
 
-	Client *cursor = workspaces[ws].list_Cl;
-	if(cursor != NULL)
-	{
-		do{
-			
-			XUnmapWindow(disp, cursor->id); //toglie le window dallo schermo
-			cursor = cursor->next; // cambio il puntaore del cursore
+    printf("[ASH-WM] Monitor %d cambia da WS %d a WS %d\n", mon_idx, old_ws, new_ws);
 
-		}while(cursor != workspaces[ws].list_Cl);
-	}
-
-	workspaces[ws].monitor_id = -1; //nascondiamo il vecchio ws togliando ache l'id che il monitor usava prima
-	
-	//aggiorno il nuovo worksapce
-	
-	monitors[mon_idx].current_ws = new_ws; //metto nel monitor l'index del workspace
-	workspaces[new_ws].monitor_id = mon_idx; //metto nel current workapce l'id del monitor che usa
-
-	cursor = workspaces[new_ws].list_Cl;
-	if(cursor != NULL)
-	{
-		do{
-			
-			XMapWindow(disp, cursor->id); //mostra le window allo schermo
-			cursor = cursor->next; // cambio il puntaore del cursore
-
-		}while(cursor != workspaces[new_ws].list_Cl);
-	}
-
-
-	if(workspaces[new_ws].list_Cl != NULL)
-    {
-        FocusWindow(disp, workspaces[new_ws].list_Cl->id);
+    // Nascondi le finestre del vecchio workspace
+    Client *cursor = workspaces[old_ws].list_Cl;
+    if(cursor != NULL) {
+        do {
+            XUnmapWindow(disp, cursor->id);
+            cursor = cursor->next;
+        } while(cursor != workspaces[old_ws].list_Cl);
     }
+    workspaces[old_ws].monitor_id = -1; 
 
-	//svuoto il buffer che uso per alloracare spostamenti
-	XSync(disp, False);
-}
+    // Attiva il nuovo workspace sul monitor corrente
+    monitors[mon_idx].current_ws = new_ws;
+    workspaces[new_ws].monitor_id = mon_idx;
 
-
-//func per muove una window ad un workspace
-void 
-MoveToWorkspace(Display *disp, Window root, int ws_target)
-{
-	
-	Window focused_win;
-	int revert_to;
-
-	XGetInputFocus(disp, &focused_win, &revert_to);
-
-	if(focused_win == None || focused_win == root)
-		return;
-	
-	int source_ws = -1;
-	Client *cursor = NULL;
-	Client *found = NULL;
-
-
-	for(int i = 0; i < WORKSPACES; i++)
-	{
-		cursor = workspaces[i].list_Cl;
-		
-		if(cursor != NULL)
-		{
-			do{
-				if(cursor->id == focused_win)
-				{
-					source_ws = i;
-					found = cursor;
-					break;
-				}
-				
-				cursor = cursor->next; // come se fosse un i++
-			}while(cursor != workspaces[i].list_Cl);
-
-		}
-
-		if(source_ws != -1)
-			break;
-
-	}
-
-	if(source_ws == -1 || source_ws == ws_target)
-		return;
-
-	printf("[ASH-WM] Sposto la finestra %lu dal WS %d al WS %d\n", focused_win, source_ws, ws_target);
-
-	if(found->next == found)
-	{
-		workspaces[source_ws].list_Cl = NULL;// era l'unica del ws
-	}
-
-	else
-	{
-		found->prev->next = found->next;
-		found->next->prev = found->prev;
-
-		if(workspaces[source_ws].list_Cl == found)
-		{
-			workspaces[source_ws].list_Cl = found->next;
-		}
-
-		FocusWindow(disp, workspaces[source_ws].list_Cl->id);
-	}
-
-	if(workspaces[ws_target].monitor_id == -1)
-	{
-		XUnmapWindow(disp, focused_win);
-	}
-
-	if(workspaces[ws_target].list_Cl == NULL)
-	{
-		workspaces[ws_target].list_Cl = found;
-		found->next = found;
-		found->prev = found;
-
-	}
-	else
-	{
-		Client *head = workspaces[ws_target].list_Cl;
-		Client *tail = head->prev;
-		
-		found->next = head;
-		found->prev = head;
-		tail->next = found;
-		head->prev = found;
-
-	}
-
-	if(workspaces[ws_target].monitor_id != -1) {
-        FocusWindow(disp, found->id);
+    // Mostra le finestre del nuovo workspace
+    cursor = workspaces[new_ws].list_Cl;
+    if(cursor != NULL) {
+        do {
+            XMapWindow(disp, cursor->id);
+            cursor = cursor->next;
+        } while(cursor != workspaces[new_ws].list_Cl);
+        
+        Dwindle(disp, new_ws);
+        FocusWindow(disp, workspaces[new_ws].list_Cl->id);
     } else {
         XSetInputFocus(disp, root, RevertToParent, CurrentTime);
     }
 
-	XSync(disp, False);
+    XSync(disp, False);
+}
 
+//func per muove una window ad un workspace (anche cross-monitor)
+void 
+MoveToWorkspace(Display *disp, Window root, int target_local_id) // target_local_id riceve il tasto premuto (es. 0-9)
+{
+    Window focused_win;
+    int revert_to;
+
+    XGetInputFocus(disp, &focused_win, &revert_to);
+
+    if(focused_win == None || focused_win == root)
+        return;
+    
+    int source_ws = -1;
+    Client *cursor = NULL;
+    Client *found = NULL;
+
+    // 1. Trova in quale workspace si trova attualmente la finestra
+    for(int i = 0; i < WORKSPACES; i++)
+    {
+        cursor = workspaces[i].list_Cl;
+        if(cursor != NULL)
+        {
+            do {
+                if(cursor->id == focused_win)
+                {
+                    source_ws = i;
+                    found = cursor;
+                    break;
+                }
+                cursor = cursor->next;
+            } while(cursor != workspaces[i].list_Cl);
+        }
+        if(source_ws != -1)
+            break;
+    }
+
+    if(source_ws == -1)
+        return;
+
+    // 2. Trova il monitor ATTUALE in cui si trova la finestra basandoti sul source_ws
+    int current_monitor_of_window = source_ws / WORKSPACES_X_MONITOR;
+
+    // 3. Calcola il workspace di destinazione REALE
+    // Vogliamo mandarla sul monitor OPPOSTO? Oppure su quello indicato dal mouse?
+    // Per fare il salto diretto 0-9 <-> 10-19, decidiamo il monitor di destinazione:
+    int target_monitor = current_monitor_of_window;
+    
+    // Se hai più di un monitor, mandala sull'altro!
+    if (monitors_count > 1) {
+        // Se era sul Monitor 0 va al Monitor 1, se era sul Monitor 1 va al Monitor 0
+        target_monitor = (current_monitor_of_window == 0) ? 1 : 0;
+    }
+
+    // Calcolo del workspace assoluto finale (es: Monitor 1 * 10 + 3 = 13)
+    int ws_target = (target_monitor * WORKSPACES_X_MONITOR) + (target_local_id % WORKSPACES_X_MONITOR);
+
+    if(source_ws == ws_target)
+        return;
+
+    printf("[ASH-WM] Sposto la finestra %lu dal WS %d al WS %d (Monitor %d)\n", focused_win, source_ws, ws_target, target_monitor);
+
+    // 4. Rimuovi dal vecchio workspace
+    if(found->next == found)
+    {
+        workspaces[source_ws].list_Cl = NULL; // Era l'unica
+    }
+    else
+    {
+        found->prev->next = found->next;
+        found->next->prev = found->prev;
+
+        if(workspaces[source_ws].list_Cl == found)
+        {
+            workspaces[source_ws].list_Cl = found->next;
+        }
+    }
+
+    // 5. Gestione visibilità: se il workspace di destinazione NON è visibile, nascondi la finestra
+    if(workspaces[ws_target].monitor_id == -1)
+    {
+        XUnmapWindow(disp, focused_win);
+    }
+    else
+    {
+        // Altrimenti se l'altro monitor sta mostrando quel workspace, rendila visibile immediatamente
+        XMapWindow(disp, focused_win);
+    }
+
+    // 6. Inserisci nel nuovo workspace
+    if(workspaces[ws_target].list_Cl == NULL)
+    {
+        workspaces[ws_target].list_Cl = found;
+        found->next = found;
+        found->prev = found;
+    }
+    else
+    {
+        Client *head = workspaces[ws_target].list_Cl;
+        Client *tail = head->prev;
+        
+        found->next = head;
+        found->prev = tail;
+        tail->next = found;
+        head->prev = found;
+    }
+
+    // 7. Gestione Focus protetta
+    if(workspaces[ws_target].monitor_id != -1) {
+        FocusWindow(disp, found->id);
+    } else {
+        if (workspaces[source_ws].list_Cl != NULL) {
+            FocusWindow(disp, workspaces[source_ws].list_Cl->id);
+        } else {
+            XSetInputFocus(disp, root, RevertToParent, CurrentTime);
+        }
+    }
+    
+    // 8. Ricalcola i layout geometrici per entrambi i workspace
+    if(workspaces[ws_target].monitor_id != -1) {
+        Dwindle(disp, ws_target);
+    }
+    Dwindle(disp, source_ws);
+
+    XSync(disp, False);
 }
 
 // server praticamente per freeare la memory quando una finestra o crusha o code simili
@@ -354,6 +373,7 @@ RemoveWindowList(Display *disp, Window w)
 				{
 					found = cursor;
 					ws_index = i;
+					break;
 				}
 
 				cursor = cursor->next;
@@ -383,6 +403,10 @@ RemoveWindowList(Display *disp, Window w)
 		if(workspaces[ws_index].list_Cl == found) {
 			workspaces[ws_index].list_Cl = found->next;
 		}
+
+		if (workspaces[ws_index].monitor_id != -1) {
+            FocusWindow(disp, workspaces[ws_index].list_Cl->id);
+        }
 	}
 
 	printf("[-] Finestra %lu rimossa (WS %d)\n", w, ws_index);
@@ -438,12 +462,20 @@ Dwindle(Display *disp, int ws_index)
     int mw = monitors[mod_index].width;
     int mh = monitors[mod_index].height;
 
+    // Dimensione minima assoluta per non far crashare X11
+    const unsigned int MIN_WIDTH = 60;
+    const unsigned int MIN_HEIGHT = 60;
+
+    // Se c'è una sola finestra, prende tutto il monitor (meno i gap)
     if(count_ws == 1)
     {
+        int target_w = mw - (GAPS * 2);
+        int target_h = mh - (GAPS * 2);
+
         head->x = mx + GAPS;
         head->y = my + GAPS;
-        head->w = mw - (GAPS * 2);
-        head->h = mh - (GAPS * 2);
+        head->w = target_w < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)target_w;
+        head->h = target_h < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)target_h;
 
         XMoveResizeWindow(disp, head->id, head->x, head->y, head->w, head->h);
         return;
@@ -459,34 +491,55 @@ Dwindle(Display *disp, int ws_index)
     {
         if(i == count_ws - 1)
         {
-            cursor->x = wx + GAPS;
-            cursor->y = wy + GAPS;
-            cursor->w = ww - (GAPS * 2);
-            cursor->h = wh - (GAPS * 2);
+            // Ultima finestra: si prende tutto lo spazio rimasto
+            int target_x = wx + GAPS;
+            int target_y = wy + GAPS;
+            int target_w = ww - (GAPS * 2);
+            int target_h = wh - (GAPS * 2);
+
+            cursor->x = target_x;
+            cursor->y = target_y;
+            cursor->w = target_w < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)target_w;
+            cursor->h = target_h < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)target_h;
         }
         else
         {
             if(i % 2 == 0)
             {
                 ww /= 2;
+                // Previene il collasso dello spazio disponibile al giro successivo
+                if (ww < (int)MIN_WIDTH) ww = MIN_WIDTH; 
+
+                int target_w = ww - (GAPS * 2);
                 cursor->x = wx + GAPS;
                 cursor->y = wy + GAPS;
-                cursor->w = ww - (GAPS * 1.5);
-                cursor->h = wh - (GAPS * 2);
+                cursor->w = target_w < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)target_w;
+                cursor->h = (wh - (GAPS * 2)) < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)(wh - (GAPS * 2));
                 wx += ww;
             }
             else
             {
                 wh /= 2;
+                // Previene il collasso dello spazio disponibile al giro successivo
+                if (wh < (int)MIN_HEIGHT) wh = MIN_HEIGHT;
+
+                int target_h = wh - (GAPS * 2);
                 cursor->x = wx + GAPS;
                 cursor->y = wy + GAPS;
-                cursor->w = ww - (GAPS * 2);
-                cursor->h = wh - (GAPS * 1.5);
+                cursor->w = (ww - (GAPS * 2)) < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)(ww - (GAPS * 2));
+                cursor->h = target_h < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)target_h;
                 wy += wh;
             }
         }
 
-        // CORRETTO: Applica le geometrie calcolate a 'cursor->id', non a 'head->id'
+        // Controllo finale di allineamento sui bordi fisici del monitor
+        if (cursor->x + (int)cursor->w > mx + mw) cursor->x = (mx + mw) - (int)cursor->w;
+        if (cursor->y + (int)cursor->h > my + mh) cursor->y = (my + mh) - (int)cursor->h;
+
+        // Sicurezza estrema: costringiamo le coordinate a non andare oltre l'origine del monitor
+        if (cursor->x < mx) cursor->x = mx;
+        if (cursor->y < my) cursor->y = my;
+
         XMoveResizeWindow(disp, cursor->id, cursor->x, cursor->y, cursor->w, cursor->h);
         cursor = cursor->next;
     }
@@ -494,6 +547,126 @@ Dwindle(Display *disp, int ws_index)
 
 
 
+void 
+UpdateCurrentMonitor(Display *disp, Window root)
+{
+	Window dummy_win;
+	int dummy_int;
+	unsigned int dummy_mask;
+	int mouse_x, mouse_y;
+	int target_monitor = 0;
+
+	XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x , &mouse_y , &dummy_int, &dummy_int, &dummy_mask);
+	
+	//cerco mouse nei monitors
+	for(int i = 0; i< monitors_count; i++)
+	{
+		if (mouse_x >= monitors[i].x && mouse_x < (monitors[i].x + monitors[i].width) &&
+				mouse_y >= monitors[i].y && mouse_y < (monitors[i].y + monitors[i].height)) {
+			target_monitor = i;
+			break;
+		}
+
+	}
+
+
+	int active_ws = monitors[target_monitor].current_ws;
+
+	if(workspaces[active_ws].monitor_id != target_monitor)
+	{
+		printf("[ASH-WM] Sincronizzo: Il mouse ha attivato il Monitor %d (WS %d)\n", target_monitor, active_ws);
+		workspaces[active_ws].monitor_id = target_monitor;
+	}
+}
+
+
+
+// Sposta la finestra focalizzata sul monitor successivo/opposto
+void 
+MoveWindowToMonitor(Display *disp, Window root)
+{
+    if (monitors_count <= 1)
+        return;
+
+    Window focused_win;
+    int revert_to;
+    XGetInputFocus(disp, &focused_win, &revert_to);
+
+    if (focused_win == None || focused_win == root)
+        return;
+
+    int source_ws = -1;
+    Client *found = NULL;
+
+    // 1. Trova in quale workspace si trova attualmente la finestra focalizzata
+    for (int i = 0; i < WORKSPACES; i++) {
+        Client *cursor = workspaces[i].list_Cl;
+        if (cursor != NULL) {
+            do {
+                if (cursor->id == focused_win) {
+                    source_ws = i;
+                    found = cursor;
+                    break;
+                }
+                cursor = cursor->next;
+            } while (cursor != workspaces[i].list_Cl);
+        }
+        if (source_ws != -1)
+            break;
+    }
+
+    if (source_ws == -1 || found == NULL)
+        return;
+
+    // 2. Determina il monitor di origine e destinazione
+    int current_monitor = source_ws / WORKSPACES_X_MONITOR;
+    int target_monitor = (current_monitor == 0) ? 1 : 0; // Alterna tra 0 e 1 per dual-monitor
+    int ws_target = monitors[target_monitor].current_ws;
+
+    printf("[ASH-WM] Sposto la finestra %lu dal Monitor %d (WS %d) al Monitor %d (WS %d)\n", 
+           focused_win, current_monitor, source_ws, target_monitor, ws_target);
+
+    // 3. Rimuovi la finestra dal vecchio workspace (gestione lista circolare)
+    if (found->next == found) {
+        workspaces[source_ws].list_Cl = NULL; 
+    } else {
+        found->prev->next = found->next;
+        found->next->prev = found->prev;
+        if (workspaces[source_ws].list_Cl == found) {
+            workspaces[source_ws].list_Cl = found->next;
+        }
+    }
+
+    // 4. Inserisci la finestra nella lista del nuovo workspace
+    if (workspaces[ws_target].list_Cl == NULL) {
+        workspaces[ws_target].list_Cl = found;
+        found->next = found;
+        found->prev = found;
+    } else {
+        Client *head = workspaces[ws_target].list_Cl;
+        Client *tail = head->prev;
+        
+        found->next = head;
+        found->prev = tail;
+        tail->next = found;
+        head->prev = found;
+    }
+
+    // 5. Ricalcola i layout geometrici (Dwindle aggiornerà x, y, w, h sul nuovo monitor)
+    Dwindle(disp, ws_target);
+    Dwindle(disp, source_ws);
+
+    // 6. Muovi il mouse al centro della finestra spostata per stabilizzare il focus-follows-mouse
+    XWarpPointer(disp, None, found->id, 0, 0, 0, 0, found->w / 2, found->h / 2);
+    FocusWindow(disp, found->id);
+
+    // 7. Se il vecchio monitor è rimasto vuoto, pulisci il focus sulla root
+    if (workspaces[source_ws].list_Cl == NULL) {
+        XSetInputFocus(disp, root, RevertToParent, CurrentTime);
+    }
+
+    XSync(disp, False);
+}
 
 
 
@@ -503,7 +676,7 @@ Dwindle(Display *disp, int ws_index)
 
 int main(void)
 {
-	
+
 	XEvent Ev;
 	unsigned int clean_state;
 
@@ -520,7 +693,7 @@ int main(void)
 
 
 	//serve ad un programma a registrarsi in coda 
-	XSelectInput(disp, root, SubstructureRedirectMask | SubstructureNotifyMask | KeyPressMask);
+	XSelectInput(disp, root, SubstructureRedirectMask | SubstructureNotifyMask | KeyPressMask | PointerMotionMask);
 
 	// svuota il buffer dove stanno le finestre in coda perche x11 e asincrono 
 	XSync(disp, False);
@@ -541,7 +714,7 @@ int main(void)
 		int n;
 		XineramaScreenInfo *info = XineramaQueryScreens(disp, &n);
 
-		monitors_count = n < MAX_MONITORS ? n : MAX_MONITORS;
+		monitors_count = n < N_MONITORS ? n : N_MONITORS;
 
 		
 		for(int i = 0; i < monitors_count; i++)
@@ -584,7 +757,7 @@ int main(void)
 	}
 
 	
-
+	signal(SIGCHLD, SIG_IGN);
 	while(1)
 	{
 
@@ -632,18 +805,23 @@ int main(void)
 								KillWindow(disp, root);
 							}
 
-							else{
-								// Gestione Workspace (cmd è NULL)
-								int ws_target = keys[i].arg;
+							else if (keys[i].arg == -2) { // Immaginando -2 come identificativo per spostare monitor
+								MoveWindowToMonitor(disp, root);
+							}
+
+							else {
+								// Prende il tasto premuto (0-9)
+								int ws_target = keys[i].arg % WORKSPACES_X_MONITOR; 
 
 								if(keys[i].mod & WS_MODIFIER)
 								{
-									printf("[ASH-WM] Richiesto spostamento finestra nel WS %d\n", ws_target);
+									// Questa farà saltare la finestra nell'altro range (es. da 3 a 13)
 									MoveToWorkspace(disp, root, ws_target);
 								}
 								else
 								{
-									ChangeWorksapce(disp, root, ws_target);
+									// Questa cambierà workspace restando nel range del monitor corrente
+									ChangeWorkspace(disp, root, ws_target);
 								}
 							}
 						}
@@ -652,22 +830,34 @@ int main(void)
 				}
 				break;
 
-
+			
+			case MotionNotify:
+				// Il mouse si sta muovendo sullo sfondo o tra i monitor: aggiorna la mappa dei monitor
+				UpdateCurrentMonitor(disp, root);
+				break;
 			
 			//gestisce sopostamento mouse
 			case EnterNotify:
-				// Evitiamo di cambiare focus se stiamo entrando in sotto-finestre di X11 strane
 				if (Ev.xcrossing.mode != NotifyNormal || Ev.xcrossing.detail == NotifyInferior)
 					break;
 
-				printf("[ASH-WM] Il mouse è entrato nella finestra %lu. Cambio focus.\n", Ev.xcrossing.window);
-				FocusWindow(disp, Ev.xcrossing.window);
+				UpdateCurrentMonitor(disp, root);
+
+				// FIX DI SICUREZZA: Controlla se la finestra è effettivamente visibile a schermo prima di darle il focus
+				XWindowAttributes wa;
+				XGetWindowAttributes(disp, Ev.xcrossing.window, &wa);
+				if (wa.map_state == IsViewable) {
+					printf("[ASH-WM] Il mouse è entrato nella finestra %lu. Cambio focus.\n", Ev.xcrossing.window);
+					FocusWindow(disp, Ev.xcrossing.window);
+				}
 				break;
 
 
 			case DestroyNotify:	 // questo é Window w
 				RemoveWindowList(disp ,Ev.xdestroywindow.window);
 				break;
+
+
 
 		
 			default:

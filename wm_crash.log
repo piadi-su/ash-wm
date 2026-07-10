@@ -1,0 +1,686 @@
+
+This GDB supports auto-downloading debuginfo from the following URLs:
+  <https://debuginfod.archlinux.org>
+Enable debuginfod for this session? (y or [n]) [answered N; input not from terminal]
+Debuginfod has been disabled.
+To make this setting permanent, add 'set debuginfod enabled off' to .gdbinit.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/usr/lib/libthread_db.so.1".
+[Detaching after fork from child process 189373]
+[Detaching after fork from child process 189413]
+[Detaching after fork from child process 189452]
+[Detaching after fork from child process 189509]
+[Detaching after fork from child process 189565]
+[Detaching after fork from child process 189585]
+[Detaching after fork from child process 189643]
+[Detaching after fork from child process 189682]
+[Detaching after fork from child process 189740]
+[ASH-WM] Salvato Monitor 0: X=0, Y=0, W=1920, H=1080
+[ASH-WM] Salvato Monitor 1: X=1920, Y=0, W=768, H=1366
+[ASH-WM] Finestra 8388611 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 8388611
+[ASH-WM] Il mouse è entrato nella finestra 8388611. Cambio focus.
+[ASH-WM] Finestra 18874371 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 18874371
+[ASH-WM] Il mouse è entrato nella finestra 18874371. Cambio focus.
+[ASH-WM] Finestra 29360131 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 29360131
+[ASH-WM] Sposto la finestra 29360131 dal Monitor 0 (WS 0) al Monitor 1 (WS 1)
+[ASH-WM] Il mouse è entrato nella finestra 18874371. Cambio focus.
+[ASH-WM] Il mouse è entrato nella finestra 29360131. Cambio focus.
+[ASH-WM] Sposto la finestra 29360131 dal Monitor 0 (WS 1) al Monitor 1 (WS 1)
+[ASH-WM] Sposto la finestra 29360131 dal Monitor 0 (WS 1) al Monitor 1 (WS 1)
+[ASH-WM] Il mouse è entrato nella finestra 29360131. Cambio focus.
+[ASH-WM] Sposto la finestra 29360131 dal Monitor 0 (WS 1) al Monitor 1 (WS 1)
+[ASH-WM] Finestra 39845891 spawnata sul Monitor 1 -> Salvata nel Workspace 1
+[+] nuova finestra id: 39845891
+[ASH-WM] Finestra 50331651 spawnata sul Monitor 1 -> Salvata nel Workspace 1
+[+] nuova finestra id: 50331651
+[ASH-WM] Finestra 60817411 spawnata sul Monitor 1 -> Salvata nel Workspace 1
+[+] nuova finestra id: 60817411
+[ASH-WM] Finestra 71303171 spawnata sul Monitor 1 -> Salvata nel Workspace 1
+[+] nuova finestra id: 71303171
+[ASH-WM] Finestra 81788931 spawnata sul Monitor 1 -> Salvata nel Workspace 1
+[+] nuova finestra id: 81788931
+[ASH-WM] Il mouse è entrato nella finestra 50331651. Cambio focus.
+[ASH-WM] Il mouse è entrato nella finestra 71303171. Cambio focus.
+[ASH-WM] Il mouse è entrato nella finestra 81788931. Cambio focus.
+[ASH-WM] Sposto la finestra 81788931 dal Monitor 0 (WS 1) al Monitor 1 (WS 1)
+[ASH-WM] Il mouse è entrato nella finestra 81788931. Cambio focus.
+[ASH-WM] Il mouse è entrato nella finestra 60817411. Cambio focus.
+[ASH-WM] Il mouse è entrato nella finestra 50331651. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 50331651
+[-] Finestra 50331651 rimossa (WS 1)
+[ASH-WM] Il mouse è entrato nella finestra 60817411. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 60817411
+[-] Finestra 60817411 rimossa (WS 1)
+[ASH-WM] Il mouse è entrato nella finestra 71303171. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 71303171
+[-] Finestra 71303171 rimossa (WS 1)
+[ASH-WM] Il mouse è entrato nella finestra 81788931. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 81788931
+[-] Finestra 81788931 rimossa (WS 1)
+[ASH-WM] Il mouse è entrato nella finestra 39845891. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 39845891
+[-] Finestra 39845891 rimossa (WS 1)
+[ASH-WM] Il mouse è entrato nella finestra 29360131. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 29360131
+[-] Finestra 29360131 rimossa (WS 1)
+[ASH-WM] Il mouse è entrato nella finestra 18874371. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 18874371
+[-] Finestra 18874371 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 8388611. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 8388611
+[-] Finestra 8388611 rimossa (WS 0)
+[ASH-WM] Finestra 92274691 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 92274691
+[ASH-WM] Il mouse è entrato nella finestra 92274691. Cambio focus.
+[ASH-WM] Sposto la finestra 92274691 dal WS 0 al WS 11 (Monitor 1)
+[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 0
+[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 2
+[ASH-WM] Sincronizzo: Il mouse ha attivato il Monitor 1 (WS 1)
+[ASH-WM] Monitor 1 cambia da WS 1 a WS 11
+[ASH-WM] Il mouse è entrato nella finestra 92274691. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 11 a WS 10
+[ASH-WM] Monitor 1 cambia da WS 10 a WS 11
+[ASH-WM] Il mouse è entrato nella finestra 92274691. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 11 a WS 10
+[ASH-WM] Monitor 0 cambia da WS 2 a WS 0
+[ASH-WM] Monitor [Detaching after fork from child process 189855]
+[Detaching after fork from child process 189886]
+[Detaching after fork from child process 189933]
+[Detaching after fork from child process 189972]
+[Detaching after fork from child process 190003]
+[Detaching after fork from child process 190049]
+[Detaching after fork from child process 190089]
+[Detaching after fork from child process 190129]
+[Detaching after fork from child process 190165]
+[Detaching after fork from child process 190207]
+[Detaching after fork from child process 190246]
+[Detaching after fork from child process 190285]
+[Detaching after fork from child process 190323]
+[Detaching after fork from child process 190360]
+[Detaching after fork from child process 190402]
+[Detaching after fork from child process 190441]
+[Detaching after fork from child process 190496]
+0 cambia da WS 0 a WS 1
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 2
+[ASH-WM] Monitor 0 cambia da WS 2 a WS 0
+[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 2
+[ASH-WM] Monitor 0 cambia da WS 2 a WS 0
+[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 2
+[ASH-WM] Monitor 0 cambia da WS 2 a WS 0
+[ASH-WM] Monitor 1 cambia da WS 10 a WS 11
+[ASH-WM] Il mouse è entrato nella finestra 92274691. Cambio focus.
+[ASH-WM] Sposto la finestra 92274691 dal Monitor 1 (WS 11) al Monitor 0 (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 92274691. Cambio focus.
+[ASH-WM] Sposto la finestra 92274691 dal WS 0 al WS 10 (Monitor 1)
+[ASH-WM] Monitor 1 cambia da WS 11 a WS 10
+[ASH-WM] Il mouse è entrato nella finestra 92274691. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 10 a WS 11
+[ASH-WM] Monitor 1 cambia da WS 11 a WS 12
+[ASH-WM] Monitor 1 cambia da WS 12 a WS 10
+[ASH-WM] Il mouse è entrato nella finestra 92274691. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 92274691
+[-] Finestra 92274691 rimossa (WS 10)
+[ASH-WM] Finestra 102760451 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 102760451
+[ASH-WM] Il mouse è entrato nella finestra 102760451. Cambio focus.
+[ASH-WM] Finestra 113246211 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 113246211
+[ASH-WM] Finestra 123731971 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 123731971
+[ASH-WM] Finestra 134217731 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 134217731
+[ASH-WM] Finestra 144703491 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 144703491
+[ASH-WM] Finestra 155189251 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 155189251
+[ASH-WM] Finestra 165675011 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 165675011
+[ASH-WM] Finestra 176160771 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 176160771
+[ASH-WM] Finestra 186646531 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 186646531
+[ASH-WM] Finestra 197132291 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 197132291
+[ASH-WM] Uccido la finestra hardware: 197132291
+[-] Finestra 197132291 rimossa (WS 0)
+[ASH-WM] Uccido la finestra hardware: 102760451
+[-] Finestra 102760451 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 113246211. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 113246211
+[-] Finestra 113246211 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 123731971. Cambio focus.
+[ASH-WM] Finestra 207618051 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 207618051
+[ASH-WM] Finestra 218103811 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 218103811
+[ASH-WM] Finestra 228589571 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 228589571
+[ASH-WM] Finestra 239075331 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 239075331
+[ASH-WM] Finestra 249561091 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 249561091
+[ASH-WM] Finestra 260046851 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 260046851
+[ASH-WM] Finestra 270532611 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 270532611
+[ASH-WM] Uccido la finestra hardware: 270532611
+[-] Finestra 270532611 rimossa (WS 0)
+[ASH-WM] Uccido la finestra hardware: 123731971
+[-] Finestra 123731971 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 134217731. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 134217731
+[-] Finestra 134217731 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 144703491. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 144703491
+[-] Finestra 144703491 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 155189251. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 155189251
+[-] Finestra 155189251 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella fi[Detaching after fork from child process 190536]
+[Detaching after fork from child process 190576]
+[Detaching after fork from child process 190635]
+[Detaching after fork from child process 190678]
+[Detaching after fork from child process 190698]
+[Detaching after fork from child process 190768]
+[Detaching after fork from child process 190803]
+[Detaching after fork from child process 190846]
+[Detaching after fork from child process 190920]
+[Detaching after fork from child process 190942]
+[Detaching after fork from child process 190998]
+[Detaching after fork from child process 191032]
+[Detaching after fork from child process 191076]
+[Detaching after fork from child process 191111]
+nestra 165675011. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 165675011
+[-] Finestra 165675011 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 176160771. Cambio focus.
+[ASH-WM] Finestra 281018371 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 281018371
+[ASH-WM] Finestra 291504131 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 291504131
+[ASH-WM] Uccido la finestra hardware: 291504131
+[-] Finestra 291504131 rimossa (WS 0)
+[ASH-WM] Uccido la finestra hardware: 176160771
+[-] Finestra 176160771 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 186646531. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 186646531
+[-] Finestra 186646531 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 207618051. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 207618051
+[-] Finestra 207618051 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 218103811. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 218103811
+[-] Finestra 218103811 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 228589571. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 228589571
+[-] Finestra 228589571 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 239075331. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 239075331
+[-] Finestra 239075331 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 249561091. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 249561091
+[-] Finestra 249561091 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 260046851. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 260046851
+[-] Finestra 260046851 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 281018371. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 281018371
+[-] Finestra 281018371 rimossa (WS 0)
+[ASH-WM] Finestra 301989891 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 301989891
+[ASH-WM] Il mouse è entrato nella finestra 301989891. Cambio focus.
+[ASH-WM] Finestra 312475651 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 312475651
+[ASH-WM] Finestra 322961411 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 322961411
+[ASH-WM] Finestra 333447171 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 333447171
+[ASH-WM] Finestra 343932931 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 343932931
+[ASH-WM] Finestra 354418691 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 354418691
+[-] Finestra 354418691 rimossa (WS 0)
+[-] Finestra 301989891 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 312475651. Cambio focus.
+[-] Finestra 312475651 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 322961411. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 322961411
+[-] Finestra 322961411 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 333447171. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 333447171
+[-] Finestra 333447171 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 343932931. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 343932931
+[-] Finestra 343932931 rimossa (WS 0)
+[ASH-WM] Finestra 301989891 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 301989891
+[ASH-WM] Il mouse è entrato nella finestra 301989891. Cambio focus.
+[ASH-WM] Finestra 312475651 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 312475651
+[ASH-WM] Finestra 354418691 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 354418691
+[ASH-WM] Finestra 364904451 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 364904451
+[ASH-WM] Finestra 375390211 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 375390211
+[ASH-WM] Finestra 385875971 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 385875971
+[ASH-WM] Il mouse è entrato nella finestra 354418691. Cambio focus.
+[ASH-WM] Il mouse è entrato nella finestra 375390211. Cambio focus.
+[ASH-WM] Il mouse �[Detaching after fork from child process 191157]
+[Detaching after fork from child process 191188]
+[Detaching after fork from child process 191258]
+[Detaching after fork from child process 191298]
+[Detaching after fork from child process 191401]
+[Detaching after fork from child process 191440]
+[Detaching after fork from child process 191479]
+[Detaching after fork from child process 191519]
+� entrato nella finestra 385875971. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 385875971
+[-] Finestra 385875971 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 375390211. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 375390211
+[-] Finestra 375390211 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 364904451. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 364904451
+[-] Finestra 364904451 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 354418691. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 354418691
+[-] Finestra 354418691 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 312475651. Cambio focus.
+[ASH-WM] Il mouse è entrato nella finestra 301989891. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 301989891
+[-] Finestra 301989891 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 312475651. Cambio focus.
+[ASH-WM] Finestra 396361731 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 396361731
+[ASH-WM] Il mouse è entrato nella finestra 396361731. Cambio focus.
+[ASH-WM] Finestra 406847491 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 406847491
+[ASH-WM] Il mouse è entrato nella finestra 406847491. Cambio focus.
+[ASH-WM] Il mouse è entrato nella finestra 396361731. Cambio focus.
+[ASH-WM] Il mouse è entrato nella finestra 312475651. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 312475651
+[-] Finestra 312475651 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 396361731. Cambio focus.
+[ASH-WM] Il mouse è entrato nella finestra 406847491. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 406847491
+[-] Finestra 406847491 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 396361731. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 396361731
+[-] Finestra 396361731 rimossa (WS 0)
+[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 0
+[ASH-WM] Finestra 417333251 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 417333251
+[ASH-WM] Il mouse è entrato nella finestra 417333251. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
+[ASH-WM] Finestra 427819011 spawnata sul Monitor 0 -> Salvata nel Workspace 1
+[+] nuova finestra id: 427819011
+[ASH-WM] Il mouse è entrato nella finestra 427819011. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 0
+[ASH-WM] Il mouse è entrato nella finestra 417333251. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
+[ASH-WM] Il mouse è entrato nella finestra 427819011. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 0
+[ASH-WM] Il mouse è entrato nella finestra 417333251. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
+[ASH-WM] Il mouse è entrato nella finestra 427819011. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 2
+[ASH-WM] Monitor 0 cambia da WS 2 a WS 1
+[ASH-WM] Il mouse è entrato nella finestra 427819011. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 0
+[ASH-WM] Il mouse è entrato nella finestra 417333251. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
+[ASH-WM] Il mouse è entrato nella finestra 427819011. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 2
+[ASH-WM] Finestra 438304771 spawnata sul Monitor 0 -> Salvata nel Workspace 2
+[+] nuova finestra id: 438304771
+[ASH-WM] Il mouse è entrato nella finestra 438304771. Cambio focus.
+[ASH-WM] Finestra 448790531 spawnata sul Monitor 0 -> Salvata nel Workspace 2
+[+] nuova finestra id: 448790531
+[ASH-WM] Il mouse è entrato nella finestra 448790531. Cambio focus.
+[ASH-WM] Finestra 459276291 spawnata sul Monitor 0 -> Salvata nel Workspace 2
+[+] nuova finestra id: 459276291
+[ASH-WM] Il mouse è entrato nella finestra 459276291. Cambio focus.
+[ASH-WM] Finestra 469762051 spawnata sul Monitor 0 -> Salvata nel Workspace 2
+[+] nuova finestra id: 469762051
+[ASH-WM] Il mouse è entrato nella finestra 469762051. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 469762051
+[-] Finestra 469762051 rimossa (WS 2)
+[ASH-WM] Il mouse è entrato nella finestra 459276291. Cambio focus.
+[ASH-WM] Uccido la finestra h[Detaching after fork from child process 191651]
+[Detaching after fork from child process 191690]
+ardware: 459276291
+[-] Finestra 459276291 rimossa (WS 2)
+[ASH-WM] Il mouse è entrato nella finestra 448790531. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 448790531
+[-] Finestra 448790531 rimossa (WS 2)
+[ASH-WM] Il mouse è entrato nella finestra 438304771. Cambio focus.
+[ASH-WM] Finestra 480247810 spawnata sul Monitor 0 -> Salvata nel Workspace 2
+[+] nuova finestra id: 480247810
+[ASH-WM] Il mouse è entrato nella finestra 480247810. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 480247810
+[-] Finestra 480247810 rimossa (WS 2)
+[ASH-WM] Il mouse è entrato nella finestra 438304771. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 2 a WS 0
+[ASH-WM] Il mouse è entrato nella finestra 417333251. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
+[ASH-WM] Il mouse è entrato nella finestra 427819011. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 2
+[ASH-WM] Il mouse è entrato nella finestra 438304771. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 2 a WS 0
+[ASH-WM] Il mouse è entrato nella finestra 417333251. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
+[ASH-WM] Il mouse è entrato nella finestra 427819011. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 0
+[ASH-WM] Il mouse è entrato nella finestra 417333251. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
+[ASH-WM] Il mouse è entrato nella finestra 427819011. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 2
+[ASH-WM] Il mouse è entrato nella finestra 438304771. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 2 a WS 0
+[ASH-WM] Il mouse è entrato nella finestra 417333251. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
+[ASH-WM] Il mouse è entrato nella finestra 427819011. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 2
+[ASH-WM] Il mouse è entrato nella finestra 438304771. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 2 a WS 0
+[ASH-WM] Il mouse è entrato nella finestra 417333251. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
+[ASH-WM] Il mouse è entrato nella finestra 427819011. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 2
+[ASH-WM] Il mouse è entrato nella finestra 438304771. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 2 a WS 0
+[ASH-WM] Il mouse è entrato nella finestra 417333251. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
+[ASH-WM] Il mouse è entrato nella finestra 427819011. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 2
+[ASH-WM] Il mouse è entrato nella finestra 438304771. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 2 a WS 0
+[ASH-WM] Il mouse è entrato nella finestra 417333251. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
+[ASH-WM] Il mouse è entrato nella finestra 427819011. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 2
+[ASH-WM] Il mouse è entrato nella finestra 438304771. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 438304771
+[-] Finestra 438304771 rimossa (WS 2)
+[ASH-WM] Finestra 480247811 spawnata sul Monitor 1 -> Salvata nel Workspace 10
+[+] nuova finestra id: 480247811
+[ASH-WM] Il mouse è entrato nella finestra 480247811. Cambio focus.
+[ASH-WM] Finestra 490733571 spawnata sul Monitor 1 -> Salvata nel Workspace 10
+[+] nuova finestra id: 490733571
+[ASH-WM] Sposto la finestra 490733571 dal Monitor 1 (WS 10) al Monitor 0 (WS 2)
+[ASH-WM] Il mouse è entrato nella finestra 490733571. Cambio focus.
+[ASH-WM] Sposto la finestra 490733571 dal Monitor 0 (WS 2) al Monitor 1 (WS 10)
+[ASH-WM] Il mouse è entrato nella finestra 490733571. Cambio focus.
+[ASH-WM] Sposto la finestra 490733571 dal Monitor 1 (WS 10) al Monitor 0 (WS 2)
+[ASH-WM] Il mouse è entrato nella finestra 480247811. Cambio focus.
+[ASH-WM] Il mouse è entrato nella finestra 490733571. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 2 a WS 0
+[ASH-WM] Il mouse è entrato nella finestra 417333251. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
+[ASH-WM] Il mouse è entrato nella finestra 427819011. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 2
+[ASH-WM] Il mouse è entrato nella finestra 490733571. Cambio focus.
+[ASH-WM] Il mouse è entrato nella finestra 480247811. [Detaching after fork from child process 191768]
+[Detaching after fork from child process 191826]
+[Detaching after fork from child process 191886]
+[Detaching after fork from child process 191943]
+
+thread 'main' (191943) panicked at alacritty/src/clipboard.rs:48:57:
+called `Result::unwrap()` on an `Err` value: XcbConnect(SetupFailed(SetupFailed { .. }))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+[Detaching after fork from child process 191946]
+
+thread 'main' (191946) panicked at alacritty/src/clipboard.rs:48:57:
+called `Result::unwrap()` on an `Err` value: XcbConnect(SetupFailed(SetupFailed { .. }))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+[Detaching after fork from child process 191951]
+
+thread 'main' (191951) panicked at alacritty/src/clipboard.rs:48:57:
+called `Result::unwrap()` on an `Err` value: XcbConnect(SetupFailed(SetupFailed { .. }))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+[Detaching after fork from child process 192035]
+
+thread 'main' (192035) panicked at alacritty/src/clipboard.rs:48:57:
+called `Result::unwrap()` on an `Err` value: XcbConnect(SetupFailed(SetupFailed { .. }))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+[Detaching after fork from child process 192039]
+[0.032] Ignoring unknown config key: window_padding_height
+[0.032] Ignoring unknown config key: cursor_blink
+[0.032] Ignoring unknown config key: confirm_close
+[0.153] Failed to enable transparency. This happens when your desktop environment does not support compositing.
+Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 10 a WS 11
+[ASH-WM] Monitor 1 cambia da WS 11 a WS 12
+[ASH-WM] Finestra 501219331 spawnata sul Monitor 1 -> Salvata nel Workspace 12
+[+] nuova finestra id: 501219331
+[ASH-WM] Il mouse è entrato nella finestra 501219331. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 12 a WS 10
+[ASH-WM] Il mouse è entrato nella finestra 480247811. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 10 a WS 11
+[ASH-WM] Monitor 1 cambia da WS 11 a WS 10
+[ASH-WM] Il mouse è entrato nella finestra 480247811. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 10 a WS 11
+[ASH-WM] Finestra 511705091 spawnata sul Monitor 1 -> Salvata nel Workspace 11
+[+] nuova finestra id: 511705091
+[ASH-WM] Il mouse è entrato nella finestra 511705091. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 11 a WS 10
+[ASH-WM] Il mouse è entrato nella finestra 480247811. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 10 a WS 11
+[ASH-WM] Il mouse è entrato nella finestra 511705091. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 11 a WS 12
+[ASH-WM] Il mouse è entrato nella finestra 501219331. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 12 a WS 13
+[ASH-WM] Finestra 522190851 spawnata sul Monitor 1 -> Salvata nel Workspace 13
+[+] nuova finestra id: 522190851
+[ASH-WM] Il mouse è entrato nella finestra 522190851. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 13 a WS 14
+[ASH-WM] Monitor 1 cambia da WS 14 a WS 13
+[ASH-WM] Il mouse è entrato nella finestra 522190851. Cambio focus.
+[ASH-WM] Il mouse è entrato nella finestra 522190851. Cambio focus.
+[ASH-WM] Il mouse è entrato nella finestra 490733571. Cambio focus.
+[ASH-WM] Il mouse è entrato nella finestra 522190851. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 13 a WS 10
+[ASH-WM] Il mouse è entrato nella finestra 480247811. Cambio focus.
+[ASH-WM] Il mouse è entrato nella finestra 490733571. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 2 a WS 1
+[ASH-WM] Il mouse è entrato nella finestra 427819011. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 427819011
+[-] Finestra 427819011 rimossa (WS 1)
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 0
+[ASH-WM] Il mouse è entrato nella finestra 417333251. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 417333251
+[-] Finestra 417333251 rimossa (WS 0)
+[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 2
+[ASH-WM] Il mouse è entrato nella finestra 490733571. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 2 a WS 0
+[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 2
+[ASH-WM] Il mouse è entrato nella finestra 490733571. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 490733571
+[-] Finestra 490733571 rimossa (WS 2)
+[ASH-WM] Monitor 0 cambia da WS 2 a WS 3
+[ASH-WM] Monitor 0 cambia da WS 3 a WS 4
+[ASH-WM] Monitor 0 cambia da WS 4 a WS 5
+[ASH-WM] Monitor 0 cambia da WS 5 a WS 6
+[ASH-WM] Monitor 0 cambia da WS 6 a WS 7
+[ASH-WM] Monitor 0 cambia da WS 7 a WS 8
+[ASH-WM] Monitor 0 cambia da WS 8 a WS 9
+[ASH-WM] Il mouse è entrato nella finestra 480247811. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 10 a WS 11
+[ASH-WM] Il mouse è entrato nella finestra 511705091. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 11 a WS 12
+[ASH-WM] Il mouse è entrato nella finestra 501219331. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 12 a WS 13
+[ASH-WM] Il mouse è entrato nella finestra 522190851. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 13 a WS 14
+[ASH-WM] Finestra 532676619 spawnata sul Monitor 1 -> Salvata nel Workspace 14
+[+] nuova finestra id: 532676619
+[ASH-WM] Il mouse è entrato nella finestra 532676619. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 14 a WS 10
+[ASH-WM] Il mouse è entrato nella finestra 480247811. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 10 a WS 11
+[ASH-WM] Il mouse è entrato nella finestra 511705091. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 11 a WS 12
+[ASH-WM] Il mouse è entrato nella finestra 501219331. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 12 a WS 13
+[ASH-WM] Il mouse è entrato nella finestra 522190851. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 13 a[Detaching after fork from child process 192430]
+
+thread 'main' (192430) panicked at alacritty/src/clipboard.rs:48:57:
+called `Result::unwrap()` on an `Err` value: XcbConnect(SetupFailed(SetupFailed { .. }))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+[Detaching after fork from child process 192433]
+
+thread 'main' (192433) panicked at alacritty/src/clipboard.rs:48:57:
+called `Result::unwrap()` on an `Err` value: XcbConnect(SetupFailed(SetupFailed { .. }))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+[Detaching after fork from child process 192436]
+
+thread 'main' (192436) panicked at alacritty/src/clipboard.rs:48:57:
+called `Result::unwrap()` on an `Err` value: XcbConnect(SetupFailed(SetupFailed { .. }))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+[Detaching after fork from child process 192439]
+
+thread 'main' (192439) panicked at alacritty/src/clipboard.rs:48:57:
+called `Result::unwrap()` on an `Err` value: XcbConnect(SetupFailed(SetupFailed { .. }))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+[Detaching after fork from child process 192442]
+
+thread 'main' (192442) panicked at alacritty/src/clipboard.rs:48:57:
+called `Result::unwrap()` on an `Err` value: XcbConnect(SetupFailed(SetupFailed { .. }))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+[Detaching after fork from child process 192445]
+
+thread 'main' (192445) panicked at alacritty/src/clipboard.rs:48:57:
+called `Result::unwrap()` on an `Err` value: XcbConnect(SetupFailed(SetupFailed { .. }))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+[Detaching after fork from child process 192448]
+[0.033] Ignoring unknown config key: window_padding_height
+[0.033] Ignoring unknown config key: cursor_blink
+[0.033] Ignoring unknown config key: confirm_close
+[0.162] Failed to enable transparency. This happens when your desktop environment does not support compositing.
+X Error of failed request:  BadWindow (invalid Window parameter)
+  Major opcode of failed request:  20 (X_GetProperty)
+  Resource id in failed request:  0x1fe0000b
+  Serial number of failed request:  438
+  Current serial number in output stream:  438
+[Detaching after fork from child process 192935]
+
+thread 'main' (193371) panicked at alacritty/src/clipboard.rs:48:57:
+called `Result::unwrap()` on an `Err` value: XcbConnect(SetupFailed(SetupFailed { .. }))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+[Detaching after fork from child process 193377]
+
+thread 'main' (193377) panicked at alacritty/src/clipboard.rs:48:57:
+called `Result::unwrap()` on an `Err` value: XcbConnect(SetupFailed(SetupFailed { .. }))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+[Detaching after fork from child process 193416]
+
+thread 'main' (193416) panicked at alacritty/src/clipboard.rs:48:57:
+called `Result::unwrap()` on an `Err` value: XcbConnect(SetupFailed(SetupFailed { .. }))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+[Detaching after fork from child process 193419]
+[0.032] Ignoring unknown config key: window_padding_height
+[0.032] Ignoring unknown config key: cursor_blink
+[0.032] Ignoring unknown config key: confirm_close
+[0.142] Failed to enable transparency. This happens when your desktop environment does not support compositing.
+[Detaching after fork from child process 193988]
+Maximum number of clients reached
+Error: Os(OsError { line: 788, file: "/build/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/platform_impl/linux/mod.rs", error: XNotSupported(XOpenDisplayFailed) })
+[Detaching after fork from child process 193990]
+Maximum number of clients reached
+Error: Os(OsError { line: 788, file: "/build/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/platform_impl/linux/mod.rs", error: XNotSupported(XOpenDisplayFailed) })
+[Detaching after fork from child process 193992]
+Maximum number of clients reached
+Error: Os(OsError { line: 788, file: "/build/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/platform_impl/linux/mod.rs", error: XNotSupported(XOpenDisplayFailed) })
+[Detaching after fork from child process 193994]
+Maximum number of clients reached
+
+(process:193994): X11Helper-WARNING **: 19:06:30.881: Failed to open display: :1
+
+(process:193994): Rofi-WARNING **: 19:06:30.881: No valid backend was found. Make sure to launch rofi from a valid X11 or Wayland session.
+[Detaching after fork from child process 194000]
+Maximum number of clients reached
+Error: Can't open display: :1
+[Detaching after fork from child process 194002]
+Maximum number of clients reached
+Error: Can't open display: :1
+[Detaching after fork from child process 194062]
+Maximum number of clients reached
+Error: Os(OsError { line: 788, file: "/build/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/platform_impl/linux/mod.rs", error: XNotSupported(XOpenDisplayFailed) })
+
+Program received signal SIGTERM, Terminated.
+0x00007ffff7c9405e in ?? () from /usr/lib/libc.so.6
+#0  0x00007ffff7c9405e in ?? () from /usr/lib/libc.so.6
+#1  0x00007ffff7c94084 in ?? () from /usr/lib/libc.so.6
+#2  0x00007ffff7d0e68e in poll () from /usr/lib/libc.so.6
+#3  0x00007ffff7be220b in ?? () from /usr/lib/libxcb.so.1
+#4  0x00007ffff7be3f3d in xcb_wait_for_event () from /usr/lib/libxcb.so.1
+#5  0x00007ffff7e8d659 in _XReadEvents () from /usr/lib/libX11.so.6
+#6  0x00007ffff7e74379 in XNextEvent () from /usr/lib/libX11.so.6
+#7  0x0000555555556fd7 in main ()
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+XIO:  fatal IO error 0 (Success) on X server ":1"
+      after 831 requests (831 known processed) with 0 events remaining.
+XIO:  fatal IO error 0 (Success) on X server ":1"
+      after 1071 requests (1071 known processed) with 0 events remaining.

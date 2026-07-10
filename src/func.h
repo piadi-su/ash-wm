@@ -14,11 +14,12 @@
 
 void FocusWindow(Display *disp, Window w);
 void AddWindowList(Display *disp, Window w, Window root);
-void ChangeWorksapce(Display *disp, Window root, int new_ws);
+void ChangeWorkspace(Display *disp, Window root, int new_ws);
 void MoveToWorkspace(Display *disp, Window root, int ws_target);
 void RemoveWindowList(Display *disp, Window w);
 void KillWindow(Display  *disp, Window root);
 void Dwindle(Display *disp, int ws_index);
 void UpdateCurrentMonitor(Display *disp, Window root);
+void MoveWindowToMonitor(Display *disp, Window root);
 
 #endif

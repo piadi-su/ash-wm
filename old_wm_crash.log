@@ -1,0 +1,206 @@
+
+This GDB supports auto-downloading debuginfo from the following URLs:
+  <https://debuginfod.archlinux.org>
+Enable debuginfod for this session? (y or [n]) [answered N; input not from terminal]
+Debuginfod has been disabled.
+To make this setting permanent, add 'set debuginfod enabled off' to .gdbinit.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/usr/lib/libthread_db.so.1".
+[Detaching after fork from child process 142808]
+[Detaching after fork from child process 142816]
+[Detaching after fork from child process 142881]
+[Detaching after fork from child process 142925]
+[Detaching after fork from child process 142960]
+[Detaching after fork from child process 142999]
+[Detaching after fork from child process 143038]
+[Detaching after fork from child process 143077]
+[Detaching after fork from child process 143120]
+[Detaching after fork from child process 143155]
+[Detaching after fork from child process 143214]
+[Detaching after fork from child process 143229]
+[Detaching after fork from child process 143279]
+[Detaching after fork from child process 143325]
+[Detaching after fork from child process 143366]
+[Detaching after fork from child process 143403]
+[Detaching after fork from child process 143441]
+[Detaching after fork from child process 143488]
+[Detaching after fork from child process 143527]
+[Detaching after fork from child process 143566]
+[Detaching after fork from child process 143592]
+[Detaching after fork from child process 143644]
+[ASH-WM] Salvato Monitor 0: X=0, Y=0, W=1920, H=1080
+[ASH-WM] Salvato Monitor 1: X=1920, Y=0, W=768, H=1366
+[ASH-WM] Finestra 8388611 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 8388611
+[ASH-WM] Il mouse è entrato nella finestra 8388611. Cambio focus.
+[ASH-WM] Finestra 18874371 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 18874371
+[ASH-WM] Il mouse è entrato nella finestra 18874371. Cambio focus.
+[ASH-WM] Finestra 29360131 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 29360131
+[ASH-WM] Finestra 39845891 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 39845891
+[ASH-WM] Finestra 50331651 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 50331651
+[ASH-WM] Finestra 60817411 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 60817411
+[ASH-WM] Finestra 71303171 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 71303171
+[ASH-WM] Finestra 81788931 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 81788931
+[ASH-WM] Finestra 92274691 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 92274691
+[ASH-WM] Uccido la finestra hardware: 92274691
+[-] Finestra 92274691 rimossa (WS 0)
+[ASH-WM] Finestra 102760451 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 102760451
+[ASH-WM] Uccido la finestra hardware: 102760451
+[-] Finestra 102760451 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 18874371. Cambio focus.
+[ASH-WM] Finestra 113246211 spawnata sul Monitor 1 -> Salvata nel Workspace 1
+[+] nuova finestra id: 113246211
+[ASH-WM] Il mouse è entrato nella finestra 113246211. Cambio focus.
+[ASH-WM] Finestra 123731971 spawnata sul Monitor 1 -> Salvata nel Workspace 1
+[+] nuova finestra id: 123731971
+[ASH-WM] Il mouse è entrato nella finestra 123731971. Cambio focus.
+[ASH-WM] Finestra 134217731 spawnata sul Monitor 1 -> Salvata nel Workspace 1
+[+] nuova finestra id: 134217731
+[ASH-WM] Finestra 144703491 spawnata sul Monitor 1 -> Salvata nel Workspace 1
+[+] nuova finestra id: 144703491
+[ASH-WM] Finestra 155189251 spawnata sul Monitor 1 -> Salvata nel Workspace 1
+[+] nuova finestra id: 155189251
+[ASH-WM] Finestra 165675011 spawnata sul Monitor 1 -> Salvata nel Workspace 1
+[+] nuova finestra id: 165675011
+[ASH-WM] Finestra 176160771 spawnata sul Monitor 1 -> Salvata nel Workspace 1
+[+] nuova finestra id: 176160771
+[ASH-WM] Finestra 186646531 spawnata sul Monitor 1 -> Salvata nel Workspace 1
+[+] nuova finestra id: 186646531
+[ASH-WM] Finestra 197132291 spawnata sul Monitor 1 -> Salvata nel Workspace 1
+[+] nuova finestra id: 197132291
+[ASH-WM] Finestra 207618051 spawnata sul Monitor 1 -> Salvata nel Workspace 1
+[+] nuova finestra id: 207618051
+[ASH-WM] Finestra 218103811 spawnata sul Monitor 1 -> Salvata nel Workspace 1
+[+] nuova finestra id: 218103811
+[ASH-WM] Monitor 1 richiede cambio da WS 1 a WS 0
+[ASH-WM] WS 0 è occupato dal Monitor 0. Eseguo lo SWAP con WS 1!
+[ASH-WM] Il mouse è entrato nella finestra 18874371. Cambio focus.
+[ASH-WM] Monitor 1 richiede cambio da WS 0 a WS 1
+[ASH-WM] WS 1 è occupato dal Monitor 0. Eseguo lo SWAP con WS 0!
+[ASH-WM] Il mouse è entrato nella finestra 123731971. Cambio focus.
+[ASH-WM] Monitor 1 richiede cambio da WS 1 a WS 2
+[ASH-WM] Monitor 1 richiede cambio da WS 2 a WS 0
+[ASH-WM] WS 0 è occupato dal Monitor 0. Eseguo lo SWAP con WS 2!
+[ASH-WM] Il mouse è entrato nella finestra 18874371. Cambio focus.
+[ASH-WM] Monitor 1 richiede cambio da WS 0 a WS 1
+[ASH-WM] Il mouse è entrato nella finestra 123731971. Cambio focus.
+[ASH-WM] Monitor 1 richiede cambio da WS 1 a WS 2
+[ASH-WM] WS 2 è occupato dal Monitor 0. Eseguo lo SWAP con WS 1!
+[ASH-WM] Finestra 228589571 spawnata sul Monitor 1 -> Salvata nel Workspace 2
+[+] nuova finestra id: 228589571
+[ASH-WM] Il mouse è entrato nella finestra 228589571. Cambio focus.
+[ASH-WM] Monitor 1 richiede cambio da WS 2 a WS 3
+[ASH-WM] Monitor 1 richiede cambio da WS 3 a WS 0
+[ASH-WM] Il mouse è entrato nella finestra 1887[Detaching after fork from child process 143686]
+[Detaching after fork from child process 143725]
+[Detaching after fork from child process 143764]
+[Detaching after fork from child process 143796]
+[Detaching after fork from child process 143842]
+[Detaching after fork from child process 143881]
+[Detaching after fork from child process 143938]
+X Error of failed request:  BadAlloc (insufficient resources for operation)
+  Major opcode of failed request:  12 (X_ConfigureWindow)
+  Serial number of failed request:  963
+  Current serial number in output stream:  967
+4371. Cambio focus.
+[ASH-WM] Monitor 1 richiede cambio da WS 0 a WS 1
+[ASH-WM] WS 1 è occupato dal Monitor 0. Eseguo lo SWAP con WS 0!
+[ASH-WM] Il mouse è entrato nella finestra 123731971. Cambio focus.
+[ASH-WM] Monitor 1 richiede cambio da WS 1 a WS 2
+[ASH-WM] Il mouse è entrato nella finestra 228589571. Cambio focus.
+[ASH-WM] Monitor 1 richiede cambio da WS 2 a WS 3
+[ASH-WM] Monitor 1 richiede cambio da WS 3 a WS 0
+[ASH-WM] WS 0 è occupato dal Monitor 0. Eseguo lo SWAP con WS 3!
+[ASH-WM] Il mouse è entrato nella finestra 18874371. Cambio focus.
+[ASH-WM] Monitor 1 richiede cambio da WS 0 a WS 1
+[ASH-WM] Il mouse è entrato nella finestra 123731971. Cambio focus.
+[ASH-WM] Monitor 1 richiede cambio da WS 1 a WS 2
+[ASH-WM] Il mouse è entrato nella finestra 228589571. Cambio focus.
+[ASH-WM] Monitor 1 richiede cambio da WS 2 a WS 3
+[ASH-WM] WS 3 è occupato dal Monitor 0. Eseguo lo SWAP con WS 2!
+[ASH-WM] Monitor 1 richiede cambio da WS 3 a WS 5
+[ASH-WM] Monitor 1 richiede cambio da WS 5 a WS 0
+[ASH-WM] Il mouse è entrato nella finestra 18874371. Cambio focus.
+[ASH-WM] Monitor 1 richiede cambio da WS 0 a WS 1
+[ASH-WM] Il mouse è entrato nella finestra 123731971. Cambio focus.
+[ASH-WM] Monitor 1 richiede cambio da WS 1 a WS 2
+[ASH-WM] WS 2 è occupato dal Monitor 0. Eseguo lo SWAP con WS 1!
+[ASH-WM] Il mouse è entrato nella finestra 228589571. Cambio focus.
+[ASH-WM] Monitor 1 richiede cambio da WS 2 a WS 3
+[ASH-WM] Monitor 1 richiede cambio da WS 3 a WS 0
+[ASH-WM] Il mouse è entrato nella finestra 18874371. Cambio focus.
+[ASH-WM] Monitor 1 richiede cambio da WS 0 a WS 1
+[ASH-WM] WS 1 è occupato dal Monitor 0. Eseguo lo SWAP con WS 0!
+[ASH-WM] Il mouse è entrato nella finestra 123731971. Cambio focus.
+[ASH-WM] Monitor 1 richiede cambio da WS 1 a WS 2
+[ASH-WM] Il mouse è entrato nella finestra 228589571. Cambio focus.
+[ASH-WM] Monitor 1 richiede cambio da WS 2 a WS 3
+[ASH-WM] Finestra 239075331 spawnata sul Monitor 1 -> Salvata nel Workspace 3
+[+] nuova finestra id: 239075331
+[ASH-WM] Il mouse è entrato nella finestra 239075331. Cambio focus.
+[ASH-WM] Finestra 249561091 spawnata sul Monitor 1 -> Salvata nel Workspace 3
+[+] nuova finestra id: 249561091
+[ASH-WM] Il mouse è entrato nella finestra 249561091. Cambio focus.
+[ASH-WM] Finestra 260046851 spawnata sul Monitor 1 -> Salvata nel Workspace 3
+[+] nuova finestra id: 260046851
+[ASH-WM] Finestra 270532611 spawnata sul Monitor 1 -> Salvata nel Workspace 3
+[+] nuova finestra id: 270532611
+[ASH-WM] Finestra 281018371 spawnata sul Monitor 1 -> Salvata nel Workspace 3
+[+] nuova finestra id: 281018371
+[ASH-WM] Finestra 291504131 spawnata sul Monitor 1 -> Salvata nel Workspace 3
+[+] nuova finestra id: 291504131
+[ASH-WM] Richiesto spostamento finestra nel WS 1
+[ASH-WM] Sposto la finestra 291504131 dal WS 3 al WS 1
+[ASH-WM] Richiesto spostamento finestra nel WS 0
+[ASH-WM] Richiesto spostamento finestra nel WS 0
+[ASH-WM] Richiesto spostamento finestra nel WS 1
+[ASH-WM] Richiesto spostamento finestra nel WS 2
+[ASH-WM] Richiesto spostamento finestra nel WS 0
+[ASH-WM] Richiesto spostamento finestra nel WS 1
+[ASH-WM] Richiesto spostamento finestra nel WS 2
+[ASH-WM] Richiesto spostamento finestra nel WS 0
+[ASH-WM] Richiesto spostamento finestra nel WS 2
+[ASH-WM] Finestra 301989891 spawnata sul Monitor 1 -> Salvata nel Workspace 3
+[+] nuova finestra id: 301989891
+[ASH-WM] Monitor 1 richiede cambio da WS 3 a WS 1
+[Inferior 1 (process 142787) exited with code 01]
+No stack.
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+X connection to :1 broken (explicit kill or server shutdown).
+XIO:  fatal IO error 104 (Connection reset by peer) on X server ":1"
+      after 305 requests (303 known processed) with 0 events remaining.

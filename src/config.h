@@ -23,6 +23,9 @@ typedef struct {
     { MODIFIER|WS_MODIFIER,   KEY, NULL, WS_INDEX }
 
 
+//----------------------//
+
+#define N_MONITORS 2
 #define GAPS 10
 
 //tutti i conandi
@@ -30,7 +33,7 @@ static char *term_cmd[] = {"alacritty", NULL};
 static char *clock_cmd[] = {"xclock", NULL};
 // static char *firefox_cmd[] = {"firefox", NULL};
 static char *rofi_cmd[] = {"rofi", "-show", "drun", NULL};
-static char *close_wm[] = {"killall", "ash-wm", NULL};
+// static char *close_wm[] = {"killall", "ash-wm", NULL};
 
 
 static KeyBinds keys[] = {
@@ -40,10 +43,14 @@ static KeyBinds keys[] = {
 	// {MODIFIER, XK_o, firefox_cmd},
 	{MODIFIER, XK_o, clock_cmd, -1},
 	{MODIFIER, XK_d, rofi_cmd, -1},
-	{MODIFIER, XK_u, close_wm, -1},
+	// {MODIFIER, XK_u, close_wm, -1},
 
 	{MODIFIER, XK_q, NULL, -1},
 
+
+	// Nella tua lista dei keybinds (es. struct Key keys[])
+
+	WORKSPACE_KEYS(XK_m, -2),
 
 	//bind per tutti i workspace
 	WORKSPACE_KEYS(XK_1, 0),
@@ -58,6 +65,8 @@ static KeyBinds keys[] = {
     WORKSPACE_KEYS(XK_0, 9),
 
 };
+
+//----------------------//
 
 // calcola il numero totale
 static const int num_keys = sizeof(keys) / sizeof(keys[0]);
