@@ -9,18 +9,18 @@
 
 #include <signal.h>
 #include <stdlib.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
 
 //miei file
 #include "config.h"
-
+#include  "func.h"
 
 //miei define
 
 #define MAX_MONITORS 4
 #define WORKSPACES 10
-
 
 
 
@@ -32,14 +32,27 @@ typedef struct {
 	int current_ws;
 } Monitors ;
 
-static Monitors monitors[MAX_MONITORS];
-static int monitors_count = {0};
+
 
 
 //strcut per client/finestre
 typedef struct Client {
 	Window id;
 	int monitor_id;
+
+    int is_floating;   // 1 se la muovi col mouse, 0 se segue il tiling
+    int is_fullscreen; // 1 se è a tutto schermo
+
+
+    int x, y; 
+	unsigned int w, h; 
+	
+
+	// Geometria di backup (Fullscreen / Floating)
+    // Per salvare le dimensioni originali quando la stacchi in floating o fullscreen
+    int old_x, old_y; 
+    unsigned int old_w, old_h;
+
 	struct Client *next;
 	struct Client *prev;
 
@@ -54,8 +67,14 @@ typedef struct{
 	Client *list_Cl;
 }Workspace ;
 
-
+static Monitors monitors[MAX_MONITORS];
+static int monitors_count = {0};
 static Workspace workspaces[WORKSPACES];
+
+
+
+//-----------------------------//
+
 
 
 //func to change worksapce focus
@@ -124,6 +143,7 @@ AddWindowList(Display *disp, Window w, Window root)
 		
 	//-------------------------------------------//
 	
+	XSelectInput(disp, w, EnterWindowMask | PropertyChangeMask);
 
 	//se non sta un cazzo prendiamo la finestra e la mettiamo nella lista e come prev é next a sole lei
 	if (workspaces[active_ws].list_Cl == NULL) {
@@ -143,6 +163,7 @@ AddWindowList(Display *disp, Window w, Window root)
 	}
 
 
+	Dwindle(disp, active_ws);
 }
 
 //cambia il worksapce che vediamo
@@ -167,15 +188,15 @@ ChangeWorksapce(Display *disp, Window root, int new_ws)
         }
     }
 
-	int old_ws = monitors[mon_idx].current_ws;
+	int ws = monitors[mon_idx].current_ws;
 
 	// esce se volgio cambiare worksapce ma ci sono gia dentro
-	if(old_ws == new_ws)
+	if(ws == new_ws)
 		return;
 		
-	printf("[ASH-WM] Monitor %d: cambio da WS %d a WS %d\n", mon_idx, old_ws, new_ws);
+	printf("[ASH-WM] Monitor %d: cambio da WS %d a WS %d\n", mon_idx, ws, new_ws);
 
-	Client *cursor = workspaces[old_ws].list_Cl;
+	Client *cursor = workspaces[ws].list_Cl;
 	if(cursor != NULL)
 	{
 		do{
@@ -183,10 +204,10 @@ ChangeWorksapce(Display *disp, Window root, int new_ws)
 			XUnmapWindow(disp, cursor->id); //toglie le window dallo schermo
 			cursor = cursor->next; // cambio il puntaore del cursore
 
-		}while(cursor != workspaces[old_ws].list_Cl);
+		}while(cursor != workspaces[ws].list_Cl);
 	}
 
-	workspaces[old_ws].monitor_id = -1; //nascondiamo il vecchio ws togliando ache l'id che il monitor usava prima
+	workspaces[ws].monitor_id = -1; //nascondiamo il vecchio ws togliando ache l'id che il monitor usava prima
 	
 	//aggiorno il nuovo worksapce
 	
@@ -316,7 +337,7 @@ MoveToWorkspace(Display *disp, Window root, int ws_target)
 
 // server praticamente per freeare la memory quando una finestra o crusha o code simili
 void 
-RemoveWindowList(Window w)
+RemoveWindowList(Display *disp, Window w)
 {
 	Client *found = NULL;
 	int ws_index = -1;
@@ -351,24 +372,24 @@ RemoveWindowList(Window w)
 		return;
 
 
-	//se é l'unica
-	if(found->next == found)
-	{
+
+	if(found->next == found) {
 		workspaces[ws_index].list_Cl = NULL;
 	}
-	else
-	{
+	else {
 		found->prev->next = found->next;
 		found->next->prev = found->prev;
 
-		if(workspaces[ws_index].list_Cl == found)
-		{
+		if(workspaces[ws_index].list_Cl == found) {
 			workspaces[ws_index].list_Cl = found->next;
 		}
 	}
 
 	printf("[-] Finestra %lu rimossa (WS %d)\n", w, ws_index);
 	free(found);
+
+	// Ricalcola il layout del workspace dopo la rimozione!
+	Dwindle(disp, ws_index);
 
 }
 
@@ -392,10 +413,99 @@ KillWindow(Display  *disp, Window root)
 }
 
 
+//func per layout dwindle autotyling
+void
+Dwindle(Display *disp, int ws_index)
+{
+    Client *head = workspaces[ws_index].list_Cl;
+
+    if(head == NULL)
+        return;
+
+    int count_ws = 0;
+    Client *cursor = head;
+    do {
+        count_ws++;
+        cursor = cursor->next;
+    } while(cursor != head);
+
+    int mod_index = workspaces[ws_index].monitor_id;
+    if(mod_index == -1)
+        return;
+
+    int mx = monitors[mod_index].x;
+    int my = monitors[mod_index].y;
+    int mw = monitors[mod_index].width;
+    int mh = monitors[mod_index].height;
+
+    if(count_ws == 1)
+    {
+        head->x = mx + GAPS;
+        head->y = my + GAPS;
+        head->w = mw - (GAPS * 2);
+        head->h = mh - (GAPS * 2);
+
+        XMoveResizeWindow(disp, head->id, head->x, head->y, head->w, head->h);
+        return;
+    }
+
+    cursor = head;
+    int wx = mx;
+    int wy = my;
+    int ww = mw;
+    int wh = mh;
+
+    for(int i = 0; i < count_ws; i++)
+    {
+        if(i == count_ws - 1)
+        {
+            cursor->x = wx + GAPS;
+            cursor->y = wy + GAPS;
+            cursor->w = ww - (GAPS * 2);
+            cursor->h = wh - (GAPS * 2);
+        }
+        else
+        {
+            if(i % 2 == 0)
+            {
+                ww /= 2;
+                cursor->x = wx + GAPS;
+                cursor->y = wy + GAPS;
+                cursor->w = ww - (GAPS * 1.5);
+                cursor->h = wh - (GAPS * 2);
+                wx += ww;
+            }
+            else
+            {
+                wh /= 2;
+                cursor->x = wx + GAPS;
+                cursor->y = wy + GAPS;
+                cursor->w = ww - (GAPS * 2);
+                cursor->h = wh - (GAPS * 1.5);
+                wy += wh;
+            }
+        }
+
+        // CORRETTO: Applica le geometrie calcolate a 'cursor->id', non a 'head->id'
+        XMoveResizeWindow(disp, cursor->id, cursor->x, cursor->y, cursor->w, cursor->h);
+        cursor = cursor->next;
+    }
+}
+
+
+
+
+
+
+
+
+
+
 int main(void)
 {
 	
 	XEvent Ev;
+	unsigned int clean_state;
 
 	Display *disp = XOpenDisplay(NULL);
 	if(disp == NULL){
@@ -496,7 +606,7 @@ int main(void)
 			
 			case KeyPress:
 				// Puliamo lo stato da NumLock (Mod2Mask) o CapsLock (LockMask) se attivi
-				unsigned int clean_state = Ev.xkey.state & ~(LockMask | Mod2Mask);
+				clean_state = Ev.xkey.state & ~(LockMask | Mod2Mask);
 
 				for(int i = 0 ; i < num_keys; i++)
 				{
@@ -543,14 +653,23 @@ int main(void)
 				break;
 
 
+			
+			//gestisce sopostamento mouse
+			case EnterNotify:
+				// Evitiamo di cambiare focus se stiamo entrando in sotto-finestre di X11 strane
+				if (Ev.xcrossing.mode != NotifyNormal || Ev.xcrossing.detail == NotifyInferior)
+					break;
 
-
-
-			case DestroyNotify:	 // questo é Window w
-				RemoveWindowList(Ev.xdestroywindow.window);
+				printf("[ASH-WM] Il mouse è entrato nella finestra %lu. Cambio focus.\n", Ev.xcrossing.window);
+				FocusWindow(disp, Ev.xcrossing.window);
 				break;
 
 
+			case DestroyNotify:	 // questo é Window w
+				RemoveWindowList(disp ,Ev.xdestroywindow.window);
+				break;
+
+		
 			default:
 				break;
 		
