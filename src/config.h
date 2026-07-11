@@ -60,6 +60,7 @@ static KeyBinds keys[] = {
     {MODIFIER|ShiftMask,    XK_m,      NULL,      -2}, // Sposta la finestra sul monitor opposto
     {MODIFIER,              XK_j,      NULL,      -3}, // Focus Finestra Successiva
     {MODIFIER,              XK_k,      NULL,      -4},
+	{MODIFIER,              XK_f,      NULL,      -5}, // Toggle Fullscreen
 
 	//bind per tutti i workspace
 	WORKSPACE_KEYS(XK_1, 0),

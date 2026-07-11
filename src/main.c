@@ -263,7 +263,8 @@ ChangeWorkspace(Display *disp, Window root, int target_local_id) // riceve l'ind
 }
 
 //func per muove una window ad un workspace (anche cross-monitor)
-void MoveToWorkspace(Display *disp, Window root, int target_local_id) {
+void 
+MoveToWorkspace(Display *disp, Window root, int target_local_id) {
     Window focused_win;
     int revert_to;
 
@@ -461,6 +462,7 @@ void
 Dwindle(Display *disp, int ws_index)
 {
     Client *head = workspaces[ws_index].list_Cl;
+    Client *fullscreen_client = NULL;
 
     if(head == NULL)
         return;
@@ -469,6 +471,10 @@ Dwindle(Display *disp, int ws_index)
     Client *cursor = head;
     do {
         count_ws++;
+        // --- QUESTO CONTROLLO SERVE ASSOLUTAMENTE, NON TOGLIERLO ---
+        if (cursor->is_fullscreen) {
+            fullscreen_client = cursor;
+        }
         cursor = cursor->next;
     } while(cursor != head);
 
@@ -483,6 +489,27 @@ Dwindle(Display *disp, int ws_index)
             cursor = cursor->next;
         } while(cursor != head);
         return;
+    }
+
+    if (fullscreen_client != NULL) {
+        cursor = head;
+        do {
+            if (cursor == fullscreen_client) {
+                cursor->x = monitors[mod_index].x;
+                cursor->y = monitors[mod_index].y;
+                cursor->w = monitors[mod_index].width;
+                cursor->h = monitors[mod_index].height;
+
+                XSetWindowBorderWidth(disp, cursor->id, 0);
+                XMoveResizeWindow(disp, cursor->id, cursor->x, cursor->y, cursor->w, cursor->h);
+                XMapWindow(disp, cursor->id);
+                XRaiseWindow(disp, cursor->id);
+            } else {
+                XUnmapWindow(disp, cursor->id);
+            }
+            cursor = cursor->next;
+        } while(cursor != head);
+        return; 
     }
 
     // CASO 2: Il workspace è attivo -> CALCOLA, POSIZIONA E MAPPA (RENDI VISIBILE)
@@ -505,8 +532,10 @@ Dwindle(Display *disp, int ws_index)
         head->w = target_w < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)target_w;
         head->h = target_h < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)target_h;
 
+        // Ripristina il bordo se la finestra era in fullscreen prima
+        XSetWindowBorderWidth(disp, head->id, BORDER_WIDTH);
         XMoveResizeWindow(disp, head->id, head->x, head->y, head->w, head->h);
-        XMapWindow(disp, head->id); // Forza la visibilità
+        XMapWindow(disp, head->id); 
         return;
     }
 
@@ -518,6 +547,9 @@ Dwindle(Display *disp, int ws_index)
 
     for(int i = 0; i < count_ws; i++)
     {
+        // Ripristina il bordo per ogni finestra nel layout tiling
+        XSetWindowBorderWidth(disp, cursor->id, BORDER_WIDTH);
+
         if(i == count_ws - 1)
         {
             int target_x = wx + GAPS;
@@ -565,7 +597,7 @@ Dwindle(Display *disp, int ws_index)
         if (cursor->y < my) cursor->y = my;
 
         XMoveResizeWindow(disp, cursor->id, cursor->x, cursor->y, cursor->w, cursor->h);
-        XMapWindow(disp, cursor->id); // Forza la visibilità per ogni finestra della spirale
+        XMapWindow(disp, cursor->id); 
         
         cursor = cursor->next;
     }
@@ -694,7 +726,8 @@ MoveWindowToMonitor(Display *disp, Window root)
     XSync(disp, False);
 }
 
-unsigned long GetXColor(Display *disp, unsigned long hex_color)
+unsigned long 
+GetXColor(Display *disp, unsigned long hex_color)
 {
 	XColor col;
 	col.red   = ((hex_color >> 16) & 0xFF) * 257;
@@ -706,7 +739,8 @@ unsigned long GetXColor(Display *disp, unsigned long hex_color)
 }
 
 
-void CycleFocus(Display *disp, int direction) {
+void 
+CycleFocus(Display *disp, int direction) {
     Window dummy_win;
     int dummy_int;
     unsigned int dummy_mask;
@@ -754,6 +788,71 @@ void CycleFocus(Display *disp, int direction) {
     }
 }
 
+void 
+ToggleFullscreen(Display *disp, Window root) {
+    Window focused_win;
+    int revert_to;
+    XGetInputFocus(disp, &focused_win, &revert_to);
+    if (focused_win == None || focused_win == root) return;
+
+    int ws = -1;
+    Client *found = NULL;
+    for (int i = 0; i < WORKSPACES; i++) {
+        Client *curr = workspaces[i].list_Cl;
+        if (curr != NULL) {
+            do {
+                if (curr->id == focused_win) {
+                    ws = i;
+                    found = curr;
+                    break;
+                }
+                curr = curr->next;
+            } while (curr != workspaces[i].list_Cl);
+        }
+        if (ws != -1) break;
+    }
+
+    if (!found || workspaces[ws].monitor_id == -1) return;
+
+    int mon = workspaces[ws].monitor_id;
+
+    if (!found->is_fullscreen) {
+        // Salva la geometria attuale prima di andare in fullscreen
+        found->old_x = found->x;
+        found->old_y = found->y;
+        found->old_w = found->w;
+        found->old_h = found->h;
+
+        // Imposta a tutto schermo (usa le dimensioni piene del monitor, senza GAPS)
+        found->x = monitors[mon].x;
+        found->y = monitors[mon].y;
+        found->w = monitors[mon].width;
+        found->h = monitors[mon].height;
+
+        found->is_fullscreen = 1;
+        
+        // Rimuove i bordi per il vero effetto fullscreen
+        XSetWindowBorderWidth(disp, found->id, 0);
+        XMoveResizeWindow(disp, found->id, found->x, found->y, found->w, found->h);
+        XRaiseWindow(disp, found->id);
+    } else {
+        found->is_fullscreen = 0;
+        XSetWindowBorderWidth(disp, found->id, BORDER_WIDTH);
+        
+        // Se la finestra non è nemmeno floating, ridiciamo a Dwindle di rimetterla a posto
+        if (!found->is_floating) {
+            Dwindle(disp, ws);
+        } else {
+            // Se era floating, ripristina la sua vecchia posizione floating
+            found->x = found->old_x;
+            found->y = found->old_y;
+            found->w = found->old_w;
+            found->h = found->old_h;
+            XMoveResizeWindow(disp, found->id, found->x, found->y, found->w, found->h);
+        }
+    }
+    XSync(disp, False);
+}
 
 
 
@@ -896,6 +995,10 @@ int main(void)
 							else if (keys[i].arg == -4) // Focus del client precedente (K)
 							{
 								CycleFocus(disp, -1);
+							}
+							else if (keys[i].arg == -5) // Focus del client precedente (K)
+							{
+								ToggleFullscreen(disp, root);
 							}
 							else 
 							{
