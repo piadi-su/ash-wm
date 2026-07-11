@@ -855,6 +855,63 @@ ToggleFullscreen(Display *disp, Window root) {
 }
 
 
+void SwapDwindleDirectional(Display *disp, int direction) { // 6=H, 7=J, 8=K, 9=L
+    Window focused_win;
+    int revert_to;
+    XGetInputFocus(disp, &focused_win, &revert_to);
+    if (focused_win == None) return;
+
+    // 1. Trova il monitor e il workspace attivo tramite il mouse
+    Window dummy_win; int dummy_int; unsigned int dummy_mask;
+    int mouse_x, mouse_y; int mon_idx = 0;
+    XQueryPointer(disp, DefaultRootWindow(disp), &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
+    for (int i = 0; i < monitors_count; i++) {
+        if (mouse_x >= monitors[i].x && mouse_x < (monitors[i].x + monitors[i].width) &&
+            mouse_y >= monitors[i].y && mouse_y < (monitors[i].y + monitors[i].height)) {
+            mon_idx = i; break;
+        }
+    }
+
+    int ws = monitors[mon_idx].current_ws;
+    Client *head = workspaces[ws].list_Cl;
+    
+    // Servono almeno due finestre per fare uno scambio
+    if (head == NULL || head->next == head) return;
+
+    // 2. Trova il client correntemente focalizzato
+    Client *curr = head;
+    Client *this_client = NULL;
+    do {
+        if (curr->id == focused_win) {
+            this_client = curr;
+            break;
+        }
+        curr = curr->next;
+    } while (curr != head);
+
+    if (!this_client || this_client->is_fullscreen) return;
+
+    // 3. Individua il client target con cui scambiarsi
+    Client *target_client = (direction == 1) ? this_client->next : this_client->prev;
+
+    // 4. Scambia i dati identificativi (le finestre scambiano di posto nella spirale)
+    Window temp_id = this_client->id;
+    int temp_fs = this_client->is_fullscreen;
+
+    this_client->id = target_client->id;
+    this_client->is_fullscreen = target_client->is_fullscreen;
+
+    target_client->id = temp_id;
+    target_client->is_fullscreen = temp_fs;
+
+    // 5. Applica la nuova geometria sullo schermo
+    Dwindle(disp, ws);
+
+    // 6. Riassegna il focus alla finestra originaria (che ora ha l'id dentro target_client)
+    XRaiseWindow(disp, target_client->id);
+    XSetInputFocus(disp, target_client->id, RevertToParent, CurrentTime);
+    XSync(disp, False);
+}
 
 
 int main(void)
@@ -999,6 +1056,14 @@ int main(void)
 							else if (keys[i].arg == -5) // Focus del client precedente (K)
 							{
 								ToggleFullscreen(disp, root);
+							}
+							else if (keys[i].arg == -6) // Focus del client precedente (K)
+							{
+								SwapDwindleDirectional(disp, 1);
+							}
+							else if (keys[i].arg == -7) // Focus del client precedente (K)
+							{
+								SwapDwindleDirectional(disp, -1);
 							}
 							else 
 							{

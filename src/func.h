@@ -25,5 +25,6 @@ unsigned long GetXColor(Display *disp, unsigned long hex_color);
 void CycleFocus(Display *disp, int direction);
 void FocusWindow(Display *disp, Window w);
 void ToggleFullscreen(Display *disp, Window root);
+void SwapWindowGeometric(Display *disp, int direction);
 
 #endif

@@ -6,19 +6,14 @@ Debuginfod has been disabled.
 To make this setting permanent, add 'set debuginfod enabled off' to .gdbinit.
 [Thread debugging using libthread_db enabled]
 Using host libthread_db library "/usr/lib/libthread_db.so.1".
-[Detaching after fork from child process 324346]
-[Detaching after fork from child process 324379]
-[Detaching after fork from child process 324424]
-[Detaching after fork from child process 324459]
-[Detaching after fork from child process 324502]
-[Detaching after fork from child process 324557]
-[Detaching after fork from child process 324587]
-[Detaching after fork from child process 324635]
-[Detaching after fork from child process 324691]
-[Detaching after fork from child process 324730]
-[Detaching after fork from child process 324769]
-[Detaching after fork from child process 324803]
-[Detaching after fork from child process 324847]
+[Detaching after fork from child process 25033]
+[Detaching after fork from child process 25059]
+[Detaching after fork from child process 25107]
+[Detaching after fork from child process 25149]
+[Detaching after fork from child process 25234]
+[Detaching after fork from child process 25273]
+[Detaching after fork from child process 25309]
+[Detaching after fork from child process 25420]
 
 Program received signal SIGTERM, Terminated.
 0x00007ffff7c9405e in ?? () from /usr/lib/libc.so.6
@@ -29,12 +24,7 @@ Program received signal SIGTERM, Terminated.
 #4  0x00007ffff7be3f3d in xcb_wait_for_event () from /usr/lib/libxcb.so.1
 #5  0x00007ffff7e8d659 in _XReadEvents () from /usr/lib/libX11.so.6
 #6  0x00007ffff7e74379 in XNextEvent () from /usr/lib/libX11.so.6
-#7  0x0000555555557c28 in main ()
-X connection to :1 broken (explicit kill or server shutdown).
-X connection to :1 broken (explicit kill or server shutdown).
-X connection to :1 broken (explicit kill or server shutdown).
-X connection to :1 broken (explicit kill or server shutdown).
-X connection to :1 broken (explicit kill or server shutdown).
+#7  0x0000555555557f62 in main ()
 X connection to :1 broken (explicit kill or server shutdown).
 X connection to :1 broken (explicit kill or server shutdown).
 X connection to :1 broken (explicit kill or server shutdown).

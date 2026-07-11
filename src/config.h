@@ -27,10 +27,11 @@ typedef struct {
 
 #define N_MONITORS 2
 
-#define GAPS 10
+#define GAPS 5
 
 #define BORDER_WIDTH 2
-#define COLOR_FOCUS   0x5294E2      
+// #define COLOR_FOCUS   0x5294E2      
+#define COLOR_FOCUS   0xff0000
 #define COLOR_UNFOCUS 0x000000
 
 
@@ -41,7 +42,6 @@ static char *term_cmd[] = {"alacritty", NULL};
 static char *clock_cmd[] = {"xclock", NULL};
 // static char *firefox_cmd[] = {"firefox", NULL};
 static char *rofi_cmd[] = {"rofi", "-show", "drun", NULL};
-// static char *close_wm[] = {"killall", "ash-wm", NULL};
 
 
 static KeyBinds keys[] = {
@@ -51,16 +51,22 @@ static KeyBinds keys[] = {
 	// {MODIFIER, XK_o, firefox_cmd},
 	{MODIFIER, XK_o, clock_cmd, -1},
 	{MODIFIER, XK_d, rofi_cmd, -1},
-	// {MODIFIER, XK_u, close_wm, -1},
 
 
 	// Nella tua lista dei keybinds (es. struct Key keys[])
 
-	{MODIFIER,              XK_q,      NULL,      -1}, // Chiude la finestra focalizzata
-    {MODIFIER|ShiftMask,    XK_m,      NULL,      -2}, // Sposta la finestra sul monitor opposto
-    {MODIFIER,              XK_j,      NULL,      -3}, // Focus Finestra Successiva
+	{MODIFIER,              XK_q,      NULL,      -1},// Chiude la finestra focalizzata												  
+    
+	{MODIFIER|ShiftMask,    XK_m,      NULL,      -2}, // Sposta la finestra sul monitor opposto
+    
+	{MODIFIER,              XK_j,      NULL,      -3}, // Focus Finestra Successiva
     {MODIFIER,              XK_k,      NULL,      -4},
-	{MODIFIER,              XK_f,      NULL,      -5}, // Toggle Fullscreen
+
+	// Toggle Fullscreen
+	{MODIFIER,              XK_f,      NULL,      -5},
+
+    {MODIFIER|ShiftMask,    XK_j,      NULL,      -6}, // Swap in BASSO   (Vim Down)
+    {MODIFIER|ShiftMask,    XK_k,      NULL,      -7}, // Swap in ALTO    (Vim Up)
 
 	//bind per tutti i workspace
 	WORKSPACE_KEYS(XK_1, 0),
