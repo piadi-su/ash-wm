@@ -1,517 +1,423 @@
-==314329== Memcheck, a memory error detector
-==314329== Copyright (C) 2002-2024, and GNU GPL'd, by Julian Seward et al.
-==314329== Using Valgrind-3.25.1 and LibVEX; rerun with -h for copyright info
-==314329== Command: ./build/ash-wm
-==314329== Parent PID: 39170
-==314329== 
-==314329== 
-==314329== Process terminating with default action of signal 2 (SIGINT)
-==314329==    at 0x4A7105E: __internal_syscall_cancel (cancellation.c:64)
-==314329==    by 0x4A71083: __syscall_cancel (cancellation.c:75)
-==314329==    by 0x4AEB68D: poll (poll.c:29)
-==314329==    by 0x4C0620A: UnknownInlinedFun (poll2.h:39)
-==314329==    by 0x4C0620A: _xcb_conn_wait.part.0 (xcb_conn.c:510)
-==314329==    by 0x4C07F3C: UnknownInlinedFun (xcb_conn.c:476)
-==314329==    by 0x4C07F3C: xcb_wait_for_event (xcb_in.c:703)
-==314329==    by 0x48DC658: UnknownInlinedFun (xcb_io.c:491)
-==314329==    by 0x48DC658: _XReadEvents (xcb_io.c:463)
-==314329==    by 0x48C3378: XNextEvent (NextEvent.c:50)
-==314329==    by 0x40036FA: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== FILE DESCRIPTORS: 4 open (3 inherited) at exit.
-==314329== Open AF_UNIX socket 3: <unknown>
-==314329==    at 0x4AFADFB: socket (syscall-template.S:120)
-==314329==    by 0x4C0702D: _xcb_socket (xcb_util.c:342)
-==314329==    by 0x4C094F3: UnknownInlinedFun (xcb_util.c:509)
-==314329==    by 0x4C094F3: UnknownInlinedFun (xcb_util.c:316)
-==314329==    by 0x4C094F3: xcb_connect_to_display_with_auth_info (xcb_util.c:548)
-==314329==    by 0x48D449A: _XConnectXCB (xcb_disp.c:78)
-==314329==    by 0x48C4039: XOpenDisplay (OpenDis.c:129)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 
-==314329== HEAP SUMMARY:
-==314329==     in use at exit: 92,079 bytes in 116 blocks
-==314329==   total heap usage: 20,430 allocs, 20,314 frees, 614,528 bytes allocated
-==314329== 
-==314329== 3 bytes in 1 blocks are still reachable in loss record 1 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x4A8BABF: strdup (strdup.c:42)
-==314329==    by 0x48C4015: XOpenDisplay (OpenDis.c:119)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 8 bytes in 1 blocks are still reachable in loss record 2 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x4C2849F: UnknownInlinedFun (Xge.c:194)
-==314329==    by 0x4C2849F: _xgeCheckExtInit (Xge.c:152)
-==314329==    by 0x4C2A64E: UnknownInlinedFun (Xge.c:314)
-==314329==    by 0x4C2A64E: XextAddDisplay (extutil.c:123)
-==314329==    by 0x49D9743: XineramaIsActive (Xinerama.c:250)
-==314329==    by 0x40032E0: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 9 bytes in 1 blocks are still reachable in loss record 3 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x4A8BABF: strdup (strdup.c:42)
-==314329==    by 0x48C0B06: XInitExtension (InitExt.c:65)
-==314329==    by 0x4C2A484: XextAddDisplay (extutil.c:107)
-==314329==    by 0x49D9743: XineramaIsActive (Xinerama.c:250)
-==314329==    by 0x40032E0: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 10 bytes in 1 blocks are still reachable in loss record 4 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x4A8BABF: strdup (strdup.c:42)
-==314329==    by 0x48C0B06: XInitExtension (InitExt.c:65)
-==314329==    by 0x492EEE5: XkbUseExtension (XKBUse.c:744)
-==314329==    by 0x48C4C28: XOpenDisplay (OpenDis.c:568)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 16 bytes in 1 blocks are still reachable in loss record 5 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x4C08FDE: UnknownInlinedFun (xcb_list.c:53)
-==314329==    by 0x4C08FDE: UnknownInlinedFun (xcb_in.c:903)
-==314329==    by 0x4C08FDE: xcb_connect_to_fd (xcb_conn.c:383)
-==314329==    by 0x4C0978D: xcb_connect_to_display_with_auth_info (xcb_util.c:568)
-==314329==    by 0x48D449A: _XConnectXCB (xcb_disp.c:78)
-==314329==    by 0x48C4039: XOpenDisplay (OpenDis.c:129)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 16 bytes in 1 blocks are still reachable in loss record 6 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x48BAB8C: _XInitDisplayLock (locking.c:539)
-==314329==    by 0x48C430A: XOpenDisplay (OpenDis.c:210)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 21 bytes in 1 blocks are still reachable in loss record 7 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x48C4520: XOpenDisplay (OpenDis.c:321)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 24 bytes in 1 blocks are still reachable in loss record 8 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x4C3B4C1: UnknownInlinedFun (AuFileName.c:73)
-==314329==    by 0x4C3B4C1: XauFileName (AuFileName.c:45)
-==314329==    by 0x4C3BA8E: XauGetBestAuthByAddr (AuGetBest.c:71)
-==314329==    by 0x4C098CB: UnknownInlinedFun (xcb_auth.c:165)
-==314329==    by 0x4C098CB: UnknownInlinedFun (xcb_auth.c:346)
-==314329==    by 0x4C098CB: xcb_connect_to_display_with_auth_info (xcb_util.c:561)
-==314329==    by 0x48D449A: _XConnectXCB (xcb_disp.c:78)
-==314329==    by 0x48C4039: XOpenDisplay (OpenDis.c:129)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 24 bytes in 1 blocks are still reachable in loss record 9 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x4C29C32: XextCreateExtension (extutil.c:66)
-==314329==    by 0x4C2A0DD: _xgeFindDisplay (Xge.c:102)
-==314329==    by 0x4C2A637: UnknownInlinedFun (Xge.c:310)
-==314329==    by 0x4C2A637: XextAddDisplay (extutil.c:123)
-==314329==    by 0x49D9743: XineramaIsActive (Xinerama.c:250)
-==314329==    by 0x40032E0: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 24 bytes in 1 blocks are still reachable in loss record 10 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x4A8BABF: strdup (strdup.c:42)
-==314329==    by 0x48C0B06: XInitExtension (InitExt.c:65)
-==314329==    by 0x4C2A484: XextAddDisplay (extutil.c:107)
-==314329==    by 0x4C2A11B: _xgeFindDisplay (Xge.c:107)
-==314329==    by 0x4C2A637: UnknownInlinedFun (Xge.c:310)
-==314329==    by 0x4C2A637: XextAddDisplay (extutil.c:123)
-==314329==    by 0x49D9743: XineramaIsActive (Xinerama.c:250)
-==314329==    by 0x40032E0: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 24 bytes in 1 blocks are still reachable in loss record 11 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x4C2A669: UnknownInlinedFun (Xge.c:319)
-==314329==    by 0x4C2A669: XextAddDisplay (extutil.c:123)
-==314329==    by 0x49D9743: XineramaIsActive (Xinerama.c:250)
-==314329==    by 0x40032E0: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 24 bytes in 1 blocks are still reachable in loss record 12 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x48D23D7: append_pending_request (xcb_io.c:157)
-==314329==    by 0x48DC9EA: _XReply (xcb_io.c:694)
-==314329==    by 0x48CDC70: XQueryPointer (QuPntr.c:48)
-==314329==    by 0x40028BF: UpdateCurrentMonitor (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329==    by 0x4003A86: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 32 bytes in 1 blocks are still reachable in loss record 13 of 57
-==314329==    at 0x4858F4F: realloc (vg_replace_malloc.c:1801)
-==314329==    by 0x4C0CFDF: UnknownInlinedFun (xcb_ext.c:52)
-==314329==    by 0x4C0CFDF: get_lazyreply (xcb_ext.c:74)
-==314329==    by 0x4C0D0AE: xcb_get_extension_data (xcb_ext.c:95)
-==314329==    by 0x4C0D167: UnknownInlinedFun (xcb_out.c:147)
-==314329==    by 0x4C0D167: xcb_prefetch_maximum_request_length (xcb_out.c:139)
-==314329==    by 0x4C0D1E5: UnknownInlinedFun (xcb_out.c:166)
-==314329==    by 0x4C0D1E5: xcb_get_maximum_request_length (xcb_out.c:162)
-==314329==    by 0x48C4AC8: XOpenDisplay (OpenDis.c:506)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 32 bytes in 1 blocks are still reachable in loss record 14 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x4C05BC3: UnknownInlinedFun (xcb_in.c:265)
-==314329==    by 0x4C05BC3: _xcb_in_read (xcb_in.c:1042)
-==314329==    by 0x4C063AE: _xcb_conn_wait.part.0 (xcb_conn.c:546)
-==314329==    by 0x4C0690F: UnknownInlinedFun (xcb_conn.c:476)
-==314329==    by 0x4C0690F: wait_for_reply (xcb_in.c:522)
-==314329==    by 0x4C07B45: xcb_wait_for_reply (xcb_in.c:552)
-==314329==    by 0x4C0D0F3: xcb_get_extension_data (xcb_ext.c:99)
-==314329==    by 0x4C0D167: UnknownInlinedFun (xcb_out.c:147)
-==314329==    by 0x4C0D167: xcb_prefetch_maximum_request_length (xcb_out.c:139)
-==314329==    by 0x4C0D1E5: UnknownInlinedFun (xcb_out.c:166)
-==314329==    by 0x4C0D1E5: xcb_get_maximum_request_length (xcb_out.c:162)
-==314329==    by 0x48C4AC8: XOpenDisplay (OpenDis.c:506)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 32 bytes in 1 blocks are still reachable in loss record 15 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x4C2A463: XextAddDisplay (extutil.c:103)
-==314329==    by 0x49D9743: XineramaIsActive (Xinerama.c:250)
-==314329==    by 0x40032E0: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 32 bytes in 1 blocks are still reachable in loss record 16 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x4C2A463: XextAddDisplay (extutil.c:103)
-==314329==    by 0x4C2A11B: _xgeFindDisplay (Xge.c:107)
-==314329==    by 0x4C2A637: UnknownInlinedFun (Xge.c:310)
-==314329==    by 0x4C2A637: XextAddDisplay (extutil.c:123)
-==314329==    by 0x49D9743: XineramaIsActive (Xinerama.c:250)
-==314329==    by 0x40032E0: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 40 bytes in 1 blocks are still reachable in loss record 17 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x48BD473: XInitThreads (locking.c:614)
-==314329==    by 0x400D1AE: call_init (dl-init.c:74)
-==314329==    by 0x400D1AE: call_init (dl-init.c:26)
-==314329==    by 0x400D28C: _dl_init (dl-init.c:121)
-==314329==    by 0x402615F: ??? (in /usr/lib/ld-linux-x86-64.so.2)
-==314329== 
-==314329== 40 bytes in 1 blocks are still reachable in loss record 18 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x48BD491: XInitThreads (locking.c:616)
-==314329==    by 0x400D1AE: call_init (dl-init.c:74)
-==314329==    by 0x400D1AE: call_init (dl-init.c:26)
-==314329==    by 0x400D28C: _dl_init (dl-init.c:121)
-==314329==    by 0x402615F: ??? (in /usr/lib/ld-linux-x86-64.so.2)
-==314329== 
-==314329== 40 bytes in 1 blocks are still reachable in loss record 19 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x48BD4B0: XInitThreads (locking.c:621)
-==314329==    by 0x400D1AE: call_init (dl-init.c:74)
-==314329==    by 0x400D1AE: call_init (dl-init.c:26)
-==314329==    by 0x400D28C: _dl_init (dl-init.c:121)
-==314329==    by 0x402615F: ??? (in /usr/lib/ld-linux-x86-64.so.2)
-==314329== 
-==314329== 40 bytes in 1 blocks are still reachable in loss record 20 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x48BABD9: _XInitDisplayLock (locking.c:548)
-==314329==    by 0x48C430A: XOpenDisplay (OpenDis.c:210)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 40 bytes in 1 blocks are still reachable in loss record 21 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x48D47BA: _XPollfdCacheInit (XlibInt.c:133)
-==314329==    by 0x48C431B: XOpenDisplay (OpenDis.c:215)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 48 bytes in 1 blocks are still reachable in loss record 22 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x48D4425: _XConnectXCB (xcb_disp.c:86)
-==314329==    by 0x48C4039: XOpenDisplay (OpenDis.c:129)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 48 bytes in 1 blocks are still reachable in loss record 23 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x48D443B: _XConnectXCB (xcb_disp.c:87)
-==314329==    by 0x48C4039: XOpenDisplay (OpenDis.c:129)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 48 bytes in 1 blocks are still reachable in loss record 24 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x48BABC7: _XInitDisplayLock (locking.c:547)
-==314329==    by 0x48C430A: XOpenDisplay (OpenDis.c:210)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 48 bytes in 1 blocks are still reachable in loss record 25 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x48BABEA: _XInitDisplayLock (locking.c:549)
-==314329==    by 0x48C430A: XOpenDisplay (OpenDis.c:210)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 48 bytes in 1 blocks are still reachable in loss record 26 of 57
-==314329==    at 0x4858D13: calloc (vg_replace_malloc.c:1675)
-==314329==    by 0x492FD44: XkbGetMap (XKBGetMap.c:596)
-==314329==    by 0x49286D4: _XkbLoadDpy (XKBBind.c:523)
-==314329==    by 0x4928DA7: XKeysymToKeycode (XKBBind.c:145)
-==314329==    by 0x4003267: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 72 bytes in 1 blocks are still reachable in loss record 27 of 57
-==314329==    at 0x4858D13: calloc (vg_replace_malloc.c:1675)
-==314329==    by 0x48C43CE: XOpenDisplay (OpenDis.c:253)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 72 bytes in 1 blocks are still reachable in loss record 28 of 57
-==314329==    at 0x4858D13: calloc (vg_replace_malloc.c:1675)
-==314329==    by 0x492FD27: XkbGetMap (XKBGetMap.c:593)
-==314329==    by 0x49286D4: _XkbLoadDpy (XKBBind.c:523)
-==314329==    by 0x4928DA7: XKeysymToKeycode (XKBBind.c:145)
-==314329==    by 0x4003267: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 72 bytes in 1 blocks are still reachable in loss record 29 of 57
-==314329==    at 0x4858D13: calloc (vg_replace_malloc.c:1675)
-==314329==    by 0x400163C: AddWindowList (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329==    by 0x4003765: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 112 bytes in 1 blocks are still reachable in loss record 30 of 57
-==314329==    at 0x4858D13: calloc (vg_replace_malloc.c:1675)
-==314329==    by 0x48D4324: _XConnectXCB (xcb_disp.c:65)
-==314329==    by 0x48C4039: XOpenDisplay (OpenDis.c:129)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 112 bytes in 1 blocks are still reachable in loss record 31 of 57
-==314329==    at 0x4858D13: calloc (vg_replace_malloc.c:1675)
-==314329==    by 0x48C47AB: XOpenDisplay (OpenDis.c:417)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 128 bytes in 1 blocks are still reachable in loss record 32 of 57
-==314329==    at 0x4858D13: calloc (vg_replace_malloc.c:1675)
-==314329==    by 0x48C469B: XOpenDisplay (OpenDis.c:375)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 128 bytes in 1 blocks are still reachable in loss record 33 of 57
-==314329==    at 0x4858D13: calloc (vg_replace_malloc.c:1675)
-==314329==    by 0x48C0AF5: XInitExtension (InitExt.c:64)
-==314329==    by 0x492EEE5: XkbUseExtension (XKBUse.c:744)
-==314329==    by 0x48C4C28: XOpenDisplay (OpenDis.c:568)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 128 bytes in 1 blocks are still reachable in loss record 34 of 57
-==314329==    at 0x4858D13: calloc (vg_replace_malloc.c:1675)
-==314329==    by 0x48C0AF5: XInitExtension (InitExt.c:64)
-==314329==    by 0x4C2A484: XextAddDisplay (extutil.c:107)
-==314329==    by 0x49D9743: XineramaIsActive (Xinerama.c:250)
-==314329==    by 0x40032E0: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 128 bytes in 1 blocks are still reachable in loss record 35 of 57
-==314329==    at 0x4858D13: calloc (vg_replace_malloc.c:1675)
-==314329==    by 0x48C0AF5: XInitExtension (InitExt.c:64)
-==314329==    by 0x4C2A484: XextAddDisplay (extutil.c:107)
-==314329==    by 0x4C2A11B: _xgeFindDisplay (Xge.c:107)
-==314329==    by 0x4C2A637: UnknownInlinedFun (Xge.c:310)
-==314329==    by 0x4C2A637: XextAddDisplay (extutil.c:123)
-==314329==    by 0x49D9743: XineramaIsActive (Xinerama.c:250)
-==314329==    by 0x40032E0: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 152 bytes in 1 blocks are still reachable in loss record 36 of 57
-==314329==    at 0x4858D13: calloc (vg_replace_malloc.c:1675)
-==314329==    by 0x492F107: XkbUseExtension (XKBUse.c:653)
-==314329==    by 0x48C4C28: XOpenDisplay (OpenDis.c:568)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 160 bytes in 1 blocks are still reachable in loss record 37 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x48B2419: XCreateGC (CrGC.c:75)
-==314329==    by 0x48C4B41: XOpenDisplay (OpenDis.c:518)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 168 bytes in 1 blocks are still reachable in loss record 38 of 57
-==314329==    at 0x4858D13: calloc (vg_replace_malloc.c:1675)
-==314329==    by 0x48C45B8: XOpenDisplay (OpenDis.c:347)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 192 bytes in 1 blocks are still reachable in loss record 39 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x48BABA8: _XInitDisplayLock (locking.c:542)
-==314329==    by 0x48C430A: XOpenDisplay (OpenDis.c:210)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 208 bytes in 1 blocks are still reachable in loss record 40 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x4C28446: _xgeCheckExtInit (Xge.c:146)
-==314329==    by 0x4C2A64E: UnknownInlinedFun (Xge.c:314)
-==314329==    by 0x4C2A64E: XextAddDisplay (extutil.c:123)
-==314329==    by 0x49D9743: XineramaIsActive (Xinerama.c:250)
-==314329==    by 0x40032E0: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 208 bytes in 1 blocks are still reachable in loss record 41 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x48D6656: _XEnq (XlibInt.c:740)
-==314329==    by 0x48DAEEF: handle_response (xcb_io.c:426)
-==314329==    by 0x48DCB3F: _XReply (xcb_io.c:731)
-==314329==    by 0x4C28488: UnknownInlinedFun (Xge.c:189)
-==314329==    by 0x4C28488: _xgeCheckExtInit (Xge.c:152)
-==314329==    by 0x4C2A64E: UnknownInlinedFun (Xge.c:314)
-==314329==    by 0x4C2A64E: XextAddDisplay (extutil.c:123)
-==314329==    by 0x49D9743: XineramaIsActive (Xinerama.c:250)
-==314329==    by 0x40032E0: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 208 bytes in 1 blocks are still reachable in loss record 42 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x48D6656: _XEnq (XlibInt.c:740)
-==314329==    by 0x48DAEEF: handle_response (xcb_io.c:426)
-==314329==    by 0x48DCB3F: _XReply (xcb_io.c:731)
-==314329==    by 0x49D9899: XineramaQueryScreens (Xinerama.c:286)
-==314329==    by 0x4003301: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 256 bytes in 1 blocks are still reachable in loss record 43 of 57
-==314329==    at 0x4858D13: calloc (vg_replace_malloc.c:1675)
-==314329==    by 0x4939132: UnknownInlinedFun (XKBMAlloc.c:112)
-==314329==    by 0x4939132: XkbAllocClientMap (XKBMAlloc.c:42)
-==314329==    by 0x492D301: UnknownInlinedFun (XKBGetMap.c:409)
-==314329==    by 0x492D301: _XkbReadGetMapReply (XKBGetMap.c:537)
-==314329==    by 0x492FC96: UnknownInlinedFun (XKBGetMap.c:562)
-==314329==    by 0x492FC96: UnknownInlinedFun (XKBGetMap.c:579)
-==314329==    by 0x492FC96: XkbGetUpdatedMap (XKBGetMap.c:566)
-==314329==    by 0x492FD76: XkbGetMap (XKBGetMap.c:598)
-==314329==    by 0x49286D4: _XkbLoadDpy (XKBBind.c:523)
-==314329==    by 0x4928DA7: XKeysymToKeycode (XKBBind.c:145)
-==314329==    by 0x4003267: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 416 bytes in 2 blocks are still reachable in loss record 44 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x48D6656: _XEnq (XlibInt.c:740)
-==314329==    by 0x48DAEEF: handle_response (xcb_io.c:426)
-==314329==    by 0x48DCB3F: _XReply (xcb_io.c:731)
-==314329==    by 0x48CDC70: XQueryPointer (QuPntr.c:48)
-==314329==    by 0x40028BF: UpdateCurrentMonitor (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329==    by 0x4003A86: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 472 bytes in 11 blocks are still reachable in loss record 45 of 57
-==314329==    at 0x4858D13: calloc (vg_replace_malloc.c:1675)
-==314329==    by 0x492CB72: UnknownInlinedFun (XKBGetMap.c:81)
-==314329==    by 0x492CB72: _XkbReadGetMapReply (XKBGetMap.c:525)
-==314329==    by 0x492FC96: UnknownInlinedFun (XKBGetMap.c:562)
-==314329==    by 0x492FC96: UnknownInlinedFun (XKBGetMap.c:579)
-==314329==    by 0x492FC96: XkbGetUpdatedMap (XKBGetMap.c:566)
-==314329==    by 0x492FD76: XkbGetMap (XKBGetMap.c:598)
-==314329==    by 0x49286D4: _XkbLoadDpy (XKBBind.c:523)
-==314329==    by 0x4928DA7: XKeysymToKeycode (XKBBind.c:145)
-==314329==    by 0x4003267: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 832 bytes in 4 blocks are still reachable in loss record 46 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x48D6656: _XEnq (XlibInt.c:740)
-==314329==    by 0x48DAEEF: handle_response (xcb_io.c:426)
-==314329==    by 0x48DCB3F: _XReply (xcb_io.c:731)
-==314329==    by 0x492FC7B: UnknownInlinedFun (XKBGetMap.c:557)
-==314329==    by 0x492FC7B: UnknownInlinedFun (XKBGetMap.c:579)
-==314329==    by 0x492FC7B: XkbGetUpdatedMap (XKBGetMap.c:566)
-==314329==    by 0x492FD76: XkbGetMap (XKBGetMap.c:598)
-==314329==    by 0x49286D4: _XkbLoadDpy (XKBBind.c:523)
-==314329==    by 0x4928DA7: XKeysymToKeycode (XKBBind.c:145)
-==314329==    by 0x4003267: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 1,024 bytes in 1 blocks are still reachable in loss record 47 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x4A5D8B7: _IO_file_doallocate (filedoalloc.c:91)
-==314329==    by 0x4A6DF45: _IO_doallocbuf (genops.c:373)
-==314329==    by 0x4A6DF45: _IO_doallocbuf (genops.c:368)
-==314329==    by 0x4A6BCF8: _IO_file_overflow@@GLIBC_2.2.5 (fileops.c:779)
-==314329==    by 0x4A6C9EF: _IO_new_file_xsputn (fileops.c:1305)
-==314329==    by 0x4A6C9EF: _IO_file_xsputn@@GLIBC_2.2.5 (fileops.c:1258)
-==314329==    by 0x4A38B85: __printf_buffer_flush_to_file (printf_buffer_to_file.c:59)
-==314329==    by 0x4A38C6B: __printf_buffer_to_file_done (printf_buffer_to_file.c:120)
-==314329==    by 0x4A44550: __vfprintf_internal (vfprintf-internal.c:1549)
-==314329==    by 0x4A38322: printf (printf.c:33)
-==314329==    by 0x4003555: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 1,080 bytes in 1 blocks are still reachable in loss record 48 of 57
-==314329==    at 0x4858D13: calloc (vg_replace_malloc.c:1675)
-==314329==    by 0x49391E2: UnknownInlinedFun (XKBMAlloc.c:75)
-==314329==    by 0x49391E2: XkbAllocClientMap (XKBMAlloc.c:42)
-==314329==    by 0x492CD27: UnknownInlinedFun (XKBGetMap.c:45)
-==314329==    by 0x492CD27: _XkbReadGetMapReply (XKBGetMap.c:525)
-==314329==    by 0x492FC96: UnknownInlinedFun (XKBGetMap.c:562)
-==314329==    by 0x492FC96: UnknownInlinedFun (XKBGetMap.c:579)
-==314329==    by 0x492FC96: XkbGetUpdatedMap (XKBGetMap.c:566)
-==314329==    by 0x492FD76: XkbGetMap (XKBGetMap.c:598)
-==314329==    by 0x49286D4: _XkbLoadDpy (XKBBind.c:523)
-==314329==    by 0x4928DA7: XKeysymToKeycode (XKBBind.c:145)
-==314329==    by 0x4003267: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 2,048 bytes in 1 blocks are still reachable in loss record 49 of 57
-==314329==    at 0x4858D13: calloc (vg_replace_malloc.c:1675)
-==314329==    by 0x492CB92: UnknownInlinedFun (XKBGetMap.c:155)
-==314329==    by 0x492CB92: _XkbReadGetMapReply (XKBGetMap.c:527)
-==314329==    by 0x492FC96: UnknownInlinedFun (XKBGetMap.c:562)
-==314329==    by 0x492FC96: UnknownInlinedFun (XKBGetMap.c:579)
-==314329==    by 0x492FC96: XkbGetUpdatedMap (XKBGetMap.c:566)
-==314329==    by 0x492FD76: XkbGetMap (XKBGetMap.c:598)
-==314329==    by 0x49286D4: _XkbLoadDpy (XKBBind.c:523)
-==314329==    by 0x4928DA7: XKeysymToKeycode (XKBBind.c:145)
-==314329==    by 0x4003267: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 2,232 bytes in 26 blocks are still reachable in loss record 50 of 57
-==314329==    at 0x4858D13: calloc (vg_replace_malloc.c:1675)
-==314329==    by 0x492CA3A: UnknownInlinedFun (XKBGetMap.c:66)
-==314329==    by 0x492CA3A: _XkbReadGetMapReply (XKBGetMap.c:525)
-==314329==    by 0x492FC96: UnknownInlinedFun (XKBGetMap.c:562)
-==314329==    by 0x492FC96: UnknownInlinedFun (XKBGetMap.c:579)
-==314329==    by 0x492FC96: XkbGetUpdatedMap (XKBGetMap.c:566)
-==314329==    by 0x492FD76: XkbGetMap (XKBGetMap.c:598)
-==314329==    by 0x49286D4: _XkbLoadDpy (XKBBind.c:523)
-==314329==    by 0x4928DA7: XKeysymToKeycode (XKBBind.c:145)
-==314329==    by 0x4003267: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 4,160 bytes in 20 blocks are still reachable in loss record 51 of 57
-==314329==    at 0x48518A8: malloc (vg_replace_malloc.c:446)
-==314329==    by 0x48D6656: _XEnq (XlibInt.c:740)
-==314329==    by 0x48DAEEF: handle_response (xcb_io.c:426)
-==314329==    by 0x48DCB3F: _XReply (xcb_io.c:731)
-==314329==    by 0x48CDA91: XQueryExtension (QuExt.c:53)
-==314329==    by 0x48C0ACC: XInitExtension (InitExt.c:59)
-==314329==    by 0x4C2A484: XextAddDisplay (extutil.c:107)
-==314329==    by 0x49D9743: XineramaIsActive (Xinerama.c:250)
-==314329==    by 0x40032E0: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 4,720 bytes in 1 blocks are still reachable in loss record 52 of 57
-==314329==    at 0x4858D13: calloc (vg_replace_malloc.c:1675)
-==314329==    by 0x48C4000: XOpenDisplay (OpenDis.c:115)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 7,168 bytes in 1 blocks are still reachable in loss record 53 of 57
-==314329==    at 0x4858D13: calloc (vg_replace_malloc.c:1675)
-==314329==    by 0x492D1B6: UnknownInlinedFun (XKBGetMap.c:163)
-==314329==    by 0x492D1B6: _XkbReadGetMapReply (XKBGetMap.c:527)
-==314329==    by 0x492FC96: UnknownInlinedFun (XKBGetMap.c:562)
-==314329==    by 0x492FC96: UnknownInlinedFun (XKBGetMap.c:579)
-==314329==    by 0x492FC96: XkbGetUpdatedMap (XKBGetMap.c:566)
-==314329==    by 0x492FD76: XkbGetMap (XKBGetMap.c:598)
-==314329==    by 0x49286D4: _XkbLoadDpy (XKBBind.c:523)
-==314329==    by 0x4928DA7: XKeysymToKeycode (XKBBind.c:145)
-==314329==    by 0x4003267: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 8,276 bytes in 1 blocks are still reachable in loss record 54 of 57
-==314329==    at 0x4858F4F: realloc (vg_replace_malloc.c:1801)
-==314329==    by 0x4C091E7: UnknownInlinedFun (xcb_conn.c:184)
-==314329==    by 0x4C091E7: xcb_connect_to_fd (xcb_conn.c:386)
-==314329==    by 0x4C0978D: xcb_connect_to_display_with_auth_info (xcb_util.c:568)
-==314329==    by 0x48D449A: _XConnectXCB (xcb_disp.c:78)
-==314329==    by 0x48C4039: XOpenDisplay (OpenDis.c:129)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 16,384 bytes in 1 blocks are still reachable in loss record 55 of 57
-==314329==    at 0x4858D13: calloc (vg_replace_malloc.c:1675)
-==314329==    by 0x48C436E: XOpenDisplay (OpenDis.c:241)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 18,816 bytes in 2 blocks are still reachable in loss record 56 of 57
-==314329==    at 0x4858D13: calloc (vg_replace_malloc.c:1675)
-==314329==    by 0x48C4830: XOpenDisplay (OpenDis.c:439)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== 21,176 bytes in 1 blocks are still reachable in loss record 57 of 57
-==314329==    at 0x4858D13: calloc (vg_replace_malloc.c:1675)
-==314329==    by 0x4C08F05: xcb_connect_to_fd (xcb_conn.c:368)
-==314329==    by 0x4C0978D: xcb_connect_to_display_with_auth_info (xcb_util.c:568)
-==314329==    by 0x48D449A: _XConnectXCB (xcb_disp.c:78)
-==314329==    by 0x48C4039: XOpenDisplay (OpenDis.c:129)
-==314329==    by 0x4003170: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
-==314329== 
-==314329== LEAK SUMMARY:
-==314329==    definitely lost: 0 bytes in 0 blocks
-==314329==    indirectly lost: 0 bytes in 0 blocks
-==314329==      possibly lost: 0 bytes in 0 blocks
-==314329==    still reachable: 92,079 bytes in 116 blocks
-==314329==         suppressed: 0 bytes in 0 blocks
-==314329== 
-==314329== For lists of detected and suppressed errors, rerun with: -s
-==314329== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 0 from 0)
+==32970== Memcheck, a memory error detector
+==32970== Copyright (C) 2002-2024, and GNU GPL'd, by Julian Seward et al.
+==32970== Using Valgrind-3.25.1 and LibVEX; rerun with -h for copyright info
+==32970== Command: ./build/ash-wm
+==32970== Parent PID: 32756
+==32970== 
+==32970== 
+==32970== FILE DESCRIPTORS: 4 open (3 inherited) at exit.
+==32970== Open AF_UNIX socket 3: <unknown>
+==32970==    at 0x4AFDDFB: socket (syscall-template.S:120)
+==32970==    by 0x4C0A02D: _xcb_socket (xcb_util.c:342)
+==32970==    by 0x4C0C4F3: UnknownInlinedFun (xcb_util.c:509)
+==32970==    by 0x4C0C4F3: UnknownInlinedFun (xcb_util.c:316)
+==32970==    by 0x4C0C4F3: xcb_connect_to_display_with_auth_info (xcb_util.c:548)
+==32970==    by 0x48D749A: _XConnectXCB (xcb_disp.c:78)
+==32970==    by 0x48C7039: XOpenDisplay (OpenDis.c:129)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 
+==32970== HEAP SUMMARY:
+==32970==     in use at exit: 86,055 bytes in 87 blocks
+==32970==   total heap usage: 68,867 allocs, 68,780 frees, 1,826,048 bytes allocated
+==32970== 
+==32970== 3 bytes in 1 blocks are still reachable in loss record 1 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x4A8EABF: strdup (strdup.c:42)
+==32970==    by 0x48C7015: XOpenDisplay (OpenDis.c:119)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 8 bytes in 1 blocks are still reachable in loss record 2 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x4C2B49F: UnknownInlinedFun (Xge.c:194)
+==32970==    by 0x4C2B49F: _xgeCheckExtInit (Xge.c:152)
+==32970==    by 0x4C2D64E: UnknownInlinedFun (Xge.c:314)
+==32970==    by 0x4C2D64E: XextAddDisplay (extutil.c:123)
+==32970==    by 0x49DC743: XineramaIsActive (Xinerama.c:250)
+==32970==    by 0x4004E9D: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 9 bytes in 1 blocks are still reachable in loss record 3 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x4A8EABF: strdup (strdup.c:42)
+==32970==    by 0x48C3B06: XInitExtension (InitExt.c:65)
+==32970==    by 0x4C2D484: XextAddDisplay (extutil.c:107)
+==32970==    by 0x49DC743: XineramaIsActive (Xinerama.c:250)
+==32970==    by 0x4004E9D: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 10 bytes in 1 blocks are still reachable in loss record 4 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x4A8EABF: strdup (strdup.c:42)
+==32970==    by 0x48C3B06: XInitExtension (InitExt.c:65)
+==32970==    by 0x4931EE5: XkbUseExtension (XKBUse.c:744)
+==32970==    by 0x48C7C28: XOpenDisplay (OpenDis.c:568)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 16 bytes in 1 blocks are still reachable in loss record 5 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x4C0BFDE: UnknownInlinedFun (xcb_list.c:53)
+==32970==    by 0x4C0BFDE: UnknownInlinedFun (xcb_in.c:903)
+==32970==    by 0x4C0BFDE: xcb_connect_to_fd (xcb_conn.c:383)
+==32970==    by 0x4C0C78D: xcb_connect_to_display_with_auth_info (xcb_util.c:568)
+==32970==    by 0x48D749A: _XConnectXCB (xcb_disp.c:78)
+==32970==    by 0x48C7039: XOpenDisplay (OpenDis.c:129)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 16 bytes in 1 blocks are still reachable in loss record 6 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x48BDB8C: _XInitDisplayLock (locking.c:539)
+==32970==    by 0x48C730A: XOpenDisplay (OpenDis.c:210)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 21 bytes in 1 blocks are still reachable in loss record 7 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x48C7520: XOpenDisplay (OpenDis.c:321)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 24 bytes in 1 blocks are still reachable in loss record 8 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x4C2CC32: XextCreateExtension (extutil.c:66)
+==32970==    by 0x4C2D0DD: _xgeFindDisplay (Xge.c:102)
+==32970==    by 0x4C2D637: UnknownInlinedFun (Xge.c:310)
+==32970==    by 0x4C2D637: XextAddDisplay (extutil.c:123)
+==32970==    by 0x49DC743: XineramaIsActive (Xinerama.c:250)
+==32970==    by 0x4004E9D: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 24 bytes in 1 blocks are still reachable in loss record 9 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x4A8EABF: strdup (strdup.c:42)
+==32970==    by 0x48C3B06: XInitExtension (InitExt.c:65)
+==32970==    by 0x4C2D484: XextAddDisplay (extutil.c:107)
+==32970==    by 0x4C2D11B: _xgeFindDisplay (Xge.c:107)
+==32970==    by 0x4C2D637: UnknownInlinedFun (Xge.c:310)
+==32970==    by 0x4C2D637: XextAddDisplay (extutil.c:123)
+==32970==    by 0x49DC743: XineramaIsActive (Xinerama.c:250)
+==32970==    by 0x4004E9D: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 24 bytes in 1 blocks are still reachable in loss record 10 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x4C2D669: UnknownInlinedFun (Xge.c:319)
+==32970==    by 0x4C2D669: XextAddDisplay (extutil.c:123)
+==32970==    by 0x49DC743: XineramaIsActive (Xinerama.c:250)
+==32970==    by 0x4004E9D: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 24 bytes in 1 blocks are still reachable in loss record 11 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x48D53D7: append_pending_request (xcb_io.c:157)
+==32970==    by 0x48DF9EA: _XReply (xcb_io.c:694)
+==32970==    by 0x48D0C70: XQueryPointer (QuPntr.c:48)
+==32970==    by 0x4003CB1: UpdateCurrentMonitor (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970==    by 0x4005E42: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 32 bytes in 1 blocks are still reachable in loss record 12 of 49
+==32970==    at 0x485BF4F: realloc (vg_replace_malloc.c:1801)
+==32970==    by 0x4C0FFDF: UnknownInlinedFun (xcb_ext.c:52)
+==32970==    by 0x4C0FFDF: get_lazyreply (xcb_ext.c:74)
+==32970==    by 0x4C100AE: xcb_get_extension_data (xcb_ext.c:95)
+==32970==    by 0x4C10167: UnknownInlinedFun (xcb_out.c:147)
+==32970==    by 0x4C10167: xcb_prefetch_maximum_request_length (xcb_out.c:139)
+==32970==    by 0x4C101E5: UnknownInlinedFun (xcb_out.c:166)
+==32970==    by 0x4C101E5: xcb_get_maximum_request_length (xcb_out.c:162)
+==32970==    by 0x48C7AC8: XOpenDisplay (OpenDis.c:506)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 32 bytes in 1 blocks are still reachable in loss record 13 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x4C08BC3: UnknownInlinedFun (xcb_in.c:265)
+==32970==    by 0x4C08BC3: _xcb_in_read (xcb_in.c:1042)
+==32970==    by 0x4C093AE: _xcb_conn_wait.part.0 (xcb_conn.c:546)
+==32970==    by 0x4C0990F: UnknownInlinedFun (xcb_conn.c:476)
+==32970==    by 0x4C0990F: wait_for_reply (xcb_in.c:522)
+==32970==    by 0x4C0AB45: xcb_wait_for_reply (xcb_in.c:552)
+==32970==    by 0x4C100F3: xcb_get_extension_data (xcb_ext.c:99)
+==32970==    by 0x4C10167: UnknownInlinedFun (xcb_out.c:147)
+==32970==    by 0x4C10167: xcb_prefetch_maximum_request_length (xcb_out.c:139)
+==32970==    by 0x4C101E5: UnknownInlinedFun (xcb_out.c:166)
+==32970==    by 0x4C101E5: xcb_get_maximum_request_length (xcb_out.c:162)
+==32970==    by 0x48C7AC8: XOpenDisplay (OpenDis.c:506)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 32 bytes in 1 blocks are still reachable in loss record 14 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x4C2D463: XextAddDisplay (extutil.c:103)
+==32970==    by 0x49DC743: XineramaIsActive (Xinerama.c:250)
+==32970==    by 0x4004E9D: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 32 bytes in 1 blocks are still reachable in loss record 15 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x4C2D463: XextAddDisplay (extutil.c:103)
+==32970==    by 0x4C2D11B: _xgeFindDisplay (Xge.c:107)
+==32970==    by 0x4C2D637: UnknownInlinedFun (Xge.c:310)
+==32970==    by 0x4C2D637: XextAddDisplay (extutil.c:123)
+==32970==    by 0x49DC743: XineramaIsActive (Xinerama.c:250)
+==32970==    by 0x4004E9D: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 40 bytes in 1 blocks are still reachable in loss record 16 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x48BDBD9: _XInitDisplayLock (locking.c:548)
+==32970==    by 0x48C730A: XOpenDisplay (OpenDis.c:210)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 40 bytes in 1 blocks are still reachable in loss record 17 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x48D77BA: _XPollfdCacheInit (XlibInt.c:133)
+==32970==    by 0x48C731B: XOpenDisplay (OpenDis.c:215)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 48 bytes in 1 blocks are still reachable in loss record 18 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x48D7425: _XConnectXCB (xcb_disp.c:86)
+==32970==    by 0x48C7039: XOpenDisplay (OpenDis.c:129)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 48 bytes in 1 blocks are still reachable in loss record 19 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x48D743B: _XConnectXCB (xcb_disp.c:87)
+==32970==    by 0x48C7039: XOpenDisplay (OpenDis.c:129)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 48 bytes in 1 blocks are still reachable in loss record 20 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x48BDBC7: _XInitDisplayLock (locking.c:547)
+==32970==    by 0x48C730A: XOpenDisplay (OpenDis.c:210)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 48 bytes in 1 blocks are still reachable in loss record 21 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x48BDBEA: _XInitDisplayLock (locking.c:549)
+==32970==    by 0x48C730A: XOpenDisplay (OpenDis.c:210)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 48 bytes in 1 blocks are still reachable in loss record 22 of 49
+==32970==    at 0x485BD13: calloc (vg_replace_malloc.c:1675)
+==32970==    by 0x4932D44: XkbGetMap (XKBGetMap.c:596)
+==32970==    by 0x492B6D4: _XkbLoadDpy (XKBBind.c:523)
+==32970==    by 0x492BDA7: XKeysymToKeycode (XKBBind.c:145)
+==32970==    by 0x4004DAE: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 72 bytes in 1 blocks are still reachable in loss record 23 of 49
+==32970==    at 0x485BD13: calloc (vg_replace_malloc.c:1675)
+==32970==    by 0x48C73CE: XOpenDisplay (OpenDis.c:253)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 72 bytes in 1 blocks are still reachable in loss record 24 of 49
+==32970==    at 0x485BD13: calloc (vg_replace_malloc.c:1675)
+==32970==    by 0x4932D27: XkbGetMap (XKBGetMap.c:593)
+==32970==    by 0x492B6D4: _XkbLoadDpy (XKBBind.c:523)
+==32970==    by 0x492BDA7: XKeysymToKeycode (XKBBind.c:145)
+==32970==    by 0x4004DAE: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 112 bytes in 1 blocks are still reachable in loss record 25 of 49
+==32970==    at 0x485BD13: calloc (vg_replace_malloc.c:1675)
+==32970==    by 0x48D7324: _XConnectXCB (xcb_disp.c:65)
+==32970==    by 0x48C7039: XOpenDisplay (OpenDis.c:129)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 112 bytes in 1 blocks are still reachable in loss record 26 of 49
+==32970==    at 0x485BD13: calloc (vg_replace_malloc.c:1675)
+==32970==    by 0x48C77AB: XOpenDisplay (OpenDis.c:417)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 128 bytes in 1 blocks are still reachable in loss record 27 of 49
+==32970==    at 0x485BD13: calloc (vg_replace_malloc.c:1675)
+==32970==    by 0x48C769B: XOpenDisplay (OpenDis.c:375)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 128 bytes in 1 blocks are still reachable in loss record 28 of 49
+==32970==    at 0x485BD13: calloc (vg_replace_malloc.c:1675)
+==32970==    by 0x48C3AF5: XInitExtension (InitExt.c:64)
+==32970==    by 0x4931EE5: XkbUseExtension (XKBUse.c:744)
+==32970==    by 0x48C7C28: XOpenDisplay (OpenDis.c:568)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 128 bytes in 1 blocks are still reachable in loss record 29 of 49
+==32970==    at 0x485BD13: calloc (vg_replace_malloc.c:1675)
+==32970==    by 0x48C3AF5: XInitExtension (InitExt.c:64)
+==32970==    by 0x4C2D484: XextAddDisplay (extutil.c:107)
+==32970==    by 0x49DC743: XineramaIsActive (Xinerama.c:250)
+==32970==    by 0x4004E9D: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 128 bytes in 1 blocks are still reachable in loss record 30 of 49
+==32970==    at 0x485BD13: calloc (vg_replace_malloc.c:1675)
+==32970==    by 0x48C3AF5: XInitExtension (InitExt.c:64)
+==32970==    by 0x4C2D484: XextAddDisplay (extutil.c:107)
+==32970==    by 0x4C2D11B: _xgeFindDisplay (Xge.c:107)
+==32970==    by 0x4C2D637: UnknownInlinedFun (Xge.c:310)
+==32970==    by 0x4C2D637: XextAddDisplay (extutil.c:123)
+==32970==    by 0x49DC743: XineramaIsActive (Xinerama.c:250)
+==32970==    by 0x4004E9D: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 152 bytes in 1 blocks are still reachable in loss record 31 of 49
+==32970==    at 0x485BD13: calloc (vg_replace_malloc.c:1675)
+==32970==    by 0x4932107: XkbUseExtension (XKBUse.c:653)
+==32970==    by 0x48C7C28: XOpenDisplay (OpenDis.c:568)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 160 bytes in 1 blocks are still reachable in loss record 32 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x48B5419: XCreateGC (CrGC.c:75)
+==32970==    by 0x48C7B41: XOpenDisplay (OpenDis.c:518)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 168 bytes in 1 blocks are still reachable in loss record 33 of 49
+==32970==    at 0x485BD13: calloc (vg_replace_malloc.c:1675)
+==32970==    by 0x48C75B8: XOpenDisplay (OpenDis.c:347)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 192 bytes in 1 blocks are still reachable in loss record 34 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x48BDBA8: _XInitDisplayLock (locking.c:542)
+==32970==    by 0x48C730A: XOpenDisplay (OpenDis.c:210)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 208 bytes in 1 blocks are still reachable in loss record 35 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x4C2B446: _xgeCheckExtInit (Xge.c:146)
+==32970==    by 0x4C2D64E: UnknownInlinedFun (Xge.c:314)
+==32970==    by 0x4C2D64E: XextAddDisplay (extutil.c:123)
+==32970==    by 0x49DC743: XineramaIsActive (Xinerama.c:250)
+==32970==    by 0x4004E9D: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 208 bytes in 1 blocks are still reachable in loss record 36 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x48D9656: _XEnq (XlibInt.c:740)
+==32970==    by 0x48DDEEF: handle_response (xcb_io.c:426)
+==32970==    by 0x48DF5B0: UnknownInlinedFun (xcb_io.c:519)
+==32970==    by 0x48DF5B0: _XReadEvents (xcb_io.c:463)
+==32970==    by 0x48C6378: XNextEvent (NextEvent.c:50)
+==32970==    by 0x40052B7: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 208 bytes in 1 blocks are still reachable in loss record 37 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x48D9656: _XEnq (XlibInt.c:740)
+==32970==    by 0x48DDEEF: handle_response (xcb_io.c:426)
+==32970==    by 0x48DFB3F: _XReply (xcb_io.c:731)
+==32970==    by 0x48D0C70: XQueryPointer (QuPntr.c:48)
+==32970==    by 0x4003CB1: UpdateCurrentMonitor (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970==    by 0x4005E42: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 256 bytes in 1 blocks are still reachable in loss record 38 of 49
+==32970==    at 0x485BD13: calloc (vg_replace_malloc.c:1675)
+==32970==    by 0x493C132: UnknownInlinedFun (XKBMAlloc.c:112)
+==32970==    by 0x493C132: XkbAllocClientMap (XKBMAlloc.c:42)
+==32970==    by 0x4930301: UnknownInlinedFun (XKBGetMap.c:409)
+==32970==    by 0x4930301: _XkbReadGetMapReply (XKBGetMap.c:537)
+==32970==    by 0x4932C96: UnknownInlinedFun (XKBGetMap.c:562)
+==32970==    by 0x4932C96: UnknownInlinedFun (XKBGetMap.c:579)
+==32970==    by 0x4932C96: XkbGetUpdatedMap (XKBGetMap.c:566)
+==32970==    by 0x4932D76: XkbGetMap (XKBGetMap.c:598)
+==32970==    by 0x492B6D4: _XkbLoadDpy (XKBBind.c:523)
+==32970==    by 0x492BDA7: XKeysymToKeycode (XKBBind.c:145)
+==32970==    by 0x4004DAE: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 472 bytes in 11 blocks are still reachable in loss record 39 of 49
+==32970==    at 0x485BD13: calloc (vg_replace_malloc.c:1675)
+==32970==    by 0x492FB72: UnknownInlinedFun (XKBGetMap.c:81)
+==32970==    by 0x492FB72: _XkbReadGetMapReply (XKBGetMap.c:525)
+==32970==    by 0x4932C96: UnknownInlinedFun (XKBGetMap.c:562)
+==32970==    by 0x4932C96: UnknownInlinedFun (XKBGetMap.c:579)
+==32970==    by 0x4932C96: XkbGetUpdatedMap (XKBGetMap.c:566)
+==32970==    by 0x4932D76: XkbGetMap (XKBGetMap.c:598)
+==32970==    by 0x492B6D4: _XkbLoadDpy (XKBBind.c:523)
+==32970==    by 0x492BDA7: XKeysymToKeycode (XKBBind.c:145)
+==32970==    by 0x4004DAE: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 624 bytes in 3 blocks are still reachable in loss record 40 of 49
+==32970==    at 0x48548A8: malloc (vg_replace_malloc.c:446)
+==32970==    by 0x48D9656: _XEnq (XlibInt.c:740)
+==32970==    by 0x48DDEEF: handle_response (xcb_io.c:426)
+==32970==    by 0x48DF5FC: UnknownInlinedFun (xcb_io.c:537)
+==32970==    by 0x48DF5FC: _XReadEvents (xcb_io.c:463)
+==32970==    by 0x48C6378: XNextEvent (NextEvent.c:50)
+==32970==    by 0x40052B7: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 1,080 bytes in 1 blocks are still reachable in loss record 41 of 49
+==32970==    at 0x485BD13: calloc (vg_replace_malloc.c:1675)
+==32970==    by 0x493C1E2: UnknownInlinedFun (XKBMAlloc.c:75)
+==32970==    by 0x493C1E2: XkbAllocClientMap (XKBMAlloc.c:42)
+==32970==    by 0x492FD27: UnknownInlinedFun (XKBGetMap.c:45)
+==32970==    by 0x492FD27: _XkbReadGetMapReply (XKBGetMap.c:525)
+==32970==    by 0x4932C96: UnknownInlinedFun (XKBGetMap.c:562)
+==32970==    by 0x4932C96: UnknownInlinedFun (XKBGetMap.c:579)
+==32970==    by 0x4932C96: XkbGetUpdatedMap (XKBGetMap.c:566)
+==32970==    by 0x4932D76: XkbGetMap (XKBGetMap.c:598)
+==32970==    by 0x492B6D4: _XkbLoadDpy (XKBBind.c:523)
+==32970==    by 0x492BDA7: XKeysymToKeycode (XKBBind.c:145)
+==32970==    by 0x4004DAE: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 2,048 bytes in 1 blocks are still reachable in loss record 42 of 49
+==32970==    at 0x485BD13: calloc (vg_replace_malloc.c:1675)
+==32970==    by 0x492FB92: UnknownInlinedFun (XKBGetMap.c:155)
+==32970==    by 0x492FB92: _XkbReadGetMapReply (XKBGetMap.c:527)
+==32970==    by 0x4932C96: UnknownInlinedFun (XKBGetMap.c:562)
+==32970==    by 0x4932C96: UnknownInlinedFun (XKBGetMap.c:579)
+==32970==    by 0x4932C96: XkbGetUpdatedMap (XKBGetMap.c:566)
+==32970==    by 0x4932D76: XkbGetMap (XKBGetMap.c:598)
+==32970==    by 0x492B6D4: _XkbLoadDpy (XKBBind.c:523)
+==32970==    by 0x492BDA7: XKeysymToKeycode (XKBBind.c:145)
+==32970==    by 0x4004DAE: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 2,232 bytes in 26 blocks are still reachable in loss record 43 of 49
+==32970==    at 0x485BD13: calloc (vg_replace_malloc.c:1675)
+==32970==    by 0x492FA3A: UnknownInlinedFun (XKBGetMap.c:66)
+==32970==    by 0x492FA3A: _XkbReadGetMapReply (XKBGetMap.c:525)
+==32970==    by 0x4932C96: UnknownInlinedFun (XKBGetMap.c:562)
+==32970==    by 0x4932C96: UnknownInlinedFun (XKBGetMap.c:579)
+==32970==    by 0x4932C96: XkbGetUpdatedMap (XKBGetMap.c:566)
+==32970==    by 0x4932D76: XkbGetMap (XKBGetMap.c:598)
+==32970==    by 0x492B6D4: _XkbLoadDpy (XKBBind.c:523)
+==32970==    by 0x492BDA7: XKeysymToKeycode (XKBBind.c:145)
+==32970==    by 0x4004DAE: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 4,720 bytes in 1 blocks are still reachable in loss record 44 of 49
+==32970==    at 0x485BD13: calloc (vg_replace_malloc.c:1675)
+==32970==    by 0x48C7000: XOpenDisplay (OpenDis.c:115)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 7,168 bytes in 1 blocks are still reachable in loss record 45 of 49
+==32970==    at 0x485BD13: calloc (vg_replace_malloc.c:1675)
+==32970==    by 0x49301B6: UnknownInlinedFun (XKBGetMap.c:163)
+==32970==    by 0x49301B6: _XkbReadGetMapReply (XKBGetMap.c:527)
+==32970==    by 0x4932C96: UnknownInlinedFun (XKBGetMap.c:562)
+==32970==    by 0x4932C96: UnknownInlinedFun (XKBGetMap.c:579)
+==32970==    by 0x4932C96: XkbGetUpdatedMap (XKBGetMap.c:566)
+==32970==    by 0x4932D76: XkbGetMap (XKBGetMap.c:598)
+==32970==    by 0x492B6D4: _XkbLoadDpy (XKBBind.c:523)
+==32970==    by 0x492BDA7: XKeysymToKeycode (XKBBind.c:145)
+==32970==    by 0x4004DAE: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 8,276 bytes in 1 blocks are still reachable in loss record 46 of 49
+==32970==    at 0x485BF4F: realloc (vg_replace_malloc.c:1801)
+==32970==    by 0x4C0C1E7: UnknownInlinedFun (xcb_conn.c:184)
+==32970==    by 0x4C0C1E7: xcb_connect_to_fd (xcb_conn.c:386)
+==32970==    by 0x4C0C78D: xcb_connect_to_display_with_auth_info (xcb_util.c:568)
+==32970==    by 0x48D749A: _XConnectXCB (xcb_disp.c:78)
+==32970==    by 0x48C7039: XOpenDisplay (OpenDis.c:129)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 16,384 bytes in 1 blocks are still reachable in loss record 47 of 49
+==32970==    at 0x485BD13: calloc (vg_replace_malloc.c:1675)
+==32970==    by 0x48C736E: XOpenDisplay (OpenDis.c:241)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 18,816 bytes in 2 blocks are still reachable in loss record 48 of 49
+==32970==    at 0x485BD13: calloc (vg_replace_malloc.c:1675)
+==32970==    by 0x48C7830: XOpenDisplay (OpenDis.c:439)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== 21,176 bytes in 1 blocks are still reachable in loss record 49 of 49
+==32970==    at 0x485BD13: calloc (vg_replace_malloc.c:1675)
+==32970==    by 0x4C0BF05: xcb_connect_to_fd (xcb_conn.c:368)
+==32970==    by 0x4C0C78D: xcb_connect_to_display_with_auth_info (xcb_util.c:568)
+==32970==    by 0x48D749A: _XConnectXCB (xcb_disp.c:78)
+==32970==    by 0x48C7039: XOpenDisplay (OpenDis.c:129)
+==32970==    by 0x4004CA8: main (in /home/piadi/code_skool/ash-wm/build/ash-wm)
+==32970== 
+==32970== LEAK SUMMARY:
+==32970==    definitely lost: 0 bytes in 0 blocks
+==32970==    indirectly lost: 0 bytes in 0 blocks
+==32970==      possibly lost: 0 bytes in 0 blocks
+==32970==    still reachable: 86,055 bytes in 87 blocks
+==32970==         suppressed: 0 bytes in 0 blocks
+==32970== 
+==32970== For lists of detected and suppressed errors, rerun with: -s
+==32970== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 0 from 0)

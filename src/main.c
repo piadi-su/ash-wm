@@ -470,7 +470,10 @@ Dwindle(Display *disp, int ws_index)
     int count_ws = 0;
     Client *cursor = head;
     do {
-        count_ws++;
+		// // --- MODIFICA 1: Conta solo le finestre tiling attive ---
+        if (!cursor->is_floating && !cursor->is_fullscreen) {
+            count_ws++;
+        }
         // --- QUESTO CONTROLLO SERVE ASSOLUTAMENTE, NON TOGLIERLO ---
         if (cursor->is_fullscreen) {
             fullscreen_client = cursor;
@@ -521,21 +524,49 @@ Dwindle(Display *disp, int ws_index)
     const unsigned int MIN_WIDTH = 60;
     const unsigned int MIN_HEIGHT = 60;
 
+	if (count_ws == 0) {
+        cursor = head;
+        do {
+            XSetWindowBorderWidth(disp, cursor->id, BORDER_WIDTH);
+            XMoveResizeWindow(disp, cursor->id, cursor->x, cursor->y, cursor->w, cursor->h);
+            XMapWindow(disp, cursor->id);
+            cursor = cursor->next;
+        } while(cursor != head);
+        return;
+    }
+
     // Se c'è una sola finestra, prende tutto il monitor (meno i gap)
     if(count_ws == 1)
     {
-        int target_w = mw - (GAPS * 2);
-        int target_h = mh - (GAPS * 2);
+		cursor = head;
+		do{
+			if (!cursor->is_floating && !cursor->is_fullscreen){
+				int target_w = mw - (GAPS * 2);
+				int target_h = mh - (GAPS * 2);
 
-        head->x = mx + GAPS;
-        head->y = my + GAPS;
-        head->w = target_w < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)target_w;
-        head->h = target_h < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)target_h;
+				head->x = mx + GAPS;
+				head->y = my + GAPS;
+				head->w = target_w < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)target_w;
+				head->h = target_h < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)target_h;
 
-        // Ripristina il bordo se la finestra era in fullscreen prima
-        XSetWindowBorderWidth(disp, head->id, BORDER_WIDTH);
-        XMoveResizeWindow(disp, head->id, head->x, head->y, head->w, head->h);
-        XMapWindow(disp, head->id); 
+				// Ripristina il bordo se la finestra era in fullscreen prima
+				XSetWindowBorderWidth(disp, head->id, BORDER_WIDTH);
+				XMoveResizeWindow(disp, head->id, head->x, head->y, head->w, head->h);
+				XMapWindow(disp, head->id); 
+			}
+
+			if(cursor->is_floating)
+			{
+				// Se la finestra è floating, mantieni la sua geometria libera e mappala sopra
+				XSetWindowBorderWidth(disp, cursor->id, BORDER_WIDTH);
+				XMoveResizeWindow(disp, cursor->id, cursor->x, cursor->y, cursor->w, cursor->h);
+				XMapWindow(disp, cursor->id);
+			}
+
+			cursor = cursor->next;
+
+
+		}while(cursor != head);
         return;
     }
 
@@ -545,12 +576,24 @@ Dwindle(Display *disp, int ws_index)
     int ww = mw;
     int wh = mh;
 
-    for(int i = 0; i < count_ws; i++)
-    {
-        // Ripristina il bordo per ogni finestra nel layout tiling
+	int tiling_idx = 0;
+	do {
+		// Se la finestra corrente è floating, mantieni le SUE coordinate libere memorizzate nella struct
+		if (cursor->is_floating) {
+			// Non toccare il bordo se preferisci, o lascialo coerente
+			XSetWindowBorderWidth(disp, cursor->id, BORDER_WIDTH);
+			XMoveResizeWindow(disp, cursor->id, cursor->x, cursor->y, cursor->w, cursor->h);
+			XMapWindow(disp, cursor->id);
+
+			cursor = cursor->next;
+			continue;
+		}
+
+
+        // Da qui in poi eseguiamo la logica originale, ma usando 'tiling_idx' al posto di 'i'
         XSetWindowBorderWidth(disp, cursor->id, BORDER_WIDTH);
 
-        if(i == count_ws - 1)
+        if(tiling_idx == count_ws - 1)
         {
             int target_x = wx + GAPS;
             int target_y = wy + GAPS;
@@ -564,7 +607,7 @@ Dwindle(Display *disp, int ws_index)
         }
         else
         {
-            if(i % 2 == 0)
+            if(tiling_idx % 2 == 0)
             {
                 ww /= 2;
                 if (ww < (int)MIN_WIDTH) ww = MIN_WIDTH; 
@@ -599,8 +642,9 @@ Dwindle(Display *disp, int ws_index)
         XMoveResizeWindow(disp, cursor->id, cursor->x, cursor->y, cursor->w, cursor->h);
         XMapWindow(disp, cursor->id); 
         
+        tiling_idx++; // Incrementa solo quando posizioni una finestra in tiling
         cursor = cursor->next;
-    }
+    } while(cursor != head);
 }
 
 
@@ -914,17 +958,45 @@ void SwapDwindleDirectional(Display *disp, int direction) { // 6=H, 7=J, 8=K, 9=
 }
 
 
+
+
+int
+XErrorHandlerImpl(Display *disp, XErrorEvent *ee)
+{
+	(void)disp;
+    // Ignora gli errori BadWindow (finestre distrutte nel frattempo)
+    if (ee->error_code == BadWindow ||
+        (ee->request_code == 12 && ee->error_code == BadMatch) || // ConfigureWindow BadMatch
+        (ee->request_code == 42 && ee->error_code == BadWindow))  // SetInputFocus BadWindow
+    {
+        printf("[ASH-WM] Errore X11 intercettato e ignorato safely.\n");
+        return 0;
+    }
+    
+    // Se è un errore fatale grave, stampa ed esci
+    fprintf(stderr, "[ASH-WM] Errore fatale X11: major %d, error %d\n", ee->request_code, ee->error_code);
+    return 0; 
+}
+
 int main(void)
 {
 
 	XEvent Ev;
 	unsigned int clean_state;
 
+	XWindowAttributes mouse_attr;
+    XButtonEvent mouse_start;
+    mouse_start.subwindow = None;
+
 	Display *disp = XOpenDisplay(NULL);
 	if(disp == NULL){
 		fprintf(stderr, "error opening the display");
 		return 1;
 	}
+
+	//error handler
+	XSetErrorHandler(XErrorHandlerImpl);
+
 	
 	int sc = DefaultScreen(disp);
 
@@ -946,6 +1018,16 @@ int main(void)
 		KeyCode code = XKeysymToKeycode(disp, keys[i].keysym);
 		XGrabKey(disp, code, keys[i].mod, root, True, GrabModeAsync, GrabModeAsync); // prende i tasti/sequesta dalla root win
 	}
+
+	// Cattura Mod + Click Sinistro (Button1) per spostare le finestre
+    XGrabButton(disp, Button1, MODIFIER, root, True,
+                ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
+                GrabModeAsync, GrabModeAsync, None, None);
+
+    // Cattura Mod + Click Destro (Button3) per ridimensionare le finestre
+    XGrabButton(disp, Button3, MODIFIER, root, True,
+                ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
+                GrabModeAsync, GrabModeAsync, None, None);
 	
 	
 	//get monitors
@@ -1041,30 +1123,67 @@ int main(void)
 							{
 								KillWindow(disp, root);
 							}
+							
 							else if (keys[i].arg == -2) 
 							{ 
 								MoveWindowToMonitor(disp, root);
 							}
+							
 							else if (keys[i].arg == -3) // Focus del prossimo client (J)
 							{
 								CycleFocus(disp, 1);
 							}
+							
 							else if (keys[i].arg == -4) // Focus del client precedente (K)
 							{
 								CycleFocus(disp, -1);
 							}
+							
 							else if (keys[i].arg == -5) // Focus del client precedente (K)
 							{
 								ToggleFullscreen(disp, root);
 							}
+
 							else if (keys[i].arg == -6) // Focus del client precedente (K)
 							{
 								SwapDwindleDirectional(disp, 1);
 							}
+							
 							else if (keys[i].arg == -7) // Focus del client precedente (K)
 							{
 								SwapDwindleDirectional(disp, -1);
 							}
+
+							else if (keys[i].arg == -8) // TOGGLE FLOATING (Mod + Spazio)
+							{
+								Window focused_win; int rev;
+								XGetInputFocus(disp, &focused_win, &rev);
+								if (focused_win != None) {
+									Window dummy_win; int dummy_int; unsigned int dummy_mask;
+									int mouse_x, mouse_y; int mon_idx = 0;
+									XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
+									for (int m = 0; m < monitors_count; m++) {
+										if (mouse_x >= monitors[m].x && mouse_x < (monitors[m].x + monitors[m].width) &&
+												mouse_y >= monitors[m].y && mouse_y < (monitors[m].y + monitors[m].height)) {
+											mon_idx = m; break;
+										}
+									}
+									int ws = monitors[mon_idx].current_ws;
+
+									Client *curr = workspaces[ws].list_Cl;
+									if (curr != NULL) {
+										do {
+											if (curr->id == focused_win && !curr->is_fullscreen) {
+												curr->is_floating = !curr->is_floating; 
+												break;
+											}
+											curr = curr->next;
+										} while(curr != workspaces[ws].list_Cl);
+									}
+									Dwindle(disp, ws); 
+								}
+							}
+
 							else 
 							{
 								int ws_target = keys[i].arg % WORKSPACES_X_MONITOR; 
@@ -1085,10 +1204,109 @@ int main(void)
 				break;
 
 
-			case MotionNotify:
-				// Il mouse si sta muovendo sullo sfondo o tra i monitor: aggiorna la mappa dei monitor
-				UpdateCurrentMonitor(disp, root);
+			case ButtonPress:
+				if (Ev.xbutton.subwindow != None) {
+					XGetWindowAttributes(disp, Ev.xbutton.subwindow, &mouse_attr);
+
+					// Salviamo i dati di partenza dell'evento
+					mouse_start = Ev.xbutton;
+
+					// Trova il workspace corrente basato sulla posizione del mouse
+					Window dummy_win; int dummy_int; unsigned int dummy_mask;
+					int mouse_x, mouse_y; int mon_idx = 0;
+					XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
+					for (int m = 0; m < monitors_count; m++) {
+						if (mouse_x >= monitors[m].x && mouse_x < (monitors[m].x + monitors[m].width) &&
+								mouse_y >= monitors[m].y && mouse_y < (monitors[m].y + monitors[m].height)) {
+							mon_idx = m; break;
+						}
+					}
+					int ws = monitors[mon_idx].current_ws;
+
+					// Imposta lo stato floating nella struct interna
+					Client *h = workspaces[ws].list_Cl;
+					if (h != NULL) {
+						Client *c = h;
+						do {
+							if (c->id == Ev.xbutton.subwindow && !c->is_fullscreen) {
+								c->is_floating = 1;
+								break;
+							}
+							c = c->next;
+						} while (c != h);
+					}
+
+					// Riordina il mosaico (la finestra cliccata ora è libera, le altre si allargano)
+					Dwindle(disp, ws);
+					XRaiseWindow(disp, Ev.xbutton.subwindow);
+				}
 				break;
+
+			case MotionNotify:
+				if (mouse_start.subwindow != None) {
+					// Calcola il delta (lo spostamento effettivo del mouse da inizio click)
+					int xdiff = Ev.xbutton.x_root - mouse_start.x_root;
+					int ydiff = Ev.xbutton.y_root - mouse_start.y_root;
+
+					if (mouse_start.button == Button1) {
+						// Spostamento basato sulla posizione iniziale reale della finestra
+						XMoveWindow(disp, mouse_start.subwindow, 
+								mouse_attr.x + xdiff, 
+								mouse_attr.y + ydiff);
+					} 
+					else if (mouse_start.button == Button3) {
+						// Ridimensionamento preciso
+						int new_w = mouse_attr.width + xdiff;
+						int new_h = mouse_attr.height + ydiff;
+
+						if (new_w < 60) new_w = 60;
+						if (new_h < 60) new_h = 60;
+
+						XResizeWindow(disp, mouse_start.subwindow, new_w, new_h);
+					}
+				} else {
+					UpdateCurrentMonitor(disp, root);
+				}
+				break;
+
+			case ButtonRelease:
+				if (mouse_start.subwindow != None) {
+					Window dummy_win; int dummy_int; unsigned int dummy_mask;
+					int mouse_x, mouse_y; int mon_idx = 0;
+					XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
+					for (int m = 0; m < monitors_count; m++) {
+						if (mouse_x >= monitors[m].x && mouse_x < (monitors[m].x + monitors[m].width) &&
+								mouse_y >= monitors[m].y && mouse_y < (monitors[m].y + monitors[m].height)) {
+							mon_idx = m; break;
+						}
+					}
+					int ws = monitors[mon_idx].current_ws;
+
+					// SALVATAGGIO DEFINITIVO: Chiedi a X11 dove si trova ORA la finestra finita 
+					// e memorizzala nel Client del workspace, così se cambi workspace o rinfreschi, resta lì!
+					Client *h = workspaces[ws].list_Cl;
+					if (h != NULL) {
+						Client *c = h;
+						do {
+							if (c->id == mouse_start.subwindow) {
+								XWindowAttributes final_attr;
+								XGetWindowAttributes(disp, c->id, &final_attr);
+								c->x = final_attr.x;
+								c->y = final_attr.y;
+								c->w = final_attr.width;
+								c->h = final_attr.height;
+								break;
+							}
+							c = c->next;
+						} while (c != h);
+					}
+					mouse_start.subwindow = None; // Rilascia il blocco
+				}
+				break;
+
+
+
+
 
 				//gestisce sopostamento mouse
 			case EnterNotify:
