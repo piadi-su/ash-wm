@@ -40,6 +40,10 @@ sudo make install
 
 ## DEMO
 
+![AshWM Demo](img/demo.gif)
+
+(the gray thing on top is a bar i'm working on)
+---
 
 pls report with and issue or even pr if you find any bugs
 
