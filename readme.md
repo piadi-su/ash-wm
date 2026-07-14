@@ -40,6 +40,13 @@ sudo make install
 ## DEMO
 
 
+pls report with and issue or even pr if you find any bugs
+
+### things to add
+- [ ] window resize
+- [ ] and more
+
+
 ---
 
 ## License
