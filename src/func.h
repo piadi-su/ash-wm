@@ -7,16 +7,24 @@
 #include <X11/XF86keysym.h>
 #include <X11/keysym.h>
 #include <X11/XKBlib.h>
-
 #include <X11/extensions/Xinerama.h>
 
 
+//for debug purpuse
+#ifdef DEBUG
+	#define DEBUG_LOG(...) printf(__VA_ARGS__)
+#else
+    #define DEBUG_LOG(...) do {} while (0)
+#endif
+
+//IPC
+void UpdateBarIPC(Display *disp, Window root);
 
 void FocusWindow(Display *disp, Window w);
 void AddWindowList(Display *disp, Window w, Window root);
 void ChangeWorkspace(Display *disp, Window root, int new_ws);
 void MoveToWorkspace(Display *disp, Window root, int ws_target);
-void RemoveWindowList(Display *disp, Window w);
+void RemoveWindowList(Display *disp, Window w, Window root);
 void KillWindow(Display  *disp, Window root);
 void Dwindle(Display *disp, int ws_index);
 void UpdateCurrentMonitor(Display *disp, Window root);

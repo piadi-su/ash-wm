@@ -30,6 +30,7 @@ typedef struct {
 
 #define MODIFIER Mod4Mask
 // #define MODIFIER Mod1Mask
+
 #define WS_MODIFIER ShiftMask
 
 //macro per genereare i workaspce nel chill

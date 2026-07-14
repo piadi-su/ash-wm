@@ -20,6 +20,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <signal.h>
+#include <string.h>
 #include <stdio.h>
 
 
@@ -76,11 +77,57 @@ typedef struct{
 	Client *list_Cl;
 }Workspace ;
 
-static Monitors monitors[N_MONITORS];
-static int monitors_count = {0};
-static Workspace workspaces[WORKSPACES];
+Monitors monitors[N_MONITORS];
+int monitors_count = {0};
+Workspace workspaces[WORKSPACES];
+
+//workspace ipc
+//-----------------------------//
 
 
+//workspace ipc
+void
+UpdateBarIPC(Display *disp, Window root)
+{
+    // Creiamo una stringa che rappresenta lo stato, es: "1:A 2:I 3:E" 
+    // (A = Attivo, I = Inattivo ma occupato, E = Vuoto)
+    char status[128] = "";
+    
+    // Trova il monitor attivo (puoi usare la logica del mouse come fai già)
+    Window dummy_win; int dummy_int; unsigned int dummy_mask;
+    int mouse_x, mouse_y; int mon_idx = 0;
+    XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
+    for (int i = 0; i < monitors_count; i++) {
+        if (mouse_x >= monitors[i].x && mouse_x < (monitors[i].x + monitors[i].width) &&
+            mouse_y >= monitors[i].y && mouse_y < (monitors[i].y + monitors[i].height)) {
+            mon_idx = i; break;
+        }
+    }
+    int active_ws = monitors[mon_idx].current_ws;
+
+    for (int i = 0; i < WORKSPACES_X_MONITOR; i++) {
+        int real_ws = (mon_idx * WORKSPACES_X_MONITOR) + i;
+        char ws_status = 'E'; // Empty (Vuoto)
+        
+        if (real_ws == active_ws) {
+            ws_status = 'A'; // Active (Attivo corrente)
+        } else if (workspaces[real_ws].list_Cl != NULL) {
+            ws_status = 'O'; // Occupied (Occupato da finestre)
+        }
+        
+        char buf[16];
+        snprintf(buf, sizeof(buf), "%d:%c ", i + 1, ws_status);
+        strcat(status, buf);
+    }
+
+    // Creiamo un ATOM custom su X11 per la nostra proprietà
+    Atom prop = XInternAtom(disp, "_ASHWM_WORKSPACES", False);
+    
+    // Scriviamo la stringa sulla Root Window
+    XChangeProperty(disp, root, prop, XA_STRING, 8, PropModeReplace, 
+                    (unsigned char *)status, strlen(status));
+    XFlush(disp);
+}
 
 //-----------------------------//
 
@@ -187,7 +234,7 @@ AddWindowList(Display *disp, Window w, Window root)
 	int active_ws = monitors[target_monitor].current_ws;
 
 
-	printf("[ASH-WM] Finestra %lu spawnata sul Monitor %d -> Salvata nel Workspace %d\n", 
+	DEBUG_LOG("[ASH-WM] Finestra %lu spawnata sul Monitor %d -> Salvata nel Workspace %d\n", 
            w, target_monitor, active_ws);
 
 	
@@ -223,6 +270,7 @@ AddWindowList(Display *disp, Window w, Window root)
 
 
 	Dwindle(disp, active_ws);
+	UpdateBarIPC(disp, root);
 }
 
 //cambia il worksapce che vediamo
@@ -254,7 +302,7 @@ ChangeWorkspace(Display *disp, Window root, int target_local_id) // riceve l'ind
     if(old_ws == new_ws)
         return;
 
-    printf("[ASH-WM] Monitor %d cambia da WS %d a WS %d\n", mon_idx, old_ws, new_ws);
+    DEBUG_LOG("[ASH-WM] Monitor %d cambia da WS %d a WS %d\n", mon_idx, old_ws, new_ws);
 
     // Nascondi le finestre del vecchio workspace
     workspaces[old_ws].monitor_id = -1; 
@@ -273,6 +321,7 @@ ChangeWorkspace(Display *disp, Window root, int target_local_id) // riceve l'ind
 	}
 
     XSync(disp, False);
+	UpdateBarIPC(disp, root);
 }
 
 
@@ -331,7 +380,7 @@ MoveToWorkspace(Display *disp, Window root, int target_local_id) {
     int ws_target = (target_monitor * WORKSPACES_X_MONITOR) + (target_local_id % WORKSPACES_X_MONITOR);
     if(source_ws == ws_target) return;
 
-    printf("[ASH-WM] Sposto la finestra %lu dal WS %d al WS %d (Monitor %d)\n", focused_win, source_ws, ws_target, target_monitor);
+    DEBUG_LOG("[ASH-WM] Sposto la finestra %lu dal WS %d al WS %d (Monitor %d)\n", focused_win, source_ws, ws_target, target_monitor);
 
     // 2. Rimuovi dal vecchio workspace
     if(found->next == found) {
@@ -387,11 +436,12 @@ MoveToWorkspace(Display *disp, Window root, int target_local_id) {
     }
     
     XSync(disp, False);
+	UpdateBarIPC(disp, root);
 }
 
 // server praticamente per freeare la memory quando una finestra o crusha o code simili
 void 
-RemoveWindowList(Display *disp, Window w)
+RemoveWindowList(Display *disp, Window w, Window root)
 {
 	Client *found = NULL;
 	int ws_index = -1;
@@ -444,11 +494,12 @@ RemoveWindowList(Display *disp, Window w)
         }
 	}
 
-	printf("[-] Finestra %lu rimossa (WS %d)\n", w, ws_index);
+	DEBUG_LOG("[-] Finestra %lu rimossa (WS %d)\n", w, ws_index);
 	free(found);
 
 	// Ricalcola il layout del workspace dopo la rimozione!
 	Dwindle(disp, ws_index);
+	UpdateBarIPC(disp, root);
 
 }
 
@@ -465,7 +516,7 @@ KillWindow(Display  *disp, Window root)
 	if (focused_win == None || focused_win == root)
         return;
 
-    printf("[ASH-WM] Uccido la finestra hardware: %lu\n", focused_win);
+    DEBUG_LOG("[ASH-WM] Uccido la finestra hardware: %lu\n", focused_win);
     
     // Ordiniamo a X11 di distruggere la finestra
     XDestroyWindow(disp, focused_win);
@@ -704,7 +755,7 @@ UpdateCurrentMonitor(Display *disp, Window root)
 
 	if(workspaces[active_ws].monitor_id != target_monitor)
 	{
-		printf("[ASH-WM] Sincronizzo: Il mouse ha attivato il Monitor %d (WS %d)\n", target_monitor, active_ws);
+		DEBUG_LOG("[ASH-WM] Sincronizzo: Il mouse ha attivato il Monitor %d (WS %d)\n", target_monitor, active_ws);
 		workspaces[active_ws].monitor_id = target_monitor;
 	}
 }
@@ -753,7 +804,7 @@ MoveWindowToMonitor(Display *disp, Window root)
 	int target_monitor = (current_monitor + 1) % monitors_count;
     int ws_target = monitors[target_monitor].current_ws;
 
-    printf("[ASH-WM] Sposto la finestra %lu dal Monitor %d (WS %d) al Monitor %d (WS %d)\n", 
+    DEBUG_LOG("[ASH-WM] Sposto la finestra %lu dal Monitor %d (WS %d) al Monitor %d (WS %d)\n", 
            focused_win, current_monitor, source_ws, target_monitor, ws_target);
 
     // 3. Rimuovi la finestra dal vecchio workspace (gestione lista circolare)
@@ -1022,7 +1073,7 @@ XErrorHandlerImpl(Display *disp, XErrorEvent *ee)
         (ee->request_code == 12 && ee->error_code == BadMatch) || // ConfigureWindow BadMatch
         (ee->request_code == 42 && ee->error_code == BadWindow))  // SetInputFocus BadWindow
     {
-        printf("[ASH-WM] Errore X11 intercettato e ignorato safely.\n");
+        DEBUG_LOG("[ASH-WM] Errore X11 intercettato e ignorato safely.\n");
         return 0;
     }
     
@@ -1108,7 +1159,7 @@ int main(void)
 			monitors[i].height = info[i].height;
 
 
-			printf("[ASH-WM] Salvato Monitor %d: X=%d, Y=%d, W=%d, H=%d\n", 
+			DEBUG_LOG("[ASH-WM] Salvato Monitor %d: X=%d, Y=%d, W=%d, H=%d\n", 
                i, monitors[i].x, monitors[i].y, monitors[i].width, monitors[i].height);
 		}
 		XFree(info);
@@ -1125,18 +1176,7 @@ int main(void)
 	
 
 	
-	//inizialize all 10 worksapce
-	// for(int i = 0 ; i < WORKSPACES; i++)
-	// {
-	// 	workspaces[i].id = 0;
-	// 	workspaces[i].list_Cl = NULL;
-	// 	workspaces[i].monitor_id = -1;
-	// }
-	// for(int i = 0 ; i < monitors_count; i++)
-	// {
-	// 	monitors[i].current_ws = i;
-	// 	workspaces[i].monitor_id = i;
-	// }
+
 
 	//inizialize all 20 workspaces
 	for(int i = 0 ; i < WORKSPACES; i++)
@@ -1166,7 +1206,7 @@ int main(void)
 			case MapRequest:	 
 				AddWindowList(disp, Ev.xmaprequest.window, root );
 
-				printf("[+] nuova finestra id: %lu\n", Ev.xmaprequest.window);
+				DEBUG_LOG("[+] nuova finestra id: %lu\n", Ev.xmaprequest.window);
 
 				// questo é Window w
 				FocusWindow(disp, Ev.xmaprequest.window); // focussa la window
@@ -1278,189 +1318,6 @@ int main(void)
                 } // Chiude il ciclo for
                 break; // Chiude il case KeyPress
 
-			// case KeyPress:
-			// 	clean_state = Ev.xkey.state & ~(LockMask | Mod2Mask);
-			//
-			//
-			// 	for(int i = 0 ; i < num_keys; i++)
-			// 	{
-			// 		if((Ev.xkey.keycode == XKeysymToKeycode(disp, keys[i].keysym)) 
-			// 				&& (clean_state == keys[i].mod))
-			// 		{
-			// 			// 1. Comando di sistema (se cmd non è NULL, esegui ed esci)
-			// 			if(keys[i].cmd != NULL)
-			// 			{
-			// 				if(fork() == 0)
-			// 				{
-			// 					if (disp) close(ConnectionNumber(disp)); // Buona pratica nei WM
-			// 					execvp(keys[i].cmd[0], keys[i].cmd);
-			// 					exit(0);
-			// 				}
-			// 			}
-			// 			// 2. Comandi interni del Window Manager
-			// 			else 
-			// 			{    
-			//
-			// 				switch (keys[i].action) {
-			//
-			// 					case ACTION_KILL:
-			// 						KillWindow(disp, root);
-			// 						break;
-			//
-			// 					case ACTION_MOVE_MONITOR:
-			// 						MoveWindowToMonitor(disp, root);
-			// 						break;
-			//
-			// 					case ACTION_FOCUS_NEXT:
-			// 						CycleFocus(disp, 1);
-			// 						break;
-			//
-			// 					case ACTION_FOCUS_PREV:
-			// 						CycleFocus(disp, -1);
-			// 						break;
-			//
-			// 					case ACTION_TOGGLE_FULLSCREEN:
-			// 						ToggleFullscreen(disp, root);
-			// 						break;
-			//
-			// 					case ACTION_SWAP_NEXT:
-			// 						SwapDwindleDirectional(disp, 1);
-			// 						break;
-			//
-			// 					case ACTION_SWAP_PREV:
-			// 						SwapDwindleDirectional(disp, -1);
-			// 						break;
-			//
-			// 					case ACTION_TOGGLE_FLOATING:
-			// 						XGetInputFocus(disp, &focused_win, &rev);
-			// 						if (focused_win != None) {
-			// 							Window dummy_win; int dummy_int; unsigned int dummy_mask;
-			// 							int mouse_x, mouse_y; int mon_idx = 0;
-			// 							XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
-			// 							for (int m = 0; m < monitors_count; m++) {
-			// 								if (mouse_x >= monitors[m].x && mouse_x < (monitors[m].x + monitors[m].width) &&
-			// 										mouse_y >= monitors[m].y && mouse_y < (monitors[m].y + monitors[m].height)) {
-			// 									mon_idx = m; break;
-			// 								}
-			// 							}
-			// 							int ws = monitors[mon_idx].current_ws;
-			//
-			// 							Client *curr = workspaces[ws].list_Cl;
-			// 							if (curr != NULL) {
-			// 								do {
-			// 									if (curr->id == focused_win && !curr->is_fullscreen) {
-			// 										curr->is_floating = !curr->is_floating; 
-			// 										break;
-			// 									}
-			// 									curr = curr->next;
-			// 								} while(curr != workspaces[ws].list_Cl);
-			// 							}
-			// 							Dwindle(disp, ws); 
-			// 						}
-			// 						break;
-			//
-			// 					case ACTION_WORKSPACE:
-			// 						{
-			// 							int ws_target = keys[i].arg % WORKSPACES_X_MONITOR; 
-			//
-			// 							if (keys[i].mod & WS_MODIFIER) {
-			// 								MoveToWorkspace(disp, root, ws_target);
-			// 							} else {
-			// 								ChangeWorkspace(disp, root, ws_target);
-			// 							}
-			// 						}
-			// 						break;
-			//
-			// 					default:
-			// 						break;
-			//
-			// 				}
-			// 	break;
-
-							// if(keys[i].arg == -1) 
-							// {
-							// 	KillWindow(disp, root);
-							// }
-							//
-							// else if (keys[i].arg == -2) 
-							// { 
-							// 	MoveWindowToMonitor(disp, root);
-							// }
-							//
-							// else if (keys[i].arg == -3) // Focus del prossimo client (J)
-							// {
-							// 	CycleFocus(disp, 1);
-							// }
-							//
-							// else if (keys[i].arg == -4) // Focus del client precedente (K)
-							// {
-							// 	CycleFocus(disp, -1);
-							// }
-							//
-							// else if (keys[i].arg == -5) // Focus del client precedente (K)
-							// {
-							// 	ToggleFullscreen(disp, root);
-							// }
-							//
-							// else if (keys[i].arg == -6) // Focus del client precedente (K)
-							// {
-							// 	SwapDwindleDirectional(disp, 1);
-							// }
-							//
-							// else if (keys[i].arg == -7) // Focus del client precedente (K)
-							// {
-							// 	SwapDwindleDirectional(disp, -1);
-							// }
-							//
-							// else if (keys[i].arg == -8) // TOGGLE FLOATING (Mod + Spazio)
-							// {
-							// 	Window focused_win; int rev;
-							// 	XGetInputFocus(disp, &focused_win, &rev);
-							// 	if (focused_win != None) {
-							// 		Window dummy_win; int dummy_int; unsigned int dummy_mask;
-							// 		int mouse_x, mouse_y; int mon_idx = 0;
-							// 		XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
-							// 		for (int m = 0; m < monitors_count; m++) {
-							// 			if (mouse_x >= monitors[m].x && mouse_x < (monitors[m].x + monitors[m].width) &&
-							// 					mouse_y >= monitors[m].y && mouse_y < (monitors[m].y + monitors[m].height)) {
-							// 				mon_idx = m; break;
-							// 			}
-							// 		}
-							// 		int ws = monitors[mon_idx].current_ws;
-							//
-							// 		Client *curr = workspaces[ws].list_Cl;
-							// 		if (curr != NULL) {
-							// 			do {
-							// 				if (curr->id == focused_win && !curr->is_fullscreen) {
-							// 					curr->is_floating = !curr->is_floating; 
-							// 					break;
-							// 				}
-							// 				curr = curr->next;
-							// 			} while(curr != workspaces[ws].list_Cl);
-							// 		}
-							// 		Dwindle(disp, ws); 
-							// 	}
-							// }
-
-
-
-				// 			else 
-				// 			{
-				// 				int ws_target = keys[i].arg % WORKSPACES_X_MONITOR; 
-				//
-				// 				if(keys[i].mod & WS_MODIFIER)
-				// 				{
-				// 					MoveToWorkspace(disp, root, ws_target);
-				// 				}
-				// 				else
-				// 				{
-				// 					ChangeWorkspace(disp, root, ws_target);
-				// 				}
-				// 			}
-				// 		}
-				// 		break; 
-				// 	}
-				// }
 
 
 			case ButtonPress:
@@ -1589,7 +1446,7 @@ int main(void)
 
 								// Aggiorna il layout del nuovo workspace
 								Dwindle(disp, active_ws_target);
-								printf("[ASH-WM] Spostata finestra %lu nel Monitor %d (Workspace %d)\n", 
+								DEBUG_LOG("[ASH-WM] Spostata finestra %lu nel Monitor %d (Workspace %d)\n", 
 										c_to_move->id, target_monitor, active_ws_target);
 							}
 						}
@@ -1661,7 +1518,7 @@ int main(void)
 				XWindowAttributes wa;
 				XGetWindowAttributes(disp, Ev.xcrossing.window, &wa);
 				if (wa.map_state == IsViewable) {
-					printf("[ASH-WM] Il mouse è entrato nella finestra %lu. Cambio focus.\n", Ev.xcrossing.window);
+					DEBUG_LOG("[ASH-WM] Il mouse è entrato nella finestra %lu. Cambio focus.\n", Ev.xcrossing.window);
 					FocusWindow(disp, Ev.xcrossing.window);
 				}
 				break;
@@ -1685,7 +1542,7 @@ int main(void)
 				break;
 
 			case DestroyNotify:	 // questo é Window w
-				RemoveWindowList(disp ,Ev.xdestroywindow.window);
+				RemoveWindowList(disp ,Ev.xdestroywindow.window, root);
 				break;
 
 
