@@ -16,6 +16,7 @@
 
 #include <X11/extensions/Xinerama.h>
 #include <X11/Xcursor/Xcursor.h>
+#include <X11/Xatom.h>
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -33,6 +34,11 @@
 #define WORKSPACES (WORKSPACES_X_MONITOR * N_MONITORS)
 
 
+//for bar positioning
+typedef struct {
+    unsigned long left, right, top, bottom;
+} Strut;
+
 
 // strcut to define monitors,
 typedef struct {
@@ -41,7 +47,6 @@ typedef struct {
 	int width,height;
 	int current_ws;
 } Monitors ;
-
 
 
 
@@ -124,6 +129,66 @@ UpdateBarIPC(Display *disp, Window root)
     XFlush(disp);
 }
 
+//EWMH
+Strut GetWindowStrut(Display *disp, Window w) {
+    Strut s = {0, 0, 0, 0};
+    Atom actual_type;
+    int actual_format;
+    unsigned long nitems, bytes_after;
+    unsigned char *data = NULL;
+
+	//try with new standard
+    Atom prop = XInternAtom(disp, "_NET_WM_STRUT_PARTIAL", True);
+    if (prop == None) {
+        prop = XInternAtom(disp, "_NET_WM_STRUT", True);
+    }
+
+    if (prop != None) {
+		//ask x for the bar props
+        if (XGetWindowProperty(disp, w, prop, 0, 4, False, XA_CARDINAL,
+                               &actual_type, &actual_format, &nitems, &bytes_after,
+                               &data) == Success && data != NULL) {
+            
+            if (nitems >= 4) {
+                unsigned long *values = (unsigned long *)data;
+                s.left   = values[0];
+                s.right  = values[1];
+                s.top    = values[2];
+                s.bottom = values[3];
+            }
+            XFree(data);
+        }
+    }
+    return s;
+}
+
+int 
+IsDock(Display *disp, Window w) {
+    Atom actual_type;
+    int actual_format;
+    unsigned long nitems, bytes_after;
+    unsigned char *prop = NULL;
+    int is_dock = 0;
+
+    Atom net_wm_window_type = XInternAtom(disp, "_NET_WM_WINDOW_TYPE", False);
+    Atom net_wm_window_type_dock = XInternAtom(disp, "_NET_WM_WINDOW_TYPE_DOCK", False);
+
+    if (XGetWindowProperty(disp, w, net_wm_window_type, 0, 32, False, XA_ATOM,
+                           &actual_type, &actual_format, &nitems, &bytes_after, &prop) == Success) {
+        if (prop) {
+            Atom *atoms = (Atom *)prop;
+            for (unsigned long i = 0; i < nitems; i++) {
+                if (atoms[i] == net_wm_window_type_dock) {
+                    is_dock = 1;
+                    break;
+                }
+            }
+            XFree(prop);
+        }
+    }
+    return is_dock;
+}
+
 //-----------------------------//
 
 
@@ -184,6 +249,8 @@ FocusWindow(Display *disp, Window w) {
     XFlush(disp);
 }
 
+
+
 /*
  * add a new window to the list 
  * from the Ev Ev.xmaprequest.window
@@ -191,6 +258,17 @@ FocusWindow(Display *disp, Window w) {
 void 
 AddWindowList(Display *disp, Window w, Window root)
 {
+
+	XWindowAttributes wa;
+    XGetWindowAttributes(disp, w, &wa);
+
+	// see if window is made for bypass the wm
+	if (wa.override_redirect || IsDock(disp, w)) {
+		XSelectInput(disp, w, StructureNotifyMask);
+		XMapWindow(disp, w); // Mappa la barra ma NON inserirla nella lista di tiling!
+		return;
+	}
+
 	Client *new_window = calloc(1, sizeof(Client));
 	if (new_window == NULL)
 		return;
@@ -220,7 +298,7 @@ AddWindowList(Display *disp, Window w, Window root)
 	int active_ws = monitors[target_monitor].current_ws;
 
 
-	DEBUG_LOG("[ASH-WM] Finestra %lu spawnata sul Monitor %d -> Salvata nel Workspace %d\n", 
+	DEBUG_LOG("[ASH-WM] window %lu spowned on Monitor %d -> saved in Workspace %d\n", 
            w, target_monitor, active_ws);
 
 	
@@ -258,6 +336,8 @@ AddWindowList(Display *disp, Window w, Window root)
 	Dwindle(disp, active_ws);
 	UpdateBarIPC(disp, root);
 }
+
+
 
 void
 ChangeWorkspace(Display *disp, Window root, int target_local_id) 
@@ -413,6 +493,8 @@ MoveToWorkspace(Display *disp, Window root, int target_local_id) {
 	UpdateBarIPC(disp, root);
 }
 
+
+
 void 
 RemoveWindowList(Display *disp, Window w, Window root)
 {
@@ -465,13 +547,15 @@ RemoveWindowList(Display *disp, Window w, Window root)
         }
 	}
 
-	DEBUG_LOG("[-] Finestra %lu rimossa (WS %d)\n", w, ws_index);
+	DEBUG_LOG("[-] window %lu removed (WS %d)\n", w, ws_index);
 	free(found);
 
 	Dwindle(disp, ws_index);
 	UpdateBarIPC(disp, root);
 
 }
+
+
 
 void
 KillWindow(Display  *disp, Window root)
@@ -489,6 +573,7 @@ KillWindow(Display  *disp, Window root)
     
     XDestroyWindow(disp, focused_win);
 }
+
 
 
 //layout func
@@ -548,13 +633,41 @@ Dwindle(Display *disp, int ws_index)
         return; 
     }
 
+    int my = monitors[mod_index].y ;
+    int mh = monitors[mod_index].height ;
     int mx = monitors[mod_index].x;
-    int my = monitors[mod_index].y;
     int mw = monitors[mod_index].width;
-    int mh = monitors[mod_index].height;
 
-    const unsigned int MIN_WIDTH = 60;
-    const unsigned int MIN_HEIGHT = 60;
+	unsigned long pad_top = 0;
+    unsigned long pad_bottom = 0;
+    unsigned long pad_left = 0;
+    unsigned long pad_right = 0;
+
+    const unsigned int MIN_WIDTH = 30;
+    const unsigned int MIN_HEIGHT = 30;
+
+	Window root_return, parent_return, *children;
+    unsigned int nchildren;
+
+	if (XQueryTree(disp, DefaultRootWindow(disp), &root_return, &parent_return, &children, &nchildren)) {
+        for (unsigned int i = 0; i < nchildren; i++) {
+			//read if w require space 
+            Strut s = GetWindowStrut(disp, children[i]);
+            
+            if (s.top > pad_top)       pad_top = s.top;
+            if (s.bottom > pad_bottom) pad_bottom = s.bottom;
+            if (s.left > pad_left)     pad_left = s.left;
+            if (s.right > pad_right)   pad_right = s.right;
+        }
+        if (children) XFree(children);
+    }
+
+	mx += pad_left;
+    mw -= (pad_left + pad_right);
+    my += pad_top;
+    mh -= (pad_top + pad_bottom);
+
+
 
 	// all floatig window
     if (count_ws == 0) {
@@ -569,7 +682,7 @@ Dwindle(Display *disp, int ws_index)
         return;
     }
 
-	//1 window in tl
+	// window in tl
     if(count_ws == 1)
     {
         cursor = head;
@@ -596,7 +709,7 @@ Dwindle(Display *disp, int ws_index)
                 XSetWindowBorderWidth(disp, cursor->id, BORDER_WIDTH);
                 XMoveResizeWindow(disp, cursor->id, cursor->x, cursor->y, cursor->w, cursor->h);
                 XMapWindow(disp, cursor->id);
-                XRaiseWindow(disp, cursor->id); // Forza in cima
+                XRaiseWindow(disp, cursor->id); 
             }
             cursor = cursor->next;
         } while(cursor != head);
@@ -797,6 +910,8 @@ MoveWindowToMonitor(Display *disp, Window root)
     XSync(disp, False);
 }
 
+
+
 unsigned long 
 GetXColor(Display *disp, unsigned long hex_color)
 {
@@ -808,6 +923,7 @@ GetXColor(Display *disp, unsigned long hex_color)
     XAllocColor(disp, DefaultColormap(disp, DefaultScreen(disp)), &col);
     return col.pixel;
 }
+
 
 
 void 
@@ -858,6 +974,8 @@ CycleFocus(Display *disp, int direction) {
 		RaiseFloatingWindows(disp, ws);
     }
 }
+
+
 
 void 
 ToggleFullscreen(Display *disp, Window root) {
@@ -922,6 +1040,7 @@ ToggleFullscreen(Display *disp, Window root) {
 }
 
 
+
 void 
 SwapDwindleDirectional(Display *disp, int direction) { 
     Window focused_win;
@@ -976,9 +1095,6 @@ SwapDwindleDirectional(Display *disp, int direction) {
 
 
 
-
-
-
 void
 RaiseFloatingWindows(Display *disp, int ws_index)
 {
@@ -998,7 +1114,6 @@ RaiseFloatingWindows(Display *disp, int ws_index)
 
 
 
-
 int
 XErrorHandlerImpl(Display *disp, XErrorEvent *ee)
 {
@@ -1014,6 +1129,11 @@ XErrorHandlerImpl(Display *disp, XErrorEvent *ee)
     fprintf(stderr, "[ASH-WM] Error fatal X11: major %d, error %d\n", ee->request_code, ee->error_code);
     return 0; 
 }
+
+
+
+
+
 
 int main(int argc, char *argv[])
 {

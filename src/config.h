@@ -48,7 +48,7 @@ typedef struct {
 
 
 
-#define GAPS 5
+#define GAPS 6
 
 
 
