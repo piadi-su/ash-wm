@@ -15,6 +15,7 @@
 #include <X11/XKBlib.h>
 
 #include <X11/extensions/Xinerama.h>
+#include <X11/Xcursor/Xcursor.h>
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -1054,6 +1055,14 @@ int main(int argc, char *argv[])
 
 	//create root window/desktop
 	Window root = RootWindow(disp, sc);
+
+	//for the cursor 
+	Cursor cursor = XcursorLibraryLoadCursor(disp, "left_ptr");
+
+    if (cursor != None)
+        XDefineCursor(disp, root, cursor);
+
+    XFlush(disp);
 
 
 	//add to the wait

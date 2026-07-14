@@ -8,7 +8,7 @@ OBJS = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 
 CC = gcc
 CFLAGS = -Wall -Wextra -O2 -std=gnu99 -I$(SRC_DIR)
-LDFLAGS = -lX11 -lXinerama
+LDFLAGS = -lX11 -lXinerama -lXcursor
 
 DEBUG_FLAGS = -g -DDEBUG -O0
 

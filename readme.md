@@ -16,6 +16,7 @@ It follows its philosophy: to configure or change something, you edit the source
 ```txt
 - libx11
 - libxrender
+- libxcursor
 ```
 
 ## Features

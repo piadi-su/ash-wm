@@ -16,6 +16,7 @@ target_compile_options(ashwm PRIVATE
 target_link_libraries(ashwm PRIVATE
     X11
 	Xinerama
+	Xcursor
 )
 
 install(TARGETS ashwm
