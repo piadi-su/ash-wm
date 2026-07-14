@@ -1,16 +1,16 @@
 ```
-           _                                   
-          | |                                  
-  __ _ ___| |__    ______  __      ___ __ ___  
- / _` / __| '_ \  |______| \ \ /\ / / '_ ` _ \ 
-| (_| \__ \ | | |           \ V  V /| | | | | |
- \__,_|___/_| |_|            \_/\_/ |_| |_| |_|
-                                               
+              .__                                
+_____    _____|  |__             __  _  _______  
+\__  \  /  ___/  |  \    ______  \ \/ \/ /     \ 
+ / __ \_\___ \|   Y  \  /_____/   \     /  Y Y  \
+(____  /____  >___|  /             \/\_/|__|_|  /
+     \/     \/     \/                         \/  
 
 ```
 
-ash-wm is a suckless x11 window manger inspiered by dwm,
-it follow is filosofy of compile every time you change something.
+**ash-wm** is a suckless X11 window manager inspired by `dwm`.
+It follows its philosophy: to configure or change something, you edit the source and compile it.
+
 
 ## dependencies
 ```txt
@@ -20,14 +20,13 @@ it follow is filosofy of compile every time you change something.
 
 ## Features
 
-- ash-wm use Dwindle as the main layout
+- ash-wm use Dwindle as it's main tyling layout
 - it commpact with is ~1600
 - uses just ~4mb of ram 
 
 
 ## config
-for configuring ash-wm you are going to use the
-config.h header file
+To configure keys, commands, and behavior, edit the config.h header file before compiling.
 
 
 ## installation
