@@ -13,8 +13,8 @@ typedef struct {
 	int arg;
 }KeyBinds;
 
-// #define MODIFIER Mod4Mask
-#define MODIFIER Mod1Mask
+#define MODIFIER Mod4Mask
+// #define MODIFIER Mod1Mask
 #define WS_MODIFIER ShiftMask
 
 //macro per genereare i workaspce nel chill
@@ -69,6 +69,9 @@ static KeyBinds keys[] = {
     {MODIFIER|ShiftMask,    XK_k,      NULL,      -7}, // Swap in ALTO    (Vim Up)
 
 	{MODIFIER|ShiftMask,    XK_space,  NULL,      -8}, // Mod + Spazio = Toggle Floating/Tiling
+	
+	// in future
+	// { MODIFIER, XK_r, NULL, -9 },// Esempio da aggiungere alla tua struct keys[]:
 
 	//bind per tutti i workspace
 	WORKSPACE_KEYS(XK_1, 0),

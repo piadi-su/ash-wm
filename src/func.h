@@ -26,6 +26,8 @@ void CycleFocus(Display *disp, int direction);
 void FocusWindow(Display *disp, Window w);
 void ToggleFullscreen(Display *disp, Window root);
 void SwapDwindleDirectional(Display *disp, int direction);
+void ResizeFocusedWindow(Display *disp, Window root, int direction);
+void RaiseFloatingWindows(Display *disp, int ws_index);
 int XErrorHandlerImpl(Display *disp, XErrorEvent *ee);
 
 #endif
