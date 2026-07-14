@@ -9,6 +9,7 @@
 #include <X11/XKBlib.h>
 #include <X11/extensions/Xinerama.h>
 
+#define VERSION 1
 
 //for debug purpuse
 #ifdef DEBUG

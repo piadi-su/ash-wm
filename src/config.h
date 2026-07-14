@@ -5,8 +5,7 @@
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 
-// struct che definisce i KeyBinds
-// Definiamo i tipi di comandi interni del WM
+// command wnum
 typedef enum {
     ACTION_NONE = 0,
     ACTION_KILL,
@@ -24,47 +23,58 @@ typedef struct {
     unsigned int mod;
     KeySym keysym;
     char **cmd;
-    WMAction action; // Sostituisce la logica confusa di arg
-    int arg;         // Usato SOLO quando serve un valore numerico (es. l'ID del workspace)
+    WMAction action; 
+    int arg;         
 } KeyBinds;
 
-#define MODIFIER Mod4Mask
-// #define MODIFIER Mod1Mask
-
-#define WS_MODIFIER ShiftMask
-
-//macro per genereare i workaspce nel chill
-
+//macro to define workspace
 #define WORKSPACE_KEYS(KEY, WS_INDEX) \
     { MODIFIER,             KEY, NULL, ACTION_WORKSPACE, WS_INDEX }, \
     { MODIFIER|WS_MODIFIER,   KEY, NULL, ACTION_WORKSPACE, WS_INDEX }
 
 
-//----------------------//
+
+//MOD key
+#define MODIFIER Mod4Mask //win
+// #define MODIFIER Mod1Mask //alt
+
+
+
+#define WS_MODIFIER ShiftMask
+
+
 
 #define N_MONITORS 2
 
+
+
 #define GAPS 5
+
+
 
 #define BORDER_WIDTH 2
 // #define COLOR_FOCUS   0x5294E2      
+
+
 #define COLOR_FOCUS   0xff0000
 #define COLOR_UNFOCUS 0x000000
 
 
 
 
-//tutti i conandi
+//ALL COMMANDS
 static char *term_cmd[] = {"alacritty", NULL};
-static char *clock_cmd[] = {"xclock", NULL};
-// static char *firefox_cmd[] = {"firefox", NULL};
+static char *firefox_cmd[] = {"firefox", NULL};
+static char *files_cmd[] = {"thunar", NULL};
 static char *rofi_cmd[] = {"rofi", "-show", "drun", NULL};
 
 
 static KeyBinds keys[] = {
-    // Modificatore | Tasto | Comando Esterno | Azione WM | Argomento (se serve)
+    // MOD | KEY | CMD | WM ACTION | ARGS (if needed)
+	
     {MODIFIER, XK_Return, term_cmd,  ACTION_NONE,              0},
-    {MODIFIER, XK_o,      clock_cmd, ACTION_NONE,              0},
+    {MODIFIER, XK_o,      firefox_cmd, ACTION_NONE,            0},
+    {MODIFIER, XK_g,      files_cmd, ACTION_NONE,            0},
     {MODIFIER, XK_d,      rofi_cmd,  ACTION_NONE,              0},
 
     {MODIFIER,            XK_q,      NULL, ACTION_KILL,              0},
@@ -76,7 +86,7 @@ static KeyBinds keys[] = {
     {MODIFIER|ShiftMask,  XK_k,      NULL, ACTION_SWAP_PREV,         0},
     {MODIFIER|ShiftMask,  XK_space,  NULL, ACTION_TOGGLE_FLOATING,   0},
 
-    // Workspacebinds generati dalla macro
+    // Workspacebinds from macro
     WORKSPACE_KEYS(XK_1, 0),
     WORKSPACE_KEYS(XK_2, 1),
     WORKSPACE_KEYS(XK_3, 2),
@@ -89,9 +99,9 @@ static KeyBinds keys[] = {
     WORKSPACE_KEYS(XK_0, 9),
 };
 
-//----------------------//
 
-// calcola il numero totale
+
+
 static const int num_keys = sizeof(keys) / sizeof(keys[0]);
 
 

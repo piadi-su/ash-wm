@@ -24,17 +24,16 @@
 #include <stdio.h>
 
 
-//miei file
+//my files
 #include "config.h"
 #include  "func.h"
 
-//miei define
 #define WORKSPACES_X_MONITOR 10
 #define WORKSPACES (WORKSPACES_X_MONITOR * N_MONITORS)
 
 
 
-// strcut per definere monitors,
+// strcut to define monitors,
 typedef struct {
 	int id;
 	int x,y;
@@ -45,21 +44,19 @@ typedef struct {
 
 
 
-//strcut per client/finestre
+//strcut for client
 typedef struct Client {
 	Window id;
 	int monitor_id;
 
-    int is_floating;   // 1 se la muovi col mouse, 0 se segue il tiling
-    int is_fullscreen; // 1 se è a tutto schermo
+    int is_floating;   // 1 mouse, 0 tiling
+    int is_fullscreen; // 1 if full screen
 
 
     int x, y; 
 	unsigned int w, h; 
 	
 
-	// Geometria di backup (Fullscreen / Floating)
-    // Per salvare le dimensioni originali quando la stacchi in floating o fullscreen
     int old_x, old_y; 
     unsigned int old_w, old_h;
 
@@ -70,7 +67,7 @@ typedef struct Client {
 
 
 
-//struct per workspace
+//struct for workspace
 typedef struct{
 	int id;
 	int monitor_id;
@@ -81,19 +78,17 @@ Monitors monitors[N_MONITORS];
 int monitors_count = {0};
 Workspace workspaces[WORKSPACES];
 
-//workspace ipc
-//-----------------------------//
 
+
+//-----------------------------//
 
 //workspace ipc
 void
 UpdateBarIPC(Display *disp, Window root)
 {
-    // Creiamo una stringa che rappresenta lo stato, es: "1:A 2:I 3:E" 
-    // (A = Attivo, I = Inattivo ma occupato, E = Vuoto)
     char status[128] = "";
     
-    // Trova il monitor attivo (puoi usare la logica del mouse come fai già)
+	// find acrive monitor
     Window dummy_win; int dummy_int; unsigned int dummy_mask;
     int mouse_x, mouse_y; int mon_idx = 0;
     XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
@@ -107,12 +102,11 @@ UpdateBarIPC(Display *disp, Window root)
 
     for (int i = 0; i < WORKSPACES_X_MONITOR; i++) {
         int real_ws = (mon_idx * WORKSPACES_X_MONITOR) + i;
-        char ws_status = 'E'; // Empty (Vuoto)
-        
+        char ws_status = 'E'; // Empty         
         if (real_ws == active_ws) {
-            ws_status = 'A'; // Active (Attivo corrente)
+            ws_status = 'A'; // Active 
         } else if (workspaces[real_ws].list_Cl != NULL) {
-            ws_status = 'O'; // Occupied (Occupato da finestre)
+            ws_status = 'O'; // Occupied 
         }
         
         char buf[16];
@@ -120,10 +114,10 @@ UpdateBarIPC(Display *disp, Window root)
         strcat(status, buf);
     }
 
-    // Creiamo un ATOM custom su X11 per la nostra proprietà
+	// creating the atom
     Atom prop = XInternAtom(disp, "_ASHWM_WORKSPACES", False);
     
-    // Scriviamo la stringa sulla Root Window
+	//wirite string to the root window
     XChangeProperty(disp, root, prop, XA_STRING, 8, PropModeReplace, 
                     (unsigned char *)status, strlen(status));
     XFlush(disp);
@@ -134,25 +128,22 @@ UpdateBarIPC(Display *disp, Window root)
 
 
 //func to change worksapce focus
-// Funzione corretta per gestire il focus e aggiornare i bordi
 void 
 FocusWindow(Display *disp, Window w) {
     if (w == None) return;
 
-    // Controllo di sicurezza: la finestra è davvero visibile a schermo in questo millisecondo?
     XWindowAttributes attrs;
     if (XGetWindowAttributes(disp, w, &attrs)) {
         if (attrs.map_state != IsViewable) {
-            // Se non è visibile, non chiamiamo XSetInputFocus o X11 crasherà con BadMatch
             return; 
         }
     }
 
-    // 1. Assegna il focus reale di X11 in sicurezza
+    // assing focus
     XSetInputFocus(disp, w, RevertToParent, CurrentTime);
-    XRaiseWindow(disp, w); // Porta su la finestra attiva (anche se è in tiling)
+    XRaiseWindow(disp, w); 
 
-    // 2. Trova in quale workspace si trova la finestra
+	//find window workspace
     int target_ws = -1;
     Client *found = NULL;
 
@@ -173,10 +164,9 @@ FocusWindow(Display *disp, Window w) {
 
     if (target_ws == -1 || found == NULL) return;
 
-    // 3. AGGIUNTA CRITICA: Ora che la tiling è sopra, rimetti IMMEDIATAMENTE le floating sopra di essa
     RaiseFloatingWindows(disp, target_ws);
 
-    // 4. Aggiorna visivamente i bordi
+	//update bords
     Client *curr = workspaces[target_ws].list_Cl;
     if (curr == NULL) return;
 
@@ -200,28 +190,24 @@ FocusWindow(Display *disp, Window w) {
 void 
 AddWindowList(Display *disp, Window w, Window root)
 {
-	//creo nuovo client e tolgo il garbage
 	Client *new_window = calloc(1, sizeof(Client));
 	if (new_window == NULL)
 		return;
 	
-	//aggiungimo la window nel id della strct 
+	//add window id to struct
 	new_window->id = w;
 	new_window->monitor_id = 0;
 	
 	
-	//le usiamo per capire dove sta il mouse sullo schemro
 	Window dummy_win;
     int dummy_int;
     unsigned int dummy_mask;
     int mouse_x, mouse_y;
-	int target_monitor = 0; //def monitor = 0
+	int target_monitor = 0; 
 
-	//chiediamo a x11 le cordinate del cursore
 	XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
 
 
-	//trova la postizione del mouse e ritorna il numero del monitor dov'e sta tipo 0 1 2 3
 	for (int i = 0; i < monitors_count; i++) {
         if (mouse_x >= monitors[i].x && mouse_x < (monitors[i].x + monitors[i].width) &&
             mouse_y >= monitors[i].y && mouse_y < (monitors[i].y + monitors[i].height)) {
@@ -230,7 +216,6 @@ AddWindowList(Display *disp, Window w, Window root)
         }
     }
 	
-	//controlla quale worksapce é aperto ora su quel monitor
 	int active_ws = monitors[target_monitor].current_ws;
 
 
@@ -251,7 +236,7 @@ AddWindowList(Display *disp, Window w, Window root)
 	
 	XSelectInput(disp, w, EnterWindowMask | PropertyChangeMask);
 
-	//se non sta un cazzo prendiamo la finestra e la mettiamo nella lista e come prev é next a sole lei
+	// window as prev and next 
 	if (workspaces[active_ws].list_Cl == NULL) {
 		workspaces[active_ws].list_Cl = new_window;
 		workspaces[active_ws].list_Cl->next = workspaces[active_ws].list_Cl;
@@ -259,7 +244,7 @@ AddWindowList(Display *disp, Window w, Window root)
 
 	}
 
-	// se ce ne stanno altre di finestre le concateniamo a cerchio
+	// circle ds
 	else {
 		Client *head = workspaces[active_ws].list_Cl;
 		new_window->next = head;
@@ -273,9 +258,8 @@ AddWindowList(Display *disp, Window w, Window root)
 	UpdateBarIPC(disp, root);
 }
 
-//cambia il worksapce che vediamo
 void
-ChangeWorkspace(Display *disp, Window root, int target_local_id) // riceve l'indice del tasto (0-9)
+ChangeWorkspace(Display *disp, Window root, int target_local_id) 
 {
     Window dummy_win;
     int dummy_int;
@@ -283,7 +267,6 @@ ChangeWorkspace(Display *disp, Window root, int target_local_id) // riceve l'ind
     int mouse_x, mouse_y;
     int mon_idx = 0;
 
-    // Trova il monitor in cui si trova il mouse
     XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
 
     for (int i = 0; i < monitors_count; i++) {
@@ -296,22 +279,22 @@ ChangeWorkspace(Display *disp, Window root, int target_local_id) // riceve l'ind
 
     int old_ws = monitors[mon_idx].current_ws;
     
-    // Calcola il workspace REALE del monitor corrente (0-9 per mon 0, 10-19 per mon 1)
+	// calcolate worksapce es 0-9, 10-19
     int new_ws = (mon_idx * WORKSPACES_X_MONITOR) + (target_local_id % WORKSPACES_X_MONITOR);
 
     if(old_ws == new_ws)
         return;
 
-    DEBUG_LOG("[ASH-WM] Monitor %d cambia da WS %d a WS %d\n", mon_idx, old_ws, new_ws);
+    DEBUG_LOG("[ASH-WM] Monitor %d mv form WS %d to WS %d\n", mon_idx, old_ws, new_ws);
 
-    // Nascondi le finestre del vecchio workspace
+	//hide old worksapce window
     workspaces[old_ws].monitor_id = -1; 
 	Dwindle(disp, old_ws);
-    // Attiva il nuovo workspace sul monitor corrente
+	//activate new worksapce
     monitors[mon_idx].current_ws = new_ws;
     workspaces[new_ws].monitor_id = mon_idx;
 
-    // Mostra le finestre del nuovo workspace
+    // show window in the new workspace
 	Dwindle(disp, new_ws);
 
 	if(workspaces[new_ws].list_Cl != NULL) {
@@ -326,7 +309,7 @@ ChangeWorkspace(Display *disp, Window root, int target_local_id) // riceve l'ind
 
 
 
-//func per muove una window ad un workspace (anche cross-monitor)
+//move to worksapce
 void 
 MoveToWorkspace(Display *disp, Window root, int target_local_id) {
     Window focused_win;
@@ -359,7 +342,6 @@ MoveToWorkspace(Display *disp, Window root, int target_local_id) {
 
 
 	
-	// Chiedi a X11 dove si trova il mouse per capire su quale monitor vuoi mandare la finestra
     Window dummy_win;
     int dummy_int;
     unsigned int dummy_mask;
@@ -376,13 +358,11 @@ MoveToWorkspace(Display *disp, Window root, int target_local_id) {
         }
     }
 
-    // Calcola il workspace di destinazione corretto in base al monitor del mouse
     int ws_target = (target_monitor * WORKSPACES_X_MONITOR) + (target_local_id % WORKSPACES_X_MONITOR);
     if(source_ws == ws_target) return;
 
-    DEBUG_LOG("[ASH-WM] Sposto la finestra %lu dal WS %d al WS %d (Monitor %d)\n", focused_win, source_ws, ws_target, target_monitor);
+    DEBUG_LOG("[ASH-WM] mv window %lu from WS %d to WS %d (Monitor %d)\n", focused_win, source_ws, ws_target, target_monitor);
 
-    // 2. Rimuovi dal vecchio workspace
     if(found->next == found) {
         workspaces[source_ws].list_Cl = NULL;
     } else {
@@ -393,16 +373,12 @@ MoveToWorkspace(Display *disp, Window root, int target_local_id) {
         }
     }
 
-    // 3. AGGIORNAMENTO GEOMETRICO CRITICO: Sposta la finestra nel nuovo monitor fisicamente
-    // Spostiamo le coordinate logiche della struct dentro i confini del nuovo monitor
     found->x = monitors[target_monitor].x + GAPS;
     found->y = monitors[target_monitor].y + GAPS;
-    // Spiazziamo momentaneamente la finestra su X11 per evitare sovrapposizioni errate
     XMoveWindow(disp, focused_win, found->x, found->y);
 
 
 
-    // 5. Inserisci nel nuovo workspace
     if(workspaces[ws_target].list_Cl == NULL) {
         workspaces[ws_target].list_Cl = found;
         found->next = found;
@@ -417,14 +393,11 @@ MoveToWorkspace(Display *disp, Window root, int target_local_id) {
         head->prev = found;
     }
 
-    // 6. Ricalcola i layout prima di dare i focus
 	Dwindle(disp, ws_target);
 	Dwindle(disp, source_ws);
 
-    // Forza X11 ad applicare le modifiche geometriche e le mappature ADESSO
     XSync(disp, False);
 
-    // 7. Gestione Focus Protetta
     if(workspaces[ws_target].monitor_id != -1) {
         FocusWindow(disp, found->id);
     } else {
@@ -439,14 +412,12 @@ MoveToWorkspace(Display *disp, Window root, int target_local_id) {
 	UpdateBarIPC(disp, root);
 }
 
-// server praticamente per freeare la memory quando una finestra o crusha o code simili
 void 
 RemoveWindowList(Display *disp, Window w, Window root)
 {
 	Client *found = NULL;
 	int ws_index = -1;
 	
-	//cerca in quale worksapce sta la finestra
 	for(int i = 0; i < WORKSPACES; i++)
 	{
 		Client *cursor = workspaces[i].list_Cl;
@@ -472,7 +443,6 @@ RemoveWindowList(Display *disp, Window w, Window root)
 
 	}
 
-	//se non sta la finestra esci
 	if(found == NULL)
 		return;
 
@@ -497,13 +467,11 @@ RemoveWindowList(Display *disp, Window w, Window root)
 	DEBUG_LOG("[-] Finestra %lu rimossa (WS %d)\n", w, ws_index);
 	free(found);
 
-	// Ricalcola il layout del workspace dopo la rimozione!
 	Dwindle(disp, ws_index);
 	UpdateBarIPC(disp, root);
 
 }
 
-// kill di window alla mod + q
 void
 KillWindow(Display  *disp, Window root)
 {
@@ -518,13 +486,11 @@ KillWindow(Display  *disp, Window root)
 
     DEBUG_LOG("[ASH-WM] Uccido la finestra hardware: %lu\n", focused_win);
     
-    // Ordiniamo a X11 di distruggere la finestra
     XDestroyWindow(disp, focused_win);
 }
 
 
-//func per layout dwindle autotyling
-//func per layout dwindle autotyling
+//layout func
 void
 Dwindle(Display *disp, int ws_index)
 {
@@ -589,9 +555,7 @@ Dwindle(Display *disp, int ws_index)
     const unsigned int MIN_WIDTH = 60;
     const unsigned int MIN_HEIGHT = 60;
 
-    // =========================================================================
-    // CASO A: 0 finestre in tiling (ci sono solo floating)
-    // =========================================================================
+	// all floatig window
     if (count_ws == 0) {
         cursor = head;
         do {
@@ -604,9 +568,7 @@ Dwindle(Display *disp, int ws_index)
         return;
     }
 
-    // =========================================================================
-    // CASO B: Esattamente 1 finestra in tiling (le altre sono floating)
-    // =========================================================================
+	//1 window in tl
     if(count_ws == 1)
     {
         cursor = head;
@@ -615,7 +577,6 @@ Dwindle(Display *disp, int ws_index)
                 int target_w = mw - (GAPS * 2);
                 int target_h = mh - (GAPS * 2);
 
-                // CORRETTO: Modifichiamo il 'cursor' corrente, NON l'head globale!
                 cursor->x = mx + GAPS;
                 cursor->y = my + GAPS;
                 cursor->w = target_w < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)target_w;
@@ -628,7 +589,6 @@ Dwindle(Display *disp, int ws_index)
             cursor = cursor->next;
         } while(cursor != head);
 
-        // Disegna le floating SOPRA la finestra in tiling
         cursor = head;
         do {
             if(cursor->is_floating) {
@@ -642,9 +602,7 @@ Dwindle(Display *disp, int ws_index)
         return;
     }
 
-    // =========================================================================
-    // CASO C: Più finestre in tiling
-    // =========================================================================
+	//more wm in tl
     cursor = head;
     int wx = mx;
     int wy = my;
@@ -652,7 +610,6 @@ Dwindle(Display *disp, int ws_index)
     int wh = mh;
     int tiling_idx = 0;
 
-    // Primo passaggio: renderizza SOLO le finestre in tiling
     do {
         if (cursor->is_floating) {
             cursor = cursor->next;
@@ -713,14 +670,13 @@ Dwindle(Display *disp, int ws_index)
         cursor = cursor->next;
     } while(cursor != head);
 
-    // Secondo passaggio: Gestione e rendering finale delle Floating (SOPRA il tiling)
     cursor = head;
     do {
         if (cursor->is_floating) {
             XSetWindowBorderWidth(disp, cursor->id, BORDER_WIDTH);
             XMoveResizeWindow(disp, cursor->id, cursor->x, cursor->y, cursor->w, cursor->h);
             XMapWindow(disp, cursor->id);
-            XRaiseWindow(disp, cursor->id); // Spinge la finestra floating sopra tutto il tiling ricalcolato
+            XRaiseWindow(disp, cursor->id); 
         }
         cursor = cursor->next;
     } while(cursor != head);
@@ -739,7 +695,6 @@ UpdateCurrentMonitor(Display *disp, Window root)
 
 	XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x , &mouse_y , &dummy_int, &dummy_int, &dummy_mask);
 	
-	//cerco mouse nei monitors
 	for(int i = 0; i< monitors_count; i++)
 	{
 		if (mouse_x >= monitors[i].x && mouse_x < (monitors[i].x + monitors[i].width) &&
@@ -755,14 +710,13 @@ UpdateCurrentMonitor(Display *disp, Window root)
 
 	if(workspaces[active_ws].monitor_id != target_monitor)
 	{
-		DEBUG_LOG("[ASH-WM] Sincronizzo: Il mouse ha attivato il Monitor %d (WS %d)\n", target_monitor, active_ws);
+		DEBUG_LOG("[ASH-WM] mouse active in Monitor %d (WS %d)\n", target_monitor, active_ws);
 		workspaces[active_ws].monitor_id = target_monitor;
 	}
 }
 
 
 
-// Sposta la finestra focalizzata sul monitor successivo/opposto
 void 
 MoveWindowToMonitor(Display *disp, Window root)
 {
@@ -779,7 +733,6 @@ MoveWindowToMonitor(Display *disp, Window root)
     int source_ws = -1;
     Client *found = NULL;
 
-    // 1. Trova in quale workspace si trova attualmente la finestra focalizzata
     for (int i = 0; i < WORKSPACES; i++) {
         Client *cursor = workspaces[i].list_Cl;
         if (cursor != NULL) {
@@ -799,15 +752,13 @@ MoveWindowToMonitor(Display *disp, Window root)
     if (source_ws == -1 || found == NULL)
         return;
 
-    // 2. Determina il monitor di origine e destinazione
     int current_monitor = source_ws / WORKSPACES_X_MONITOR;
 	int target_monitor = (current_monitor + 1) % monitors_count;
     int ws_target = monitors[target_monitor].current_ws;
 
-    DEBUG_LOG("[ASH-WM] Sposto la finestra %lu dal Monitor %d (WS %d) al Monitor %d (WS %d)\n", 
+    DEBUG_LOG("[ASH-WM] mv window %lu from Monitor %d (WS %d) to Monitor %d (WS %d)\n", 
            focused_win, current_monitor, source_ws, target_monitor, ws_target);
 
-    // 3. Rimuovi la finestra dal vecchio workspace (gestione lista circolare)
     if (found->next == found) {
         workspaces[source_ws].list_Cl = NULL; 
     } else {
@@ -818,7 +769,6 @@ MoveWindowToMonitor(Display *disp, Window root)
         }
     }
 
-    // 4. Inserisci la finestra nella lista del nuovo workspace
     if (workspaces[ws_target].list_Cl == NULL) {
         workspaces[ws_target].list_Cl = found;
         found->next = found;
@@ -833,15 +783,12 @@ MoveWindowToMonitor(Display *disp, Window root)
         head->prev = found;
     }
 
-    // 5. Ricalcola i layout geometrici (Dwindle aggiornerà x, y, w, h sul nuovo monitor)
     Dwindle(disp, ws_target);
     Dwindle(disp, source_ws);
 
-    // 6. Muovi il mouse al centro della finestra spostata per stabilizzare il focus-follows-mouse
     XWarpPointer(disp, None, found->id, 0, 0, 0, 0, found->w / 2, found->h / 2);
     FocusWindow(disp, found->id);
 
-    // 7. Se il vecchio monitor è rimasto vuoto, pulisci il focus sulla root
     if (workspaces[source_ws].list_Cl == NULL) {
         XSetInputFocus(disp, root, RevertToParent, CurrentTime);
     }
@@ -870,7 +817,6 @@ CycleFocus(Display *disp, int direction) {
     int mouse_x, mouse_y;
     int mon_idx = 0;
 
-    // FIX: Troviamo il monitor attivo tramite puntatore per ottenere il Workspace corrente
     XQueryPointer(disp, DefaultRootWindow(disp), &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
     for (int i = 0; i < monitors_count; i++) {
         if (mouse_x >= monitors[i].x && mouse_x < (monitors[i].x + monitors[i].width) &&
@@ -896,7 +842,7 @@ CycleFocus(Display *disp, int direction) {
             target = curr;
             break;
         }
-        curr = curr->next; // Nota: avevi usato curr in precedenza, uniformato qui
+        curr = curr->next; 
     } while (curr != head);
 
     if (target == NULL) {
@@ -941,13 +887,12 @@ ToggleFullscreen(Display *disp, Window root) {
     int mon = workspaces[ws].monitor_id;
 
     if (!found->is_fullscreen) {
-        // Salva la geometria attuale prima di andare in fullscreen
+		// save gemetry before go full screnn
         found->old_x = found->x;
         found->old_y = found->y;
         found->old_w = found->w;
         found->old_h = found->h;
 
-        // Imposta a tutto schermo (usa le dimensioni piene del monitor, senza GAPS)
         found->x = monitors[mon].x;
         found->y = monitors[mon].y;
         found->w = monitors[mon].width;
@@ -955,7 +900,6 @@ ToggleFullscreen(Display *disp, Window root) {
 
         found->is_fullscreen = 1;
         
-        // Rimuove i bordi per il vero effetto fullscreen
         XSetWindowBorderWidth(disp, found->id, 0);
         XMoveResizeWindow(disp, found->id, found->x, found->y, found->w, found->h);
         XRaiseWindow(disp, found->id);
@@ -963,11 +907,9 @@ ToggleFullscreen(Display *disp, Window root) {
         found->is_fullscreen = 0;
         XSetWindowBorderWidth(disp, found->id, BORDER_WIDTH);
         
-        // Se la finestra non è nemmeno floating, ridiciamo a Dwindle di rimetterla a posto
         if (!found->is_floating) {
             Dwindle(disp, ws);
         } else {
-            // Se era floating, ripristina la sua vecchia posizione floating
             found->x = found->old_x;
             found->y = found->old_y;
             found->w = found->old_w;
@@ -980,13 +922,12 @@ ToggleFullscreen(Display *disp, Window root) {
 
 
 void 
-SwapDwindleDirectional(Display *disp, int direction) { // 6=H, 7=J, 8=K, 9=L
+SwapDwindleDirectional(Display *disp, int direction) { 
     Window focused_win;
     int revert_to;
     XGetInputFocus(disp, &focused_win, &revert_to);
     if (focused_win == None) return;
 
-    // 1. Trova il monitor e il workspace attivo tramite il mouse
     Window dummy_win; int dummy_int; unsigned int dummy_mask;
     int mouse_x, mouse_y; int mon_idx = 0;
     XQueryPointer(disp, DefaultRootWindow(disp), &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
@@ -1000,10 +941,8 @@ SwapDwindleDirectional(Display *disp, int direction) { // 6=H, 7=J, 8=K, 9=L
     int ws = monitors[mon_idx].current_ws;
     Client *head = workspaces[ws].list_Cl;
     
-    // Servono almeno due finestre per fare uno scambio
     if (head == NULL || head->next == head) return;
 
-    // 2. Trova il client correntemente focalizzato
     Client *curr = head;
     Client *this_client = NULL;
     do {
@@ -1016,10 +955,8 @@ SwapDwindleDirectional(Display *disp, int direction) { // 6=H, 7=J, 8=K, 9=L
 
     if (!this_client || this_client->is_fullscreen) return;
 
-    // 3. Individua il client target con cui scambiarsi
     Client *target_client = (direction == 1) ? this_client->next : this_client->prev;
 
-    // 4. Scambia i dati identificativi (le finestre scambiano di posto nella spirale)
     Window temp_id = this_client->id;
     int temp_fs = this_client->is_fullscreen;
 
@@ -1029,10 +966,8 @@ SwapDwindleDirectional(Display *disp, int direction) { // 6=H, 7=J, 8=K, 9=L
     target_client->id = temp_id;
     target_client->is_fullscreen = temp_fs;
 
-    // 5. Applica la nuova geometria sullo schermo
     Dwindle(disp, ws);
 
-    // 6. Riassegna il focus alla finestra originaria (che ora ha l'id dentro target_client)
     XRaiseWindow(disp, target_client->id);
     XSetInputFocus(disp, target_client->id, RevertToParent, CurrentTime);
     XSync(disp, False);
@@ -1053,7 +988,6 @@ RaiseFloatingWindows(Display *disp, int ws_index)
 
     Client *cursor = head;
     do {
-        // Se la finestra è floating e visibile, tirala su
         if (cursor->is_floating && !cursor->is_fullscreen) {
             XRaiseWindow(disp, cursor->id);
         }
@@ -1068,22 +1002,34 @@ int
 XErrorHandlerImpl(Display *disp, XErrorEvent *ee)
 {
 	(void)disp;
-    // Ignora gli errori BadWindow (finestre distrutte nel frattempo)
     if (ee->error_code == BadWindow ||
         (ee->request_code == 12 && ee->error_code == BadMatch) || // ConfigureWindow BadMatch
         (ee->request_code == 42 && ee->error_code == BadWindow))  // SetInputFocus BadWindow
     {
-        DEBUG_LOG("[ASH-WM] Errore X11 intercettato e ignorato safely.\n");
+        DEBUG_LOG("[ASH-WM] Error X11 safely.\n");
         return 0;
     }
     
-    // Se è un errore fatale grave, stampa ed esci
-    fprintf(stderr, "[ASH-WM] Errore fatale X11: major %d, error %d\n", ee->request_code, ee->error_code);
+    fprintf(stderr, "[ASH-WM] Error fatal X11: major %d, error %d\n", ee->request_code, ee->error_code);
     return 0; 
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
+
+    if (argc > 1 && strcmp(argv[1], "-h") == 0)
+    {
+        printf("-h show this.\n");
+        printf("-v show ashwm version.\n");
+		return 0;
+    }
+	
+    if (argc > 1 && strcmp(argv[1], "-v") == 0)
+    {
+        printf("ashwm Version: %d\n", VERSION);
+		return 0;
+    }
+
 
 	XEvent Ev;
 	unsigned int clean_state;
@@ -1093,7 +1039,6 @@ int main(void)
     mouse_start.subwindow = None;
 
 
-	// Window focused_win; int rev;
 
 	Display *disp = XOpenDisplay(NULL);
 	if(disp == NULL){
@@ -1111,31 +1056,27 @@ int main(void)
 	Window root = RootWindow(disp, sc);
 
 
-	//serve ad un programma a registrarsi in coda 
+	//add to the wait
 	XSelectInput(disp, root, SubstructureRedirectMask | SubstructureNotifyMask | KeyPressMask | PointerMotionMask);
 
-	// svuota il buffer dove stanno le finestre in coda perche x11 e asincrono 
 	XSync(disp, False);
 
 	
-	//for per leggere tasti da config.h
+	//read config.h binds
 	unsigned int modifiers[] = { 0, LockMask, Mod2Mask, LockMask | Mod2Mask };
 
 	for (int i = 0; i < num_keys; i++) {
 		KeyCode code = XKeysymToKeycode(disp, keys[i].keysym);
 
-		// Registra la scorciatoia per tutte le combinazioni di "Lock" attivi
 		for (unsigned int j = 0; j < 4; j++) {
 			XGrabKey(disp, code, keys[i].mod | modifiers[j], root, True, GrabModeAsync, GrabModeAsync);
 		}
 	}
 
-	// Cattura Mod + Click Sinistro (Button1) per spostare le finestre
     XGrabButton(disp, Button1, MODIFIER, root, True,
                 ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
                 GrabModeAsync, GrabModeAsync, None, None);
 
-    // Cattura Mod + Click Destro (Button3) per ridimensionare le finestre
     XGrabButton(disp, Button3, MODIFIER, root, True,
                 ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
                 GrabModeAsync, GrabModeAsync, None, None);
@@ -1186,7 +1127,6 @@ int main(void)
 		workspaces[i].monitor_id = -1;
 	}
 	
-	// CORREZIONE: Inizializzazione corretta dei workspace di avvio per ciascun monitor
 	for(int i = 0 ; i < monitors_count; i++)
 	{
 		int start_ws = i * WORKSPACES_X_MONITOR; // Monitor 0 -> WS 0 | Monitor 1 -> WS 10
@@ -1206,10 +1146,9 @@ int main(void)
 			case MapRequest:	 
 				AddWindowList(disp, Ev.xmaprequest.window, root );
 
-				DEBUG_LOG("[+] nuova finestra id: %lu\n", Ev.xmaprequest.window);
+				DEBUG_LOG("[+] new window id: %lu\n", Ev.xmaprequest.window);
 
-				// questo é Window w
-				FocusWindow(disp, Ev.xmaprequest.window); // focussa la window
+				FocusWindow(disp, Ev.xmaprequest.window);
 				break;
 
 
@@ -1222,17 +1161,15 @@ int main(void)
                     if((Ev.xkey.keycode == XKeysymToKeycode(disp, keys[i].keysym)) 
                             && (clean_state == keys[i].mod))
                     {
-                        // 1. Comando di sistema (se cmd non è NULL, esegui ed esci)
                         if(keys[i].cmd != NULL)
                         {
                             if(fork() == 0)
                             {
-                                if (disp) close(ConnectionNumber(disp)); // Buona pratica nei WM
+                                if (disp) close(ConnectionNumber(disp)); 
                                 execvp(keys[i].cmd[0], keys[i].cmd);
                                 exit(0);
                             }
                         }
-                        // 2. Comandi interni del Window Manager (usando gli Enum)
                         else 
                         {    
                             switch (keys[i].action) 
@@ -1311,12 +1248,12 @@ int main(void)
 
                                 default:
                                     break;
-                            } // Chiude lo switch
-                        } // Chiude l'else
-                        break; // Esce dal ciclo for una volta trovato il tasto
-                    } // Chiude l'if del controllo tasto
-                } // Chiude il ciclo for
-                break; // Chiude il case KeyPress
+                            } 
+                        } 
+                        break;
+                    } 
+                } 
+                break; 
 
 
 
@@ -1324,10 +1261,8 @@ int main(void)
 				if (Ev.xbutton.subwindow != None) {
 					XGetWindowAttributes(disp, Ev.xbutton.subwindow, &mouse_attr);
 
-					// Salviamo i dati di partenza dell'evento
 					mouse_start = Ev.xbutton;
 
-					// Trova il workspace corrente basato sulla posizione del mouse
 					Window dummy_win; int dummy_int; unsigned int dummy_mask;
 					int mouse_x, mouse_y; int mon_idx = 0;
 					XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
@@ -1339,8 +1274,6 @@ int main(void)
 					}
 					int ws = monitors[mon_idx].current_ws;
 
-					// CORREZIONE: Imposta lo stato floating SOLO se si sta premendo la scorciatoia (MODIFIER) + Click
-					// Evita che un click normale converta per errore una finestra in tiling in floating!
 					if (Ev.xbutton.state & MODIFIER) {
 						Client *h = workspaces[ws].list_Cl;
 						if (h != NULL) {
@@ -1353,36 +1286,31 @@ int main(void)
 								c = c->next;
 							} while (c != h);
 						}
-						// Se è diventata floating, ricalcola il mosaico e aggiorna lo schermo
 						Dwindle(disp, ws);
 					}
 
-					// Assegna il focus alla finestra cliccata (che solleverà anche le floating di conseguenza)
 					FocusWindow(disp, Ev.xbutton.subwindow);
 				}
 
-				// Consente ad X11 di far passare il click al client per usarlo normalmente all'interno della finestra
 				XAllowEvents(disp, ReplayPointer, CurrentTime);
 				break;
 
 			case MotionNotify:
 				if (mouse_start.subwindow != None) {
-					// Calcola lo spostamento effettivo del mouse
+					// calcolate mouse mv 
 					int xdiff = Ev.xbutton.x_root - mouse_start.x_root;
 					int ydiff = Ev.xbutton.y_root - mouse_start.y_root;
 
 					if (mouse_start.button == Button1) {
-						// Muove fisicamente la finestra
+						//mv window
 						XMoveWindow(disp, mouse_start.subwindow, 
 								mouse_attr.x + xdiff, 
 								mouse_attr.y + ydiff);
 
-						// RILEVAMENTO MONITOR DURANTE IL TRASCINAMENTO
 						int current_mouse_x = Ev.xmotion.x_root;
 						int current_mouse_y = Ev.xmotion.y_root;
 						int target_monitor = -1;
 
-						// Capisce su quale monitor si trova adesso il cursore
 						for (int m = 0; m < monitors_count; m++) {
 							if (current_mouse_x >= monitors[m].x && current_mouse_x < (monitors[m].x + monitors[m].width) &&
 									current_mouse_y >= monitors[m].y && current_mouse_y < (monitors[m].y + monitors[m].height)) {
@@ -1394,7 +1322,6 @@ int main(void)
 						if (target_monitor != -1) {
 							int active_ws_target = monitors[target_monitor].current_ws;
 
-							// Cerca il workspace attuale della finestra trascinata
 							int source_ws = -1;
 							Client *c_to_move = NULL;
 
@@ -1413,10 +1340,9 @@ int main(void)
 								if (c_to_move != NULL) break;
 							}
 
-							// Se la finestra è stata trascinata su un monitor differente da quello di origine
 							if (c_to_move != NULL && source_ws != active_ws_target) {
 
-								// 1. Rimuovi la finestra dalla lista del vecchio workspace
+								// rm window from old workspace 
 								if (c_to_move->next == c_to_move) {
 									workspaces[source_ws].list_Cl = NULL;
 								} else {
@@ -1426,9 +1352,8 @@ int main(void)
 										workspaces[source_ws].list_Cl = c_to_move->next;
 									}
 								}
-								Dwindle(disp, source_ws); // Riorganizza il vecchio workspace rimasto vuoto/orfanello
+								Dwindle(disp, source_ws);  
 
-								// 2. Inserisci la finestra nel workspace attivo del NUOVO monitor
 								Client *target_head = workspaces[active_ws_target].list_Cl;
 								if (target_head == NULL) {
 									c_to_move->next = c_to_move;
@@ -1441,18 +1366,15 @@ int main(void)
 									target_head->prev = c_to_move;
 								}
 
-								// 3. Impostala come floating sul nuovo schermo mentre la muovi
 								c_to_move->is_floating = 1; 
 
-								// Aggiorna il layout del nuovo workspace
 								Dwindle(disp, active_ws_target);
-								DEBUG_LOG("[ASH-WM] Spostata finestra %lu nel Monitor %d (Workspace %d)\n", 
+								DEBUG_LOG("[ASH-WM] window moved in %lu in the Monitor %d (Workspace %d)\n", 
 										c_to_move->id, target_monitor, active_ws_target);
 							}
 						}
 					} 
 					else if (mouse_start.button == Button3) {
-						// Ridimensionamento col tasto destro + Mod
 						int new_w = mouse_attr.width + xdiff;
 						int new_h = mouse_attr.height + ydiff;
 
@@ -1468,7 +1390,6 @@ int main(void)
 
 			case ButtonRelease:
 				if (mouse_start.subwindow != None) {
-					// Trova il client e il workspace effettivo della finestra rilasciata
 					int ws = -1;
 					Client *found_client = NULL;
 
@@ -1487,7 +1408,6 @@ int main(void)
 						if (found_client != NULL) break;
 					}
 
-					// Memorizza definitivamente la posizione in cui l'abbiamo lasciata
 					if (found_client != NULL) {
 						XWindowAttributes final_attr;
 						XGetWindowAttributes(disp, found_client->id, &final_attr);
@@ -1499,7 +1419,7 @@ int main(void)
 						Dwindle(disp, ws);
 						FocusWindow(disp, found_client->id);
 					}
-					mouse_start.subwindow = None; // Sblocca il mouse
+					mouse_start.subwindow = None; 
 				}
 				break;
 
@@ -1507,14 +1427,13 @@ int main(void)
 
 
 
-				//gestisce sopostamento mouse
+				//mouse movement
 			case EnterNotify:
 				if (Ev.xcrossing.mode != NotifyNormal || Ev.xcrossing.detail == NotifyInferior)
 					break;
 
 				UpdateCurrentMonitor(disp, root);
 
-				// FIX DI SICUREZZA: Controlla se la finestra è effettivamente visibile a schermo prima di darle il focus
 				XWindowAttributes wa;
 				XGetWindowAttributes(disp, Ev.xcrossing.window, &wa);
 				if (wa.map_state == IsViewable) {
@@ -1525,7 +1444,7 @@ int main(void)
 
 
 			case FocusIn:
-				// Quando una qualsiasi finestra prende il focus, forziamo le floating in cima
+				// focusing the floating window
 				{
 					Window dummy_win; int dummy_int; unsigned int dummy_mask;
 					int mouse_x, mouse_y; int mon_idx = 0;
@@ -1541,7 +1460,7 @@ int main(void)
 				}
 				break;
 
-			case DestroyNotify:	 // questo é Window w
+			case DestroyNotify:	 
 				RemoveWindowList(disp ,Ev.xdestroywindow.window, root);
 				break;
 
