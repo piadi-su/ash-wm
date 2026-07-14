@@ -23,7 +23,6 @@ void UpdateCurrentMonitor(Display *disp, Window root);
 void MoveWindowToMonitor(Display *disp, Window root);
 unsigned long GetXColor(Display *disp, unsigned long hex_color);
 void CycleFocus(Display *disp, int direction);
-void FocusWindow(Display *disp, Window w);
 void ToggleFullscreen(Display *disp, Window root);
 void SwapDwindleDirectional(Display *disp, int direction);
 void ResizeFocusedWindow(Display *disp, Window root, int direction);

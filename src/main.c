@@ -1,3 +1,12 @@
+/*
+ * ashwm is a simple x11 tyling window manger
+ * inspired by dwm 
+ *
+ * code start write date 08/07/2026
+ *
+ */
+
+
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
@@ -741,7 +750,7 @@ MoveWindowToMonitor(Display *disp, Window root)
 
     // 2. Determina il monitor di origine e destinazione
     int current_monitor = source_ws / WORKSPACES_X_MONITOR;
-    int target_monitor = (current_monitor == 0) ? 1 : 0; // Alterna tra 0 e 1 per dual-monitor
+	int target_monitor = (current_monitor + 1) % monitors_count;
     int ws_target = monitors[target_monitor].current_ws;
 
     printf("[ASH-WM] Sposto la finestra %lu dal Monitor %d (WS %d) al Monitor %d (WS %d)\n", 
@@ -1032,6 +1041,9 @@ int main(void)
     XButtonEvent mouse_start;
     mouse_start.subwindow = None;
 
+
+	// Window focused_win; int rev;
+
 	Display *disp = XOpenDisplay(NULL);
 	if(disp == NULL){
 		fprintf(stderr, "error opening the display");
@@ -1056,11 +1068,15 @@ int main(void)
 
 	
 	//for per leggere tasti da config.h
-	for(int i = 0 ; i < num_keys; i++)
-	{
-		// immagino prenda il codice di ogni keybinds nel array di struct KeYBinds
+	unsigned int modifiers[] = { 0, LockMask, Mod2Mask, LockMask | Mod2Mask };
+
+	for (int i = 0; i < num_keys; i++) {
 		KeyCode code = XKeysymToKeycode(disp, keys[i].keysym);
-		XGrabKey(disp, code, keys[i].mod, root, True, GrabModeAsync, GrabModeAsync); // prende i tasti/sequesta dalla root win
+
+		// Registra la scorciatoia per tutte le combinazioni di "Lock" attivi
+		for (unsigned int j = 0; j < 4; j++) {
+			XGrabKey(disp, code, keys[i].mod | modifiers[j], root, True, GrabModeAsync, GrabModeAsync);
+		}
 	}
 
 	// Cattura Mod + Click Sinistro (Button1) per spostare le finestre
@@ -1158,113 +1174,293 @@ int main(void)
 
 
 
-			case KeyPress:
-				clean_state = Ev.xkey.state & ~(LockMask | Mod2Mask);
+				case KeyPress:
+                clean_state = Ev.xkey.state & ~(LockMask | Mod2Mask);
 
+                for(int i = 0 ; i < num_keys; i++)
+                {
+                    if((Ev.xkey.keycode == XKeysymToKeycode(disp, keys[i].keysym)) 
+                            && (clean_state == keys[i].mod))
+                    {
+                        // 1. Comando di sistema (se cmd non è NULL, esegui ed esci)
+                        if(keys[i].cmd != NULL)
+                        {
+                            if(fork() == 0)
+                            {
+                                if (disp) close(ConnectionNumber(disp)); // Buona pratica nei WM
+                                execvp(keys[i].cmd[0], keys[i].cmd);
+                                exit(0);
+                            }
+                        }
+                        // 2. Comandi interni del Window Manager (usando gli Enum)
+                        else 
+                        {    
+                            switch (keys[i].action) 
+                            {
+                                case ACTION_KILL:
+                                    KillWindow(disp, root);
+                                    break;
+                                    
+                                case ACTION_MOVE_MONITOR:
+                                    MoveWindowToMonitor(disp, root);
+                                    break;
+                                    
+                                case ACTION_FOCUS_NEXT:
+                                    CycleFocus(disp, 1);
+                                    break;
+                                    
+                                case ACTION_FOCUS_PREV:
+                                    CycleFocus(disp, -1);
+                                    break;
+                                    
+                                case ACTION_TOGGLE_FULLSCREEN:
+                                    ToggleFullscreen(disp, root);
+                                    break;
 
-				for(int i = 0 ; i < num_keys; i++)
-				{
-					if((Ev.xkey.keycode == XKeysymToKeycode(disp, keys[i].keysym)) 
-							&& (clean_state == keys[i].mod))
-					{
-						// 1. Comando di sistema (se cmd non è NULL, esegui ed esci)
-						if(keys[i].cmd != NULL)
-						{
-							if(fork() == 0)
-							{
-								if (disp) close(ConnectionNumber(disp)); // Buona pratica nei WM
-								execvp(keys[i].cmd[0], keys[i].cmd);
-								exit(0);
-							}
-						}
-						// 2. Comandi interni del Window Manager
-						else 
-						{    
-							if(keys[i].arg == -1) 
-							{
-								KillWindow(disp, root);
-							}
-							
-							else if (keys[i].arg == -2) 
-							{ 
-								MoveWindowToMonitor(disp, root);
-							}
-							
-							else if (keys[i].arg == -3) // Focus del prossimo client (J)
-							{
-								CycleFocus(disp, 1);
-							}
-							
-							else if (keys[i].arg == -4) // Focus del client precedente (K)
-							{
-								CycleFocus(disp, -1);
-							}
-							
-							else if (keys[i].arg == -5) // Focus del client precedente (K)
-							{
-								ToggleFullscreen(disp, root);
-							}
+                                case ACTION_SWAP_NEXT:
+                                    SwapDwindleDirectional(disp, 1);
+                                    break;
+                                    
+                                case ACTION_SWAP_PREV:
+                                    SwapDwindleDirectional(disp, -1);
+                                    break;
 
-							else if (keys[i].arg == -6) // Focus del client precedente (K)
-							{
-								SwapDwindleDirectional(disp, 1);
-							}
-							
-							else if (keys[i].arg == -7) // Focus del client precedente (K)
-							{
-								SwapDwindleDirectional(disp, -1);
-							}
+                                case ACTION_TOGGLE_FLOATING:
+                                    {
+                                        Window focused_win; int rev;
+                                        XGetInputFocus(disp, &focused_win, &rev);
+                                        if (focused_win != None) {
+                                            Window dummy_win; int dummy_int; unsigned int dummy_mask;
+                                            int mouse_x, mouse_y; int mon_idx = 0;
+                                            XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
+                                            for (int m = 0; m < monitors_count; m++) {
+                                                if (mouse_x >= monitors[m].x && mouse_x < (monitors[m].x + monitors[m].width) &&
+                                                        mouse_y >= monitors[m].y && mouse_y < (monitors[m].y + monitors[m].height)) {
+                                                    mon_idx = m; break;
+                                                }
+                                            }
+                                            int ws = monitors[mon_idx].current_ws;
 
-							else if (keys[i].arg == -8) // TOGGLE FLOATING (Mod + Spazio)
-							{
-								Window focused_win; int rev;
-								XGetInputFocus(disp, &focused_win, &rev);
-								if (focused_win != None) {
-									Window dummy_win; int dummy_int; unsigned int dummy_mask;
-									int mouse_x, mouse_y; int mon_idx = 0;
-									XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
-									for (int m = 0; m < monitors_count; m++) {
-										if (mouse_x >= monitors[m].x && mouse_x < (monitors[m].x + monitors[m].width) &&
-												mouse_y >= monitors[m].y && mouse_y < (monitors[m].y + monitors[m].height)) {
-											mon_idx = m; break;
+                                            Client *curr = workspaces[ws].list_Cl;
+                                            if (curr != NULL) {
+                                                do {
+                                                    if (curr->id == focused_win && !curr->is_fullscreen) {
+                                                        curr->is_floating = !curr->is_floating; 
+                                                        break;
+                                                    }
+                                                    curr = curr->next;
+                                                } while(curr != workspaces[ws].list_Cl);
+                                            }
+                                            Dwindle(disp, ws); 
+                                        }
+                                    }
+                                    break;
+
+								case ACTION_WORKSPACE:
+									{
+										int ws_target = keys[i].arg % WORKSPACES_X_MONITOR; 
+
+										if (keys[i].mod & WS_MODIFIER) {
+											MoveToWorkspace(disp, root, ws_target);
+										} else {
+											ChangeWorkspace(disp, root, ws_target);
 										}
 									}
-									int ws = monitors[mon_idx].current_ws;
-
-									Client *curr = workspaces[ws].list_Cl;
-									if (curr != NULL) {
-										do {
-											if (curr->id == focused_win && !curr->is_fullscreen) {
-												curr->is_floating = !curr->is_floating; 
-												break;
-											}
-											curr = curr->next;
-										} while(curr != workspaces[ws].list_Cl);
-									}
-									Dwindle(disp, ws); 
-								}
-							}
+									break;
 
 
+                                default:
+                                    break;
+                            } // Chiude lo switch
+                        } // Chiude l'else
+                        break; // Esce dal ciclo for una volta trovato il tasto
+                    } // Chiude l'if del controllo tasto
+                } // Chiude il ciclo for
+                break; // Chiude il case KeyPress
 
-							else 
-							{
-								int ws_target = keys[i].arg % WORKSPACES_X_MONITOR; 
+			// case KeyPress:
+			// 	clean_state = Ev.xkey.state & ~(LockMask | Mod2Mask);
+			//
+			//
+			// 	for(int i = 0 ; i < num_keys; i++)
+			// 	{
+			// 		if((Ev.xkey.keycode == XKeysymToKeycode(disp, keys[i].keysym)) 
+			// 				&& (clean_state == keys[i].mod))
+			// 		{
+			// 			// 1. Comando di sistema (se cmd non è NULL, esegui ed esci)
+			// 			if(keys[i].cmd != NULL)
+			// 			{
+			// 				if(fork() == 0)
+			// 				{
+			// 					if (disp) close(ConnectionNumber(disp)); // Buona pratica nei WM
+			// 					execvp(keys[i].cmd[0], keys[i].cmd);
+			// 					exit(0);
+			// 				}
+			// 			}
+			// 			// 2. Comandi interni del Window Manager
+			// 			else 
+			// 			{    
+			//
+			// 				switch (keys[i].action) {
+			//
+			// 					case ACTION_KILL:
+			// 						KillWindow(disp, root);
+			// 						break;
+			//
+			// 					case ACTION_MOVE_MONITOR:
+			// 						MoveWindowToMonitor(disp, root);
+			// 						break;
+			//
+			// 					case ACTION_FOCUS_NEXT:
+			// 						CycleFocus(disp, 1);
+			// 						break;
+			//
+			// 					case ACTION_FOCUS_PREV:
+			// 						CycleFocus(disp, -1);
+			// 						break;
+			//
+			// 					case ACTION_TOGGLE_FULLSCREEN:
+			// 						ToggleFullscreen(disp, root);
+			// 						break;
+			//
+			// 					case ACTION_SWAP_NEXT:
+			// 						SwapDwindleDirectional(disp, 1);
+			// 						break;
+			//
+			// 					case ACTION_SWAP_PREV:
+			// 						SwapDwindleDirectional(disp, -1);
+			// 						break;
+			//
+			// 					case ACTION_TOGGLE_FLOATING:
+			// 						XGetInputFocus(disp, &focused_win, &rev);
+			// 						if (focused_win != None) {
+			// 							Window dummy_win; int dummy_int; unsigned int dummy_mask;
+			// 							int mouse_x, mouse_y; int mon_idx = 0;
+			// 							XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
+			// 							for (int m = 0; m < monitors_count; m++) {
+			// 								if (mouse_x >= monitors[m].x && mouse_x < (monitors[m].x + monitors[m].width) &&
+			// 										mouse_y >= monitors[m].y && mouse_y < (monitors[m].y + monitors[m].height)) {
+			// 									mon_idx = m; break;
+			// 								}
+			// 							}
+			// 							int ws = monitors[mon_idx].current_ws;
+			//
+			// 							Client *curr = workspaces[ws].list_Cl;
+			// 							if (curr != NULL) {
+			// 								do {
+			// 									if (curr->id == focused_win && !curr->is_fullscreen) {
+			// 										curr->is_floating = !curr->is_floating; 
+			// 										break;
+			// 									}
+			// 									curr = curr->next;
+			// 								} while(curr != workspaces[ws].list_Cl);
+			// 							}
+			// 							Dwindle(disp, ws); 
+			// 						}
+			// 						break;
+			//
+			// 					case ACTION_WORKSPACE:
+			// 						{
+			// 							int ws_target = keys[i].arg % WORKSPACES_X_MONITOR; 
+			//
+			// 							if (keys[i].mod & WS_MODIFIER) {
+			// 								MoveToWorkspace(disp, root, ws_target);
+			// 							} else {
+			// 								ChangeWorkspace(disp, root, ws_target);
+			// 							}
+			// 						}
+			// 						break;
+			//
+			// 					default:
+			// 						break;
+			//
+			// 				}
+			// 	break;
 
-								if(keys[i].mod & WS_MODIFIER)
-								{
-									MoveToWorkspace(disp, root, ws_target);
-								}
-								else
-								{
-									ChangeWorkspace(disp, root, ws_target);
-								}
-							}
-						}
-						break; 
-					}
-				}
-				break;
+							// if(keys[i].arg == -1) 
+							// {
+							// 	KillWindow(disp, root);
+							// }
+							//
+							// else if (keys[i].arg == -2) 
+							// { 
+							// 	MoveWindowToMonitor(disp, root);
+							// }
+							//
+							// else if (keys[i].arg == -3) // Focus del prossimo client (J)
+							// {
+							// 	CycleFocus(disp, 1);
+							// }
+							//
+							// else if (keys[i].arg == -4) // Focus del client precedente (K)
+							// {
+							// 	CycleFocus(disp, -1);
+							// }
+							//
+							// else if (keys[i].arg == -5) // Focus del client precedente (K)
+							// {
+							// 	ToggleFullscreen(disp, root);
+							// }
+							//
+							// else if (keys[i].arg == -6) // Focus del client precedente (K)
+							// {
+							// 	SwapDwindleDirectional(disp, 1);
+							// }
+							//
+							// else if (keys[i].arg == -7) // Focus del client precedente (K)
+							// {
+							// 	SwapDwindleDirectional(disp, -1);
+							// }
+							//
+							// else if (keys[i].arg == -8) // TOGGLE FLOATING (Mod + Spazio)
+							// {
+							// 	Window focused_win; int rev;
+							// 	XGetInputFocus(disp, &focused_win, &rev);
+							// 	if (focused_win != None) {
+							// 		Window dummy_win; int dummy_int; unsigned int dummy_mask;
+							// 		int mouse_x, mouse_y; int mon_idx = 0;
+							// 		XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
+							// 		for (int m = 0; m < monitors_count; m++) {
+							// 			if (mouse_x >= monitors[m].x && mouse_x < (monitors[m].x + monitors[m].width) &&
+							// 					mouse_y >= monitors[m].y && mouse_y < (monitors[m].y + monitors[m].height)) {
+							// 				mon_idx = m; break;
+							// 			}
+							// 		}
+							// 		int ws = monitors[mon_idx].current_ws;
+							//
+							// 		Client *curr = workspaces[ws].list_Cl;
+							// 		if (curr != NULL) {
+							// 			do {
+							// 				if (curr->id == focused_win && !curr->is_fullscreen) {
+							// 					curr->is_floating = !curr->is_floating; 
+							// 					break;
+							// 				}
+							// 				curr = curr->next;
+							// 			} while(curr != workspaces[ws].list_Cl);
+							// 		}
+							// 		Dwindle(disp, ws); 
+							// 	}
+							// }
+
+
+
+				// 			else 
+				// 			{
+				// 				int ws_target = keys[i].arg % WORKSPACES_X_MONITOR; 
+				//
+				// 				if(keys[i].mod & WS_MODIFIER)
+				// 				{
+				// 					MoveToWorkspace(disp, root, ws_target);
+				// 				}
+				// 				else
+				// 				{
+				// 					ChangeWorkspace(disp, root, ws_target);
+				// 				}
+				// 			}
+				// 		}
+				// 		break; 
+				// 	}
+				// }
 
 
 			case ButtonPress:
@@ -1491,6 +1687,8 @@ int main(void)
 			case DestroyNotify:	 // questo é Window w
 				RemoveWindowList(disp ,Ev.xdestroywindow.window);
 				break;
+
+
 
 
 

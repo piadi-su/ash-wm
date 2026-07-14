@@ -6,12 +6,21 @@ Debuginfod has been disabled.
 To make this setting permanent, add 'set debuginfod enabled off' to .gdbinit.
 [Thread debugging using libthread_db enabled]
 Using host libthread_db library "/usr/lib/libthread_db.so.1".
-[Detaching after fork from child process 67909]
-[Detaching after fork from child process 68005]
-[Detaching after fork from child process 68078]
-[Detaching after fork from child process 68145]
-[Detaching after fork from child process 68220]
-[Detaching after fork from child process 68291]
+[Detaching after fork from child process 78790]
+[Detaching after fork from child process 78870]
+[Detaching after fork from child process 78941]
+[Detaching after fork from child process 79028]
+[Detaching after fork from child process 79099]
+[Detaching after fork from child process 79170]
+[Detaching after fork from child process 79258]
+[Detaching after fork from child process 79329]
+[Detaching after fork from child process 79400]
+[Detaching after fork from child process 79471]
+[Detaching after fork from child process 79597]
+[Detaching after fork from child process 79680]
+[Detaching after fork from child process 79752]
+[Detaching after fork from child process 79823]
+[Detaching after fork from child process 79910]
 [ASH-WM] Salvato Monitor 0: X=0, Y=0, W=1920, H=1080
 [ASH-WM] Salvato Monitor 1: X=1920, Y=0, W=768, H=1366
 [ASH-WM] Finestra 8388612 spawnata sul Monitor 1 -> Salvata nel Workspace 10
@@ -23,85 +32,14 @@ Using host libthread_db library "/usr/lib/libthread_db.so.1".
 [ASH-WM] Il mouse è entrato nella finestra 8388612. Cambio focus.
 [ASH-WM] Finestra 18874372 spawnata sul Monitor 0 -> Salvata nel Workspace 0
 [+] nuova finestra id: 18874372
-[ASH-WM] Il mouse è entrato nella finestra 18874372. Cambio focus.
 [ASH-WM] Finestra 29360132 spawnata sul Monitor 0 -> Salvata nel Workspace 0
 [+] nuova finestra id: 29360132
 [ASH-WM] Finestra 39845892 spawnata sul Monitor 0 -> Salvata nel Workspace 0
 [+] nuova finestra id: 39845892
 [ASH-WM] Finestra 50331652 spawnata sul Monitor 0 -> Salvata nel Workspace 0
 [+] nuova finestra id: 50331652
-[ASH-WM] Sposto la finestra 50331652 dal Monitor 0 (WS 0) al Monitor 1 (WS 10)
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Sposto la finestra 50331652 dal Monitor 1 (WS 10) al Monitor 0 (WS 0)
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Sposto la finestra 50331652 dal Monitor 0 (WS 0) al Monitor 1 (WS 10)
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Sposto la finestra 50331652 dal Monitor 1 (WS 10) al Monitor 0 (WS 0)
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Sposto la finestra 50331652 dal Monitor 0 (WS 0) al Monitor 1 (WS 10)
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Spostata finestra 50331652 nel Monitor 0 (Workspace 0)
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 18874372. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 18874372. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
 [ASH-WM] Il mouse è entrato nella finestra 18874372. Cambio focus.
 [ASH-WM] Il mouse è entrato nella finestra 29360132. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 29360132. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 29360132. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 29360132. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM][Detaching after fork from child process 68398]
-[Detaching after fork from child process 68469]
-[Detaching after fork from child process 68540]
-[Detaching after fork from child process 68611]
-[Detaching after fork from child process 68728]
-[Detaching after fork from child process 68799]
-[Detaching after fork from child process 68870]
-[Detaching after fork from child process 68941]
-[Detaching after fork from child process 69012]
-[Detaching after fork from child process 69099]
-[Detaching after fork from child process 69173]
- Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
 [ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
 [ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
 [ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
@@ -120,198 +58,128 @@ Using host libthread_db library "/usr/lib/libthread_db.so.1".
 [-] Finestra 92274692 rimossa (WS 10)
 [ASH-WM] Uccido la finestra hardware: 50331652
 [-] Finestra 50331652 rimossa (WS 10)
+[ASH-WM] Il mouse è entrato nella finestra 71303172. Cambio focus.
+[ASH-WM] Il mouse è entrato nella finestra 60817412. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 60817412
+[-] Finestra 60817412 rimossa (WS 10)
+[ASH-WM] Il mouse è entrato nella finestra 71303172. Cambio focus.
 [ASH-WM] Il mouse è entrato nella finestra 81788932. Cambio focus.
 [ASH-WM] Uccido la finestra hardware: 81788932
 [-] Finestra 81788932 rimossa (WS 10)
 [ASH-WM] Il mouse è entrato nella finestra 71303172. Cambio focus.
 [ASH-WM] Uccido la finestra hardware: 71303172
 [-] Finestra 71303172 rimossa (WS 10)
-[ASH-WM] Il mouse è entrato nella finestra 60817412. Cambio focus.
-[ASH-WM] Uccido la finestra hardware: 60817412
-[-] Finestra 60817412 rimossa (WS 10)
+[ASH-WM] Il mouse è entrato nella finestra 18874372. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 18874372
+[-] Finestra 18874372 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 29360132. Cambio focus.
 [ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 39845892
+[-] Finestra 39845892 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 29360132. Cambio focus.
+[ASH-WM] Il mouse è entrato nella finestra 8388612. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 8388612
+[-] Finestra 8388612 rimossa (WS 0)
+[ASH-WM] Il mouse è entrato nella finestra 29360132. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 29360132
+[-] Finestra 29360132 rimossa (WS 0)
+[ASH-WM] Finestra 18874372 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 18874372
+[ASH-WM] Il mouse è entrato nella finestra 18874372. Cambio focus.
+[ASH-WM] Finestra 8388612 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 8388612
+[ASH-WM] Il mouse è entrato nella finestra 8388612. Cambio focus.
+[ASH-WM] Finestra 29360132 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 29360132
+[ASH-WM] Il mouse è entrato nella finestra 29360132. Cambio focus.
+[ASH-WM] Finestra 39845892 spawnata sul Monitor 0 -> Salvata nel Workspace 0
+[+] nuova finestra id: 39845892
 [ASH-WM] Monitor 0 cambia da WS 0 a WS 1
-[ASH-WM] Finestra 50331652 spawnata sul Monitor 0 -> Salvata nel Workspace 1
+[ASH-WM] Finestra 5033[Detaching after fork from child process 79982]
+[Detaching after fork from child process 80053]
+[Detaching after fork from child process 80144]
+[Detaching after fork from child process 80216]
+[Detaching after fork from child process 80310]
+[Detaching after fork from child process 80397]
+[Detaching after fork from child process 80468]
+[Detaching after fork from child process 80539]
+1652 spawnata sul Monitor 0 -> Salvata nel Workspace 1
 [+] nuova finestra id: 50331652
 [ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Finestra 60817412 spawnata sul Monitor 0 -> Salvata nel Workspace 1
-[+] nuova finestra id: 60817412
-[ASH-WM] Il mouse è entrato nella finestra 60817412. Cambio focus.
 [ASH-WM] Finestra 71303172 spawnata sul Monitor 0 -> Salvata nel Workspace 1
 [+] nuova finestra id: 71303172
 [ASH-WM] Il mouse è entrato nella finestra 71303172. Cambio focus.
 [ASH-WM] Finestra 81788932 spawnata sul Monitor 0 -> Salvata nel Workspace 1
 [+] nuova finestra id: 81788932
 [ASH-WM] Il mouse è entrato nella finestra 81788932. Cambio focus.
-[ASH-WM] Finestra 92274692 spawnata sul Monitor 0 -> Salvata nel Workspace 1
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 0
+[ASH-WM] Il mouse è entrato nella finestra 29360132. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
+[ASH-WM] Il mouse è entrato nella finestra 81788932. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 1 a WS 0
+[ASH-WM] Il mouse è entrato nella finestra 29360132. Cambio focus.
+[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
+[ASH-WM] Il mouse è entrato nella finestra 81788932. Cambio focus.
+[ASH-WM] Il mouse è entrato nella finestra 71303172. Cambio focus.
+[ASH-WM] Finestra 92274692 spawnata sul Monitor 1 -> Salvata nel Workspace 10
 [+] nuova finestra id: 92274692
-[ASH-WM] Finestra 102760452 spawnata sul Monitor 1 -> Salvata nel Workspace 10
+[ASH-WM] Il mouse è entrato nella finestra 92274692. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 10 a WS 11
+[ASH-WM] Finestra 102760452 spawnata sul Monitor 1 -> Salvata nel Workspace 11
 [+] nuova finestra id: 102760452
 [ASH-WM] Il mouse è entrato nella finestra 102760452. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 11 a WS 10
+[ASH-WM] Il mouse è entrato nella finestra 92274692. Cambio focus.
 [ASH-WM] Monitor 1 cambia da WS 10 a WS 11
+[ASH-WM] Il mouse è entrato nella finestra 102760452. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 11 a WS 10
+[ASH-WM] Il mouse è entrato nella finestra 92274692. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 10 a WS 11
+[ASH-WM] Il mouse è entrato nella finestra 102760452. Cambio focus.
+[ASH-WM] Sposto la finestra 102760452 dal WS 11 al WS 10 (Monitor 1)
+[ASH-WM] Monitor 1 cambia da WS 11 a WS 10
+[ASH-WM] Il mouse è entrato nella finestra 92274692. Cambio focus.
+[ASH-WM] Il mouse è entrato nella finestra 102760452. Cambio focus.
+[ASH-WM] Sposto la finestra 102760452 dal WS 10 al WS 11 (Monitor 1)
+[ASH-WM] Il mouse è entrato nella finestra 92274692. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 10 a WS 11
+[ASH-WM] Il mouse è entrato nella finestra 102760452. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 11 a WS 10
+[ASH-WM] Il mouse è entrato nella finestra 92274692. Cambio focus.
+[ASH-WM] Monitor 1 cambia da WS 10 a WS 11
+[ASH-WM] Il mouse è entrato nella finestra 102760452. Cambio focus.
 [ASH-WM] Finestra 113246212 spawnata sul Monitor 1 -> Salvata nel Workspace 11
 [+] nuova finestra id: 113246212
 [ASH-WM] Il mouse è entrato nella finestra 113246212. Cambio focus.
-[ASH-WM] Monitor 1 cambia da WS 11 a WS 10
-[ASH-WM] Il mouse è entrato nella finestra 102760452. Cambio focus.
-[ASH-WM] Monitor 1 cambia da WS[Detaching after fork from child process 69317]
-[Detaching after fork from child process 69381]
-[Detaching after fork from child process 69452]
- 10 a WS 11
-[ASH-WM] Il mouse è entrato nella finestra 113246212. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 81788932. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 71303172. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 60817412. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 1 a WS 0
-[ASH-WM] Il mouse è entrato nella finestra 8388612. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 18874372. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
-[ASH-WM] Il mouse è entrato nella finestra 60817412. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 1 a WS 0
-[ASH-WM] Il mouse è entrato nella finestra 18874372. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 29360132. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
-[ASH-WM] Il mouse è entrato nella finestra 71303172. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 81788932. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 92274692. Cambio focus.
-[ASH-WM] Spostata finestra 92274692 nel Monitor 1 (Workspace 11)
-[ASH-WM] Il mouse è entrato nella finestra 113246212. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 92274692. Cambio focus.
-[ASH-WM] Uccido la finestra hardware: 92274692
-[-] Finestra 92274692 rimossa (WS 11)
+[ASH-WM] Finestra 123731972 spawnata sul Monitor 1 -> Salvata nel Workspace 11
+[+] nuova finestra id: 123731972
+[ASH-WM] Finestra 134217732 spawnata sul Monitor 1 -> Salvata nel Workspace 11
+[+] nuova finestra id: 134217732
+[ASH-WM] Finestra 144703492 spawnata sul Monitor 1 -> Salvata nel Workspace 11
+[+] nuova finestra id: 144703492
+[ASH-WM] Uccido la finestra hardware: 144703492
+[-] Finestra 144703492 rimossa (WS 11)
+[ASH-WM] Uccido la finestra hardware: 102760452
+[-] Finestra 102760452 rimossa (WS 11)
+[ASH-WM] Il mouse è entrato nella finestra 123731972. Cambio focus.
 [ASH-WM] Il mouse è entrato nella finestra 113246212. Cambio focus.
 [ASH-WM] Uccido la finestra hardware: 113246212
 [-] Finestra 113246212 rimossa (WS 11)
-[ASH-WM] Il mouse è entrato nella finestra 81788932. Cambio focus.
-[ASH-WM] Uccido la finestra hardware: 81788932
-[-] Finestra 81788932 rimossa (WS 1)
+[ASH-WM] Il mouse è entrato nella finestra 123731972. Cambio focus.
+[ASH-WM] Il mouse è entrato nella finestra 134217732. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 134217732
+[-] Finestra 134217732 rimossa (WS 11)
+[ASH-WM] Il mouse è entrato nella finestra 123731972. Cambio focus.
+[ASH-WM] Uccido la finestra hardware: 123731972
+[-] Finestra 123731972 rimossa (WS 11)
 [ASH-WM] Il mouse è entrato nella finestra 71303172. Cambio focus.
 [ASH-WM] Uccido la finestra hardware: 71303172
 [-] Finestra 71303172 rimossa (WS 1)
-[ASH-WM] Il mouse è entrato nella finestra 60817412. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 50331652. Cambio focus.
-[ASH-WM] Uccido la finestra hardware: 50331652
-[-] Finestra 50331652 rimossa (WS 1)
-[ASH-WM] Il mouse è entrato nella finestra 60817412. Cambio focus.
-[ASH-WM] Uccido la finestra hardware: 60817412
-[-] Finestra 60817412 rimossa (WS 1)
-[ASH-WM] Finestra 71303172 spawnata sul Monitor 0 -> Salvata nel Workspace 1
-[+] nuova finestra id: 71303172
-[ASH-WM] Il mouse è entrato nella finestra 71303172. Cambio focus.
-[ASH-WM] Finestra 81788932 spawnata sul Monitor 0 -> Salvata nel Workspace 1
-[+] nuova finestra id: 81788932
-[ASH-WM] Il mouse è entrato nella finestra 81788932. Cambio focus.
-[ASH-WM] Finestra 92274692 spawnata sul Monitor 0 -> Salvata nel Workspace 1
-[+] nuova finestra id: 92274692
-[ASH-WM] Il mouse è entrato nella finestra 92274692. Cambio focus.
-[ASH-WM] Sposto la finestra 92274692 dal Monitor 0 (WS 1) al Monitor 1 (WS 11)
-[ASH-WM] Il mouse è entrato nella finestra 81788932. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 92274692. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 81788932. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 71303172. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 1 a WS 0
-[ASH-WM] Il mouse è entrato nella finestra 8388612. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
-[ASH-WM] Il mouse è entrato nella finestra 71303172. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 81788932. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 92274692. Cambio focus.
-[ASH-WM] Sposto la finestra 92274692 dal Monitor 1 (WS 11) al Monitor 0 (WS 1)
-[ASH-WM] Il mouse è entrato nella finestra 92274692. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 1 a WS 0
-[ASH-WM] Il mouse è entrato nella finestra 29360132. Cambio focus.
-[ASH-WM] Sposto la finestra 29360132 dal Monitor 0 (WS 0) al Monitor 1 (WS 11)
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 29360132. Cambio focus.
-[ASH-WM] Sposto la finestra 29360132 dal Monitor 1 (WS 11) al Monitor 0 (WS 0)
-[ASH-WM] Il mouse è entrato nella finestra 29360132. Cambio focus.
-[ASH-WM] Sposto la finestra 29360132 dal Monitor 0 (WS 0) al Monitor 1 (WS 11)
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 29360132. Cambio focus.
-[ASH-WM] Sposto la finestra 29360132 dal Monitor 1 (WS 11) al Monitor 0 (WS 0)
-[ASH-WM] Il mouse è entrato nella finestra 29360132. Cambio focus.
-[ASH-WM] Sposto la finestra 29360132 dal Monitor 0 (WS 0) al Monitor 1 (WS 11)
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 29360132. Cambio focus.
-[ASH-WM] Sposto la finestra 29360132 dal Monitor 1 (WS 11) al Monitor 0 (WS 0)
-[ASH-WM] Il mouse è entrato nella finestra 29360132. Cambio focus.
-[ASH-WM] Sposto la finestra 29360132 dal WS 0 al WS 1 (Monitor 0)
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
-[ASH-WM] Il mouse è entrato nella finestra 29360132. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 1 a WS 0
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Sposto la finestra 39845892 dal WS 0 al WS 2 (Monitor 0)
-[ASH-WM] Il mouse è entrato nella finestra 18874372. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
-[ASH-WM] Il mouse è entrato nella finestra 29360132. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 1 a WS 0
-[ASH-WM] Il mouse è entrato nella finestra 18874372. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
-[ASH-WM] Il mouse è entrato nella finestra 29360132. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 1 a WS 2
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 2 a WS 3
-[ASH-WM] Monitor 0 cambia da WS 3 a WS 0
-[ASH-WM] Il mouse è entrato nella finestra 18874372. Cambio focus.
-[ASH-WM] Sposto la finestra 18874372 dal WS 0 al WS 4 (Monitor 0)
-[ASH-WM] Il mouse è entrato nella finestra 8388612. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 0 a WS 4
-[ASH-WM] Il mouse è entrato nella finestra 18874372. Cambio focus.
-[ASH-WM] Sposto la finestra 18874372 dal Monitor 0 (WS 4) al Monitor 1 (WS 11)
-[ASH-WM] Il mouse è entrato nella finestra 18874372. Cambio focus.
-[ASH-WM] Monitor 1 cambia da WS 11 a WS 10
-[ASH-WM] Il mouse è entrato nella finestra 102760452. Cambio focus.
-[ASH-WM] Sposto la finestra 102760452 dal Monitor 1 (WS 10) al Monitor 0 (WS 4)
-[ASH-WM] Il mouse è entrato nella finestra 102760452. Cambio focus.
-[ASH-WM] Sposto la finestra 102760452 dal Monitor 0 (WS 4) al Monitor 1 (WS 10)
-[ASH-WM] Il mouse è entrato nella finestra 102760452. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 4 a WS 0
-[ASH-WM] Il mouse è entrato nella finestra 8388612. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
-[ASH-WM] Il mouse è entrato nella finestra 81788932. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 1 a WS 0
-[ASH-WM] Il mouse è entrato nella finestra 8388612. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
-[ASH-WM] Il mouse è entrato nella finestra 81788932. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 1 a WS 2
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 2 a WS 3
-[ASH-WM] Monitor 0 cambia da WS 3 a WS 0
-[ASH-WM] Il mouse è entrato nella finestra 8388612. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
-[ASH-WM] Il mouse è entrato nella finestra 81788932. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 1 a WS 2
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 2 a WS 0
-[ASH-WM] Il mouse è entrato nella finestra 8388612. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 0 a WS 1
-[ASH-WM] Il mouse è entrato nella finestra 81788932. Cambio focus.
-[ASH-WM] Monitor 0 cambia da WS 1 a WS 2
-[ASH-WM] Il mouse è entrato nella finestra 39845892. Cambio focus.
-[ASH-WM] Il mouse è entrato nella finestra 102760452. Cambio focus.
-[ASH-WM] Monitor 1 cambia da WS 10 a WS 13
-[ASH-WM] Monitor 1 cambia da WS 13 a WS 10
-[ASH-WM] Il mouse è entrato nella finestra 102760452. Cambio focus.
-[ASH-WM] Monitor 1 cambia da WS 10 a WS 11
-[ASH-WM] Il mouse è entrato nella finestra 18874372. Cambio f[Detaching after fork from child process 69665]
-
-Program received signal SIGTERM, Terminated.
-0x00007ffff7c9405e in ?? () from /usr/lib/libc.so.6
-#0  0x00007ffff7c9405e in ?? () from /usr/lib/libc.so.6
-#1  0x00007ffff7c94084 in ?? () from /usr/lib/libc.so.6
-#2  0x00007ffff7d0e68e in poll () from /usr/lib/libc.so.6
-#3  0x00007ffff7be220b in ?? () from /usr/lib/libxcb.so.1
-#4  0x00007ffff7be3f3d in xcb_wait_for_event () from /usr/lib/libxcb.so.1
-#5  0x00007ffff7e8d659 in _XReadEvents () from /usr/lib/libX11.so.6
-#6  0x00007ffff7e74379 in XNextEvent () from /usr/lib/libX11.so.6
-#7  0x0000555555559440 in main ()
-X connection to :1 broken (explicit kill or server shutdown).
-X connection to :1 broken (explicit kill or server shutdown).
-X connection to :1 broken (explicit kill or server shutdown).
-X connection to :1 broken (explicit kill or server shutdown).
-X connection to :1 broken (explicit kill or server shutdown).
-X connection to :1 broken (explicit kill or server shutdown).
-X connection to :1 broken (explicit kill or server shutdown).
-X connection to :1 broken (explicit kill or server shutdown).
+[ASH-WM] Il mouse è entrato nella finestra 81788932. Cambio focu[Detaching after fork from child process 80672]
+[Detaching after fork from child process 80745]
+[Detaching after fork from child process 80821]
+[Detaching after fork from child process 80892]
+[Detaching after fork from child process 80963]
+[Detaching after fork from child process 81086]
+[Detaching after fork from child process 81372]
+[Detaching after fork from child process 81443]

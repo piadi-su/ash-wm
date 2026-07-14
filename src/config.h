@@ -6,21 +6,37 @@
 #include <X11/keysym.h>
 
 // struct che definisce i KeyBinds
+// Definiamo i tipi di comandi interni del WM
+typedef enum {
+    ACTION_NONE = 0,
+    ACTION_KILL,
+    ACTION_MOVE_MONITOR,
+    ACTION_FOCUS_NEXT,
+    ACTION_FOCUS_PREV,
+    ACTION_TOGGLE_FULLSCREEN,
+    ACTION_SWAP_NEXT,
+    ACTION_SWAP_PREV,
+    ACTION_TOGGLE_FLOATING,
+	ACTION_WORKSPACE
+} WMAction;
+
 typedef struct {
-	unsigned int mod;
-	KeySym keysym;
-	char **cmd;
-	int arg;
-}KeyBinds;
+    unsigned int mod;
+    KeySym keysym;
+    char **cmd;
+    WMAction action; // Sostituisce la logica confusa di arg
+    int arg;         // Usato SOLO quando serve un valore numerico (es. l'ID del workspace)
+} KeyBinds;
 
 #define MODIFIER Mod4Mask
 // #define MODIFIER Mod1Mask
 #define WS_MODIFIER ShiftMask
 
 //macro per genereare i workaspce nel chill
+
 #define WORKSPACE_KEYS(KEY, WS_INDEX) \
-    { MODIFIER,             KEY, NULL, WS_INDEX }, \
-    { MODIFIER|WS_MODIFIER,   KEY, NULL, WS_INDEX }
+    { MODIFIER,             KEY, NULL, ACTION_WORKSPACE, WS_INDEX }, \
+    { MODIFIER|WS_MODIFIER,   KEY, NULL, ACTION_WORKSPACE, WS_INDEX }
 
 
 //----------------------//
@@ -45,36 +61,22 @@ static char *rofi_cmd[] = {"rofi", "-show", "drun", NULL};
 
 
 static KeyBinds keys[] = {
-// Modificatore | Tasto | Comando
+    // Modificatore | Tasto | Comando Esterno | Azione WM | Argomento (se serve)
+    {MODIFIER, XK_Return, term_cmd,  ACTION_NONE,              0},
+    {MODIFIER, XK_o,      clock_cmd, ACTION_NONE,              0},
+    {MODIFIER, XK_d,      rofi_cmd,  ACTION_NONE,              0},
 
-	{MODIFIER, XK_Return, term_cmd, -1},
-	// {MODIFIER, XK_o, firefox_cmd},
-	{MODIFIER, XK_o, clock_cmd, -1},
-	{MODIFIER, XK_d, rofi_cmd, -1},
+    {MODIFIER,            XK_q,      NULL, ACTION_KILL,              0},
+    {MODIFIER|ShiftMask,  XK_m,      NULL, ACTION_MOVE_MONITOR,      0},
+    {MODIFIER,            XK_j,      NULL, ACTION_FOCUS_NEXT,        0},
+    {MODIFIER,            XK_k,      NULL, ACTION_FOCUS_PREV,        0},
+    {MODIFIER,            XK_f,      NULL, ACTION_TOGGLE_FULLSCREEN, 0},
+    {MODIFIER|ShiftMask,  XK_j,      NULL, ACTION_SWAP_NEXT,         0},
+    {MODIFIER|ShiftMask,  XK_k,      NULL, ACTION_SWAP_PREV,         0},
+    {MODIFIER|ShiftMask,  XK_space,  NULL, ACTION_TOGGLE_FLOATING,   0},
 
-
-	// Nella tua lista dei keybinds (es. struct Key keys[])
-
-	{MODIFIER,              XK_q,      NULL,      -1},// Chiude la finestra focalizzata												  
-    
-	{MODIFIER|ShiftMask,    XK_m,      NULL,      -2}, // Sposta la finestra sul monitor opposto
-    
-	{MODIFIER,              XK_j,      NULL,      -3}, // Focus Finestra Successiva
-    {MODIFIER,              XK_k,      NULL,      -4},
-
-	// Toggle Fullscreen
-	{MODIFIER,              XK_f,      NULL,      -5},
-
-    {MODIFIER|ShiftMask,    XK_j,      NULL,      -6}, // Swap in BASSO   (Vim Down)
-    {MODIFIER|ShiftMask,    XK_k,      NULL,      -7}, // Swap in ALTO    (Vim Up)
-
-	{MODIFIER|ShiftMask,    XK_space,  NULL,      -8}, // Mod + Spazio = Toggle Floating/Tiling
-	
-	// in future
-	// { MODIFIER, XK_r, NULL, -9 },// Esempio da aggiungere alla tua struct keys[]:
-
-	//bind per tutti i workspace
-	WORKSPACE_KEYS(XK_1, 0),
+    // Workspacebinds generati dalla macro
+    WORKSPACE_KEYS(XK_1, 0),
     WORKSPACE_KEYS(XK_2, 1),
     WORKSPACE_KEYS(XK_3, 2),
     WORKSPACE_KEYS(XK_4, 3),
@@ -84,7 +86,6 @@ static KeyBinds keys[] = {
     WORKSPACE_KEYS(XK_8, 7),
     WORKSPACE_KEYS(XK_9, 8),
     WORKSPACE_KEYS(XK_0, 9),
-
 };
 
 //----------------------//
