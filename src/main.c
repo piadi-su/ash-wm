@@ -1159,6 +1159,7 @@ int main(int argc, char *argv[])
     XButtonEvent mouse_start;
     mouse_start.subwindow = None;
 
+	Window click_win;
 
 
 	Display *disp = XOpenDisplay(NULL);
@@ -1190,7 +1191,6 @@ int main(int argc, char *argv[])
 
 	XSync(disp, False);
 
-	
 	//read config.h binds
 	unsigned int modifiers[] = { 0, LockMask, Mod2Mask, LockMask | Mod2Mask };
 
@@ -1387,6 +1387,14 @@ int main(int argc, char *argv[])
 
 
 			case ButtonPress:
+
+				click_win = Ev.xbutton.subwindow;
+
+                // Se clicchi sulla barra, ignoriamo il click: non si trascina!
+                if (IsDock(disp, click_win)) {
+                    break; 
+                }
+
 				if (Ev.xbutton.subwindow != None) {
 					XGetWindowAttributes(disp, Ev.xbutton.subwindow, &mouse_attr);
 
@@ -1425,6 +1433,11 @@ int main(int argc, char *argv[])
 				break;
 
 			case MotionNotify:
+
+				if (IsDock(disp, mouse_start.subwindow)) {
+                    break;
+                }
+
 				if (mouse_start.subwindow != None) {
 					// calcolate mouse mv 
 					int xdiff = Ev.xbutton.x_root - mouse_start.x_root;
@@ -1518,6 +1531,12 @@ int main(int argc, char *argv[])
 				break;
 
 			case ButtonRelease:
+				click_win = Ev.xbutton.subwindow; // o ev.xbutton.window
+
+				if (IsDock(disp, click_win)) {
+					break; // Ignora il click, non avviare il dragging/floating!
+				}
+
 				if (mouse_start.subwindow != None) {
 					int ws = -1;
 					Client *found_client = NULL;
@@ -1558,6 +1577,8 @@ int main(int argc, char *argv[])
 
 				//mouse movement
 			case EnterNotify:
+
+
 				if (Ev.xcrossing.mode != NotifyNormal || Ev.xcrossing.detail == NotifyInferior)
 					break;
 
