@@ -9,6 +9,8 @@
 #include <X11/XKBlib.h>
 #include <X11/extensions/Xinerama.h>
 
+#include "config.h"
+
 #define VERSION 1
 
 //for debug purpuse
@@ -18,8 +20,68 @@
     #define DEBUG_LOG(...) do {} while (0)
 #endif
 
+
+#define WORKSPACES_X_MONITOR 10
+#define WORKSPACES (WORKSPACES_X_MONITOR * N_MONITORS)
+
+
+//for bar positioning
+typedef struct {
+    unsigned long left, right, top, bottom;
+} Strut;
+
+
+// strcut to define monitors,
+typedef struct {
+	int id;
+	int x,y;
+	int width,height;
+	int current_ws;
+} Monitors ;
+
+
+
+//strcut for client
+typedef struct Client {
+	Window id;
+	int monitor_id;
+
+    int is_floating;   // 1 mouse, 0 tiling
+    int is_fullscreen; // 1 if full screen
+
+
+    int x, y; 
+	unsigned int w, h; 
+	
+
+    int old_x, old_y; 
+    unsigned int old_w, old_h;
+
+	struct Client *next;
+	struct Client *prev;
+
+}Client;
+
+
+
+//struct for workspace
+typedef struct{
+	int id;
+	int monitor_id;
+	Client *list_Cl;
+}Workspace ;
+
+Monitors monitors[N_MONITORS];
+int monitors_count = {0};
+Workspace workspaces[WORKSPACES];
+
+
+
+
 //IPC
 void UpdateBarIPC(Display *disp, Window root);
+
+Client* FindClientByWindow(Window w, int *out_ws);
 
 void FocusWindow(Display *disp, Window w);
 void AddWindowList(Display *disp, Window w, Window root);
@@ -29,7 +91,7 @@ void RemoveWindowList(Display *disp, Window w, Window root);
 void KillWindow(Display  *disp, Window root);
 void Dwindle(Display *disp, int ws_index);
 void UpdateCurrentMonitor(Display *disp, Window root);
-void MoveWindowToMonitor(Display *disp, Window root);
+void MoveWindowToMonitor(Display *disp, Window root, Window w);
 unsigned long GetXColor(Display *disp, unsigned long hex_color);
 void CycleFocus(Display *disp, int direction);
 void ToggleFullscreen(Display *disp, Window root);

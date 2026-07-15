@@ -30,59 +30,6 @@
 #include "config.h"
 #include  "func.h"
 
-#define WORKSPACES_X_MONITOR 10
-#define WORKSPACES (WORKSPACES_X_MONITOR * N_MONITORS)
-
-
-//for bar positioning
-typedef struct {
-    unsigned long left, right, top, bottom;
-} Strut;
-
-
-// strcut to define monitors,
-typedef struct {
-	int id;
-	int x,y;
-	int width,height;
-	int current_ws;
-} Monitors ;
-
-
-
-//strcut for client
-typedef struct Client {
-	Window id;
-	int monitor_id;
-
-    int is_floating;   // 1 mouse, 0 tiling
-    int is_fullscreen; // 1 if full screen
-
-
-    int x, y; 
-	unsigned int w, h; 
-	
-
-    int old_x, old_y; 
-    unsigned int old_w, old_h;
-
-	struct Client *next;
-	struct Client *prev;
-
-}Client;
-
-
-
-//struct for workspace
-typedef struct{
-	int id;
-	int monitor_id;
-	Client *list_Cl;
-}Workspace ;
-
-Monitors monitors[N_MONITORS];
-int monitors_count = {0};
-Workspace workspaces[WORKSPACES];
 
 
 
@@ -190,6 +137,25 @@ IsDock(Display *disp, Window w) {
 }
 
 //-----------------------------//
+Client* FindClientByWindow(Window w, int *out_ws) {
+    for (int ws = 0; ws < WORKSPACES; ws++) {
+        Client *head = workspaces[ws].list_Cl;
+        if (head == NULL) continue;
+
+        Client *curr = head;
+        do {
+            if (curr->id == w) {
+                if (out_ws) *out_ws = ws;
+                return curr;
+            }
+            curr = curr->next;
+        } while (curr != head);
+    }
+    if (out_ws) *out_ws = -1;
+    return NULL;
+}
+
+//-----------------------------//
 
 
 
@@ -198,6 +164,12 @@ void
 FocusWindow(Display *disp, Window w) {
     if (w == None) return;
 
+    // Protezione: Se è una barra, dale pure il focus di X11 (se serve) ma non toccare il tiling o i bordi
+    if (IsDock(disp, w)) {
+        XSetInputFocus(disp, w, RevertToParent, CurrentTime);
+        return;
+    }
+
     XWindowAttributes attrs;
     if (XGetWindowAttributes(disp, w, &attrs)) {
         if (attrs.map_state != IsViewable) {
@@ -205,34 +177,19 @@ FocusWindow(Display *disp, Window w) {
         }
     }
 
-    // assing focus
+    // Assign focus
     XSetInputFocus(disp, w, RevertToParent, CurrentTime);
     XRaiseWindow(disp, w); 
 
-	//find window workspace
+    // Find window workspace
     int target_ws = -1;
-    Client *found = NULL;
-
-    for (int i = 0; i < WORKSPACES; i++) {
-        Client *cursor = workspaces[i].list_Cl;
-        if (cursor != NULL) {
-            do {
-                if (cursor->id == w) {
-                    target_ws = i;
-                    found = cursor;
-                    break;
-                }
-                cursor = cursor->next;
-            } while (cursor != workspaces[i].list_Cl);
-        }
-        if (target_ws != -1) break;
-    }
+    Client *found = FindClientByWindow(w, &target_ws);
 
     if (target_ws == -1 || found == NULL) return;
 
     RaiseFloatingWindows(disp, target_ws);
 
-	//update bords
+    // Update borders
     Client *curr = workspaces[target_ws].list_Cl;
     if (curr == NULL) return;
 
@@ -498,33 +455,10 @@ MoveToWorkspace(Display *disp, Window root, int target_local_id) {
 void 
 RemoveWindowList(Display *disp, Window w, Window root)
 {
-	Client *found = NULL;
 	int ws_index = -1;
+	Client *found = FindClientByWindow(w, &ws_index);
 	
-	for(int i = 0; i < WORKSPACES; i++)
-	{
-		Client *cursor = workspaces[i].list_Cl;
 
-		if(cursor != NULL){
-
-			do{
-				if(cursor->id == w)
-				{
-					found = cursor;
-					ws_index = i;
-					break;
-				}
-
-				cursor = cursor->next;
-			}while(cursor != workspaces[i].list_Cl);
-
-		}
-
-		if(found != NULL)
-			break;
-
-
-	}
 
 	if(found == NULL)
 		return;
@@ -832,46 +766,25 @@ UpdateCurrentMonitor(Display *disp, Window root)
 
 
 void 
-MoveWindowToMonitor(Display *disp, Window root)
+MoveWindowToMonitor(Display *disp, Window root, Window w)
 {
-    if (monitors_count <= 1)
-        return;
-
-    Window focused_win;
-    int revert_to;
-    XGetInputFocus(disp, &focused_win, &revert_to);
-
-    if (focused_win == None || focused_win == root)
+    if (monitors_count <= 1 || w == None || w == root)
         return;
 
     int source_ws = -1;
-    Client *found = NULL;
-
-    for (int i = 0; i < WORKSPACES; i++) {
-        Client *cursor = workspaces[i].list_Cl;
-        if (cursor != NULL) {
-            do {
-                if (cursor->id == focused_win) {
-                    source_ws = i;
-                    found = cursor;
-                    break;
-                }
-                cursor = cursor->next;
-            } while (cursor != workspaces[i].list_Cl);
-        }
-        if (source_ws != -1)
-            break;
-    }
+    Client *found = FindClientByWindow(w, &source_ws);
 
     if (source_ws == -1 || found == NULL)
         return;
 
     int current_monitor = source_ws / WORKSPACES_X_MONITOR;
-	int target_monitor = (current_monitor + 1) % monitors_count;
+    int target_monitor = (current_monitor + 1) % monitors_count;
     int ws_target = monitors[target_monitor].current_ws;
 
     DEBUG_LOG("[ASH-WM] mv window %lu from Monitor %d (WS %d) to Monitor %d (WS %d)\n", 
-           focused_win, current_monitor, source_ws, target_monitor, ws_target);
+           w, current_monitor, source_ws, target_monitor, ws_target);
+
+    XUnmapWindow(disp, found->id);
 
     if (found->next == found) {
         workspaces[source_ws].list_Cl = NULL; 
@@ -900,11 +813,16 @@ MoveWindowToMonitor(Display *disp, Window root)
     Dwindle(disp, ws_target);
     Dwindle(disp, source_ws);
 
-    XWarpPointer(disp, None, found->id, 0, 0, 0, 0, found->w / 2, found->h / 2);
-    FocusWindow(disp, found->id);
-
-    if (workspaces[source_ws].list_Cl == NULL) {
-        XSetInputFocus(disp, root, RevertToParent, CurrentTime);
+    if (monitors[target_monitor].current_ws == ws_target) {
+        XMapWindow(disp, found->id); 
+        XWarpPointer(disp, None, found->id, 0, 0, 0, 0, found->w / 2, found->h / 2);
+        FocusWindow(disp, found->id);
+    } else {
+        if (workspaces[source_ws].list_Cl != NULL) {
+            FocusWindow(disp, workspaces[source_ws].list_Cl->id);
+        } else {
+            XSetInputFocus(disp, root, RevertToParent, CurrentTime);
+        }
     }
 
     XSync(disp, False);
@@ -1113,7 +1031,7 @@ RaiseFloatingWindows(Display *disp, int ws_index)
 }
 
 
-
+//----
 int
 XErrorHandlerImpl(Display *disp, XErrorEvent *ee)
 {
@@ -1129,6 +1047,7 @@ XErrorHandlerImpl(Display *disp, XErrorEvent *ee)
     fprintf(stderr, "[ASH-WM] Error fatal X11: major %d, error %d\n", ee->request_code, ee->error_code);
     return 0; 
 }
+
 
 
 
@@ -1160,6 +1079,7 @@ int main(int argc, char *argv[])
     mouse_start.subwindow = None;
 
 	Window click_win;
+	Window focused_win;
 
 
 	Display *disp = XOpenDisplay(NULL);
@@ -1308,7 +1228,16 @@ int main(int argc, char *argv[])
                                     break;
                                     
                                 case ACTION_MOVE_MONITOR:
-                                    MoveWindowToMonitor(disp, root);
+									focused_win = None;
+									int revert_to;
+
+									// Chiediamo a X11 qual è la finestra attiva in questo millesimo di secondo
+									XGetInputFocus(disp, &focused_win, &revert_to);
+
+									// Se c'è una finestra effettivamente focalizzata (e non è il desktop/root)
+									if (focused_win != None && focused_win != root) {
+										MoveWindowToMonitor(disp, root, focused_win);
+									}
                                     break;
                                     
                                 case ACTION_FOCUS_NEXT:

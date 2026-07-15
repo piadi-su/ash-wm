@@ -65,7 +65,7 @@ typedef struct {
 //ALL COMMANDS
 static char *term_cmd[] = {"alacritty", NULL};
 static char *firefox_cmd[] = {"firefox", NULL};
-static char *files_cmd[] = {"thunar", NULL};
+static char *files_cmd[] = {"xclock", NULL};
 static char *rofi_cmd[] = {"rofi", "-show", "drun", NULL};
 
 
