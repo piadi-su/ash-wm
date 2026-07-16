@@ -36,7 +36,7 @@
 
 //-----------------------------//
 
-//workspace ipc FATTA
+//workspace ipc 
 void
 UpdateBarIPC(Display *disp, Window root)
 {
@@ -156,7 +156,7 @@ GetMouseMonitor(Display *disp, Window root)
     Window root_return, child_return;
     int root_x, root_y, win_x, win_y;
     unsigned int mask;
-    int target = 0; // Default sul primo monitor
+    int target = 0; 
 
     if (XQueryPointer(disp, root, &root_return, &child_return, &root_x, &root_y, &win_x, &win_y, &mask)) {
         for (int i = 0; i < monitors_count; i++) {
@@ -211,20 +211,16 @@ DetachClient(int ws, Client *c)
     if (c == NULL || ws < 0 || ws >= WORKSPACES) return;
     if (workspaces[ws].list_Cl == NULL) return;
 
-    // 1. Se era l'unico elemento, il workspace diventa vuoto
     if (c->next == c) {
         workspaces[ws].list_Cl = NULL;
     } else {
-        // 2. Se stiamo rimuovendo proprio la testa, spostiamo prima la testa sul prossimo
         if (workspaces[ws].list_Cl == c) {
             workspaces[ws].list_Cl = c->next;
         }
-        // 3. Ora scolleghiamo in sicurezza il nodo 'c' riallacciando i suoi vicini
         c->prev->next = c->next;
         c->next->prev = c->prev;
     }
     
-    // 4. Isola completamente il client rimosso
     c->next = NULL;
     c->prev = NULL;
 }
@@ -236,7 +232,6 @@ void
 FocusWindow(Display *disp, Window w) {
     if (w == None) return;
 
-    // Protezione: Se è una barra, dale pure il focus di X11 (se serve) ma non toccare il tiling o i bordi
     if (IsDock(disp, w)) {
         XSetInputFocus(disp, w, RevertToParent, CurrentTime);
         return;
@@ -249,11 +244,9 @@ FocusWindow(Display *disp, Window w) {
         }
     }
 
-    // Assign focus
     XSetInputFocus(disp, w, RevertToParent, CurrentTime);
     XRaiseWindow(disp, w); 
 
-    // Find window workspace
     int target_ws = -1;
     Client *found = FindClientByWindow(w, &target_ws);
 
@@ -261,7 +254,6 @@ FocusWindow(Display *disp, Window w) {
 
     RaiseFloatingWindows(disp, target_ws);
 
-    // Update borders
     Client *curr = workspaces[target_ws].list_Cl;
     if (curr == NULL) return;
 
@@ -303,7 +295,7 @@ AddWindowList(Display *disp, Window w, Window root)
 	// see if window is made for bypass the wm
 	if (wa.override_redirect || IsDock(disp, w)) {
 		XSelectInput(disp, w, StructureNotifyMask);
-		XMapWindow(disp, w); // Mappa la barra ma NON inserirla nella lista di tiling!
+		XMapWindow(disp, w); 
 		return;
 
 	}
@@ -414,7 +406,6 @@ MoveToWorkspace(Display *disp, Window root, int target_local_id) {
     Client *cursor = NULL;
     Client *found = NULL;
 
-    // 1. Trova il workspace di origine
     for(int i = 0; i < WORKSPACES; i++) {
         cursor = workspaces[i].list_Cl;
         if(cursor != NULL) {
@@ -860,29 +851,21 @@ MoveWindowToMonitor(Display *disp, Window root, Window w)
     DEBUG_LOG("[ASH-WM] mv window %lu from Monitor %d (WS %d) to Monitor %d (WS %d)\n", 
            w, current_monitor, source_ws, target_monitor, ws_target);
 
-    // 1. Sganciamo il client dal vecchio workspace usando l'helper sicuro (NO crash)
     DetachClient(source_ws, found);
 
-    // Se il workspace di destinazione NON è attivo sul monitor target, nascondiamo la finestra.
-    // Usiamo XMoveWindow posizionandola fuori dallo schermo invece di XUnmapWindow,
-    // così evitiamo di scatenare l'evento UnmapNotify che distruggerebbe il client!
     if (workspaces[ws_target].monitor_id == -1) {
         XMoveWindow(disp, found->id, -2000, -2000);
     } else {
-        // Altrimenti, muoviamola preventivamente nell'area del monitor di destinazione
         found->x = monitors[target_monitor].x + GAPS;
         found->y = monitors[target_monitor].y + GAPS;
         XMoveWindow(disp, found->id, found->x, found->y);
     }
 
-    // 2. Agganciamo il client al nuovo workspace usando l'helper
     AttachClient(ws_target, found);
 
-    // 3. Ricalcoliamo il layout per entrambi i workspace
     Dwindle(disp, ws_target);
     Dwindle(disp, source_ws);
 
-    // 4. Gestione del focus e del mouse
     if (monitors[target_monitor].current_ws == ws_target) {
         XMapWindow(disp, found->id); 
         XWarpPointer(disp, None, found->id, 0, 0, 0, 0, found->w / 2, found->h / 2);
@@ -1252,8 +1235,7 @@ int main(int argc, char *argv[])
 
 	
 
-	//test
-	//inizialize all 20 workspaces
+	//inizialize all workspaces
 	for(int i = 0 ; i < WORKSPACES; i++)
 	{
 		workspaces[i].id = 0;
@@ -1422,7 +1404,6 @@ int main(int argc, char *argv[])
 
 				click_win = Ev.xbutton.subwindow;
 
-                // Se clicchi sulla barra, ignoriamo il click: non si trascina!
                 if (IsDock(disp, click_win)) {
                     break; 
                 }
@@ -1563,10 +1544,10 @@ int main(int argc, char *argv[])
 				break;
 
 			case ButtonRelease:
-				click_win = Ev.xbutton.subwindow; // o ev.xbutton.window
+				click_win = Ev.xbutton.subwindow; // or ev.xbutton.window
 
 				if (IsDock(disp, click_win)) {
-					break; // Ignora il click, non avviare il dragging/floating!
+					break; 
 				}
 
 				if (mouse_start.subwindow != None) {
@@ -1607,7 +1588,7 @@ int main(int argc, char *argv[])
 
 
 
-				//mouse movement
+			//mouse movement
 			case EnterNotify:
 
 
