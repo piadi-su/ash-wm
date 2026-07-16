@@ -18,9 +18,10 @@ It follows its philosophy: to configure or change something, you edit the source
 
 ## Features
 
-- ash-wm use Dwindle as it's main tyling layout
-- it commpact with is ~1800 lines of code
-- uses just ~4mb of ram 
+- "ash-wm uses Dwindle as its main tiling layout
+- It is compact, with only is ~1800 lines of code
+- IPC and EWMH support
+- uses less than ~4mb of ram 
 
 
 ## config
@@ -37,16 +38,14 @@ sudo make install
 
 ## DEMO
 
-![AshWM Demo](img/old_demo.gif)
+![AshWM Demo](img/demo.gif)
 
-(the gray thing on top is a bar i'm working on)
 ---
+the bar on top is ashes, a bar especially made for ash-wm
+Link: (the link will be added when the repository goes public)
 
-pls report with and issue or even pr if you find any bugs
+pls report with an issue or even a PR if you find any bugs, thx
 
-### things to add
-- [ ] window resize
-- [ ] and more
 
 
 ---
