@@ -101,5 +101,7 @@ void ResizeFocusedWindow(Display *disp, Window root, int direction);
 void RaiseFloatingWindows(Display *disp, int ws_index);
 int XErrorHandlerImpl(Display *disp, XErrorEvent *ee);
 void sigchld(int unused);
+void CleanupWM(Display *disp, Window root);
+
 
 #endif

@@ -612,18 +612,20 @@ Dwindle(Display *disp, int ws_index)
 	Window root_return, parent_return, *children;
     unsigned int nchildren;
 
+	XGrabServer(disp); // Congela temporaneamente le modifiche di stato asincrone su X11
 	if (XQueryTree(disp, DefaultRootWindow(disp), &root_return, &parent_return, &children, &nchildren)) {
-        for (unsigned int i = 0; i < nchildren; i++) {
-			//read if w require space 
-            Strut s = GetWindowStrut(disp, children[i]);
-            
-            if (s.top > pad_top)       pad_top = s.top;
-            if (s.bottom > pad_bottom) pad_bottom = s.bottom;
-            if (s.left > pad_left)     pad_left = s.left;
-            if (s.right > pad_right)   pad_right = s.right;
-        }
-        if (children) XFree(children);
-    }
+		for (unsigned int i = 0; i < nchildren; i++) {
+			// Leggiamo se la finestra richiede spazio (barre di sistema, ecc.)
+			Strut s = GetWindowStrut(disp, children[i]);
+
+			if (s.top > pad_top)       pad_top = s.top;
+			if (s.bottom > pad_bottom) pad_bottom = s.bottom;
+			if (s.left > pad_left)     pad_left = s.left;
+			if (s.right > pad_right)   pad_right = s.right;
+		}
+		if (children) XFree(children);
+	}
+	XUngrabServer(disp);
 
 	mx += pad_left;
     mw -= (pad_left + pad_right);
@@ -1077,15 +1079,33 @@ XErrorHandlerImpl(Display *disp, XErrorEvent *ee)
     return 0; 
 }
 
-
-
 void sigchld(int unused) {
-	(void)unused;
-    if (signal(SIGCHLD, sigchld) == SIG_ERR) {
-        perror("ashwm: impossible SIGCHLD");
-        exit(1);
-    }
+    (void)unused;
     while (waitpid(-1, NULL, WNOHANG) > 0);
+}
+
+
+void
+CleanupWM(Display *disp, Window root)
+{
+    XUngrabKey(disp, AnyKey, AnyModifier, root);
+    XUngrabButton(disp, AnyButton, AnyModifier, root);
+
+    for (int i = 0; i < WORKSPACES; i++) {
+        Client *head = workspaces[i].list_Cl;
+        if (head == NULL) continue;
+
+        Client *curr = head;
+        Client *next;
+        do {
+            next = curr->next;
+            free(curr);
+            curr = next;
+        } while (curr != head);
+        workspaces[i].list_Cl = NULL;
+    }
+    
+    DEBUG_LOG("[ASH-WM] Cleanup completed: memory and grab freed.\n");
 }
 
 
@@ -1108,8 +1128,6 @@ int main(int argc, char *argv[])
 		return 0;
     }
 	
-	//test kill child process
-	sigchld(0);
 
 
 	XEvent Ev;
@@ -1231,7 +1249,16 @@ int main(int argc, char *argv[])
 	}
 
 	
-	signal(SIGCHLD, SIG_IGN);
+	
+	struct sigaction sa;
+	sa.sa_handler = sigchld;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
+	if (sigaction(SIGCHLD, &sa, NULL) == -1) {
+		perror("ashwm: error sigaction");
+		exit(EXIT_FAILURE);
+	}
+
 	while(1)
 	{
 
@@ -1599,6 +1626,27 @@ int main(int argc, char *argv[])
 				RemoveWindowList(disp ,Ev.xdestroywindow.window, root);
 				break;
 
+			case UnmapNotify:
+				{
+					int ws_idx = -1;
+					Client *c = FindClientByWindow(Ev.xunmap.window, &ws_idx);
+
+					if (c != NULL && ws_idx != -1) {
+						int monitor_del_ws = workspaces[ws_idx].monitor_id;
+
+						// Se il workspace della finestra non è assegnato a nessun monitor attivo (-1),
+						// significa che è stato nascosto volontariamente dal WM. Ignoriamo l'evento!
+						if (monitor_del_ws == -1) {
+							break;
+						}
+					}
+
+					// Se l'unmap avviene sul workspace attivo, l'app si sta chiudendo o riducendo a icona.
+					// In questo caso la rimuoviamo in modo pulito.
+					RemoveWindowList(disp, Ev.xunmap.window, root);
+				}
+				break;
+
 
 
 
@@ -1612,6 +1660,7 @@ int main(int argc, char *argv[])
 	}
 
 
+	CleanupWM(disp, root);
 	XCloseDisplay(disp);
 	return 0;
 }
