@@ -71,6 +71,7 @@ typedef struct{
 	Client *list_Cl;
 }Workspace ;
 
+
 Monitors monitors[N_MONITORS];
 int monitors_count = {0};
 Workspace workspaces[WORKSPACES];
@@ -81,8 +82,17 @@ Atom wm_delete_window;
 
 //IPC
 void UpdateBarIPC(Display *disp, Window root);
+int IsDock(Display *disp, Window w);
+Window GetFocusedWindow(Display *disp);
 
+//func use 
 Client* FindClientByWindow(Window w, int *out_ws);
+int GetMouseMonitor(Display *disp, Window root);
+
+//wm 
+
+void AttachClient(int ws, Client *c);
+void DetachClient(int ws, Client *c);
 
 void FocusWindow(Display *disp, Window w);
 void AddWindowList(Display *disp, Window w, Window root);
@@ -94,9 +104,9 @@ void Dwindle(Display *disp, int ws_index);
 void UpdateCurrentMonitor(Display *disp, Window root);
 void MoveWindowToMonitor(Display *disp, Window root, Window w);
 unsigned long GetXColor(Display *disp, unsigned long hex_color);
-void CycleFocus(Display *disp, int direction);
+void CycleFocus(Display *disp, Window root, int direction);
 void ToggleFullscreen(Display *disp, Window root);
-void SwapDwindleDirectional(Display *disp, int direction);
+void SwapDwindleDirectional(Display *disp, Window root , int direction);
 void ResizeFocusedWindow(Display *disp, Window root, int direction);
 void RaiseFloatingWindows(Display *disp, int ws_index);
 int XErrorHandlerImpl(Display *disp, XErrorEvent *ee);

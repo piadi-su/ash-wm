@@ -36,26 +36,15 @@
 
 //-----------------------------//
 
-//workspace ipc
+//workspace ipc FATTA
 void
 UpdateBarIPC(Display *disp, Window root)
 {
-    char status[256] = ""; // Aumentato a 256 per contenere tutti i workspace
-    
-    // Trova il monitor attivo sotto il mouse
-    Window dummy_win; int dummy_int; unsigned int dummy_mask;
-    int mouse_x, mouse_y; int active_mon_idx = 0;
-    XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
-    for (int i = 0; i < monitors_count; i++) {
-        if (mouse_x >= monitors[i].x && mouse_x < (monitors[i].x + monitors[i].width) &&
-            mouse_y >= monitors[i].y && mouse_y < (monitors[i].y + monitors[i].height)) {
-            active_mon_idx = i; 
-            break;
-        }
-    }
+    char status[256] = "";     
+
+	int active_mon_idx = GetMouseMonitor(disp, root);
     int active_ws = monitors[active_mon_idx].current_ws;
 
-    // Cicla su TUTTI i monitor e su tutti i loro workspace
     for (int m = 0; m < monitors_count; m++) {
         for (int i = 0; i < WORKSPACES_X_MONITOR; i++) {
             int real_ws = (m * WORKSPACES_X_MONITOR) + i;
@@ -68,7 +57,6 @@ UpdateBarIPC(Display *disp, Window root)
             }
             
             char buf[16];
-            // Scriviamo il ID reale (0..19) così la barra sa esattamente a quale monitor appartiene!
             snprintf(buf, sizeof(buf), "%d:%c ", real_ws, ws_status);
             strcat(status, buf);
         }
@@ -141,6 +129,9 @@ IsDock(Display *disp, Window w) {
 }
 
 //-----------------------------//
+
+//func used func
+
 Client* FindClientByWindow(Window w, int *out_ws) {
     for (int ws = 0; ws < WORKSPACES; ws++) {
         Client *head = workspaces[ws].list_Cl;
@@ -159,7 +150,84 @@ Client* FindClientByWindow(Window w, int *out_ws) {
     return NULL;
 }
 
+int 
+GetMouseMonitor(Display *disp, Window root) 
+{
+    Window root_return, child_return;
+    int root_x, root_y, win_x, win_y;
+    unsigned int mask;
+    int target = 0; // Default sul primo monitor
+
+    if (XQueryPointer(disp, root, &root_return, &child_return, &root_x, &root_y, &win_x, &win_y, &mask)) {
+        for (int i = 0; i < monitors_count; i++) {
+            if (root_x >= monitors[i].x && root_x < monitors[i].x + monitors[i].width &&
+                root_y >= monitors[i].y && root_y < monitors[i].y + monitors[i].height) {
+                target = i;
+                break;
+            }
+        }
+    }
+    return target;
+}
+
+Window 
+GetFocusedWindow(Display *disp) 
+{
+    Window focused;
+    int revert_to;
+    XGetInputFocus(disp, &focused, &revert_to);
+    return focused;
+}
+
+
 //-----------------------------//
+
+//wm func
+
+//client handling 
+void 
+AttachClient(int ws, Client *c) 
+{
+    if (c == NULL || ws < 0 || ws >= WORKSPACES) return;
+
+    if (workspaces[ws].list_Cl == NULL) {
+        c->next = c;
+        c->prev = c;
+        workspaces[ws].list_Cl = c;
+    } else {
+        Client *head = workspaces[ws].list_Cl;
+        Client *tail = head->prev;
+
+        tail->next = c;
+        c->prev = tail;
+        c->next = head;
+        head->prev = c;
+    }
+}
+
+void 
+DetachClient(int ws, Client *c) 
+{
+    if (c == NULL || ws < 0 || ws >= WORKSPACES) return;
+    if (workspaces[ws].list_Cl == NULL) return;
+
+    // 1. Se era l'unico elemento, il workspace diventa vuoto
+    if (c->next == c) {
+        workspaces[ws].list_Cl = NULL;
+    } else {
+        // 2. Se stiamo rimuovendo proprio la testa, spostiamo prima la testa sul prossimo
+        if (workspaces[ws].list_Cl == c) {
+            workspaces[ws].list_Cl = c->next;
+        }
+        // 3. Ora scolleghiamo in sicurezza il nodo 'c' riallacciando i suoi vicini
+        c->prev->next = c->next;
+        c->next->prev = c->prev;
+    }
+    
+    // 4. Isola completamente il client rimosso
+    c->next = NULL;
+    c->prev = NULL;
+}
 
 
 
@@ -215,76 +283,67 @@ FocusWindow(Display *disp, Window w) {
 /*
  * add a new window to the list 
  * from the Ev Ev.xmaprequest.window
- * */
+ *	
+ *  / c \
+ *  b    d
+ *  \ a /
+ *
+ * 
+ */
+
+
 void 
 AddWindowList(Display *disp, Window w, Window root)
 {
 
 	XWindowAttributes wa;
-    XGetWindowAttributes(disp, w, &wa);
+	XGetWindowAttributes(disp, w, &wa);
+
 
 	// see if window is made for bypass the wm
 	if (wa.override_redirect || IsDock(disp, w)) {
 		XSelectInput(disp, w, StructureNotifyMask);
 		XMapWindow(disp, w); // Mappa la barra ma NON inserirla nella lista di tiling!
 		return;
+
 	}
+
 
 	Client *new_window = calloc(1, sizeof(Client));
 	if (new_window == NULL)
 		return;
-	
+
+
+
 	//add window id to struct
 	new_window->id = w;
 	new_window->monitor_id = 0;
-	
-	
-	Window dummy_win;
-    int dummy_int;
-    unsigned int dummy_mask;
-    int mouse_x, mouse_y;
-	int target_monitor = 0; 
-
-	XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
 
 
-	for (int i = 0; i < monitors_count; i++) {
-        if (mouse_x >= monitors[i].x && mouse_x < (monitors[i].x + monitors[i].width) &&
-            mouse_y >= monitors[i].y && mouse_y < (monitors[i].y + monitors[i].height)) {
-            target_monitor = i;
-            break;
-        }
-    }
-	
+
+	int target_monitor = GetMouseMonitor(disp, root); 
 	int active_ws = monitors[target_monitor].current_ws;
 
 
+
 	DEBUG_LOG("[ASH-WM] window %lu spowned on Monitor %d -> saved in Workspace %d\n", 
-           w, target_monitor, active_ws);
+			w, target_monitor, active_ws);
 
-	
-	//-------------------------------------------//
 
-	/*
-	 *  / c \
-	 *  b    d
-	 *  \ a /
-     *
-	 * */
-		
-	//-------------------------------------------//
-	
 	XSelectInput(disp, w, EnterWindowMask | PropertyChangeMask);
 
+
 	// window as prev and next 
+
 	if (workspaces[active_ws].list_Cl == NULL) {
 		workspaces[active_ws].list_Cl = new_window;
 		workspaces[active_ws].list_Cl->next = workspaces[active_ws].list_Cl;
 		workspaces[active_ws].list_Cl->prev = workspaces[active_ws].list_Cl;
-
 	}
 
+
 	// circle ds
+
 	else {
 		Client *head = workspaces[active_ws].list_Cl;
 		new_window->next = head;
@@ -294,31 +353,19 @@ AddWindowList(Display *disp, Window w, Window root)
 	}
 
 
+
 	Dwindle(disp, active_ws);
 	UpdateBarIPC(disp, root);
-}
+
+} 
 
 
 
 void
 ChangeWorkspace(Display *disp, Window root, int target_local_id) 
 {
-    Window dummy_win;
-    int dummy_int;
-    unsigned int dummy_mask;
-    int mouse_x, mouse_y;
-    int mon_idx = 0;
 
-    XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
-
-    for (int i = 0; i < monitors_count; i++) {
-        if (mouse_x >= monitors[i].x && mouse_x < (monitors[i].x + monitors[i].width) &&
-            mouse_y >= monitors[i].y && mouse_y < (monitors[i].y + monitors[i].height)) {
-            mon_idx = i;
-            break;
-        }
-    }
-
+    int mon_idx = GetMouseMonitor(disp, root);
     int old_ws = monitors[mon_idx].current_ws;
     
 	// calcolate worksapce es 0-9, 10-19
@@ -354,12 +401,15 @@ ChangeWorkspace(Display *disp, Window root, int target_local_id)
 //move to worksapce
 void 
 MoveToWorkspace(Display *disp, Window root, int target_local_id) {
+
     Window focused_win;
     int revert_to;
 
     XGetInputFocus(disp, &focused_win, &revert_to);
+
     if(focused_win == None || focused_win == root) return;
-    
+
+
     int source_ws = -1;
     Client *cursor = NULL;
     Client *found = NULL;
@@ -383,36 +433,26 @@ MoveToWorkspace(Display *disp, Window root, int target_local_id) {
     if(source_ws == -1) return;
 
 
-	
-    Window dummy_win;
-    int dummy_int;
-    unsigned int dummy_mask;
-    int mouse_x, mouse_y;
-    int target_monitor = 0;
-
-    XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
-
-    for (int i = 0; i < monitors_count; i++) {
-        if (mouse_x >= monitors[i].x && mouse_x < (monitors[i].x + monitors[i].width) &&
-            mouse_y >= monitors[i].y && mouse_y < (monitors[i].y + monitors[i].height)) {
-            target_monitor = i;
-            break;
-        }
-    }
+    int target_monitor = GetMouseMonitor(disp, root);
 
     int ws_target = (target_monitor * WORKSPACES_X_MONITOR) + (target_local_id % WORKSPACES_X_MONITOR);
+
     if(source_ws == ws_target) return;
 
     DEBUG_LOG("[ASH-WM] mv window %lu from WS %d to WS %d (Monitor %d)\n", focused_win, source_ws, ws_target, target_monitor);
 
-    if(found->next == found) {
-        workspaces[source_ws].list_Cl = NULL;
-    } else {
-        found->prev->next = found->next;
-        found->next->prev = found->prev;
-        if(workspaces[source_ws].list_Cl == found) {
-            workspaces[source_ws].list_Cl = found->next;
-        }
+	if(found->next == found) {
+		workspaces[source_ws].list_Cl = NULL;
+	}
+	else
+	{
+		found->prev->next = found->next;
+		found->next->prev = found->prev;
+		
+		if(workspaces[source_ws].list_Cl == found) {
+			workspaces[source_ws].list_Cl = found->next;
+		}
+
     }
 
     found->x = monitors[target_monitor].x + GAPS;
@@ -421,77 +461,99 @@ MoveToWorkspace(Display *disp, Window root, int target_local_id) {
 
 
 
-    if(workspaces[ws_target].list_Cl == NULL) {
-        workspaces[ws_target].list_Cl = found;
-        found->next = found;
-        found->prev = found;
-    } else {
-        Client *head = workspaces[ws_target].list_Cl;
-        Client *tail = head->prev;
-        
-        found->next = head;
-        found->prev = tail;
-        tail->next = found;
-        head->prev = found;
-    }
 
-	Dwindle(disp, ws_target);
-	Dwindle(disp, source_ws);
+	if(workspaces[ws_target].list_Cl == NULL) 
+	{
 
+		workspaces[ws_target].list_Cl = found;
+		found->next = found;
+		found->prev = found;
+
+	} 
+	else
+	{
+		Client *head = workspaces[ws_target].list_Cl;
+		Client *tail = head->prev;
+
+		found->next = head;
+		found->prev = tail;
+		tail->next = found;
+		head->prev = found;
+
+	}
+
+
+    Dwindle(disp, ws_target);
+    Dwindle(disp, source_ws);
     XSync(disp, False);
 
-    if(workspaces[ws_target].monitor_id != -1) {
-        FocusWindow(disp, found->id);
-    } else {
-        if (workspaces[source_ws].list_Cl != NULL) {
-            FocusWindow(disp, workspaces[source_ws].list_Cl->id);
-        } else {
-            XSetInputFocus(disp, root, RevertToParent, CurrentTime);
-        }
-    }
+
+	if(workspaces[ws_target].monitor_id != -1) 
+	{
+		FocusWindow(disp, found->id);
+	} 
+	else 
+	{
+		if (workspaces[source_ws].list_Cl != NULL) {
+			FocusWindow(disp, workspaces[source_ws].list_Cl->id);
+		} 
+		else 
+		{
+			XSetInputFocus(disp, root, RevertToParent, CurrentTime);
+		}
+
+	}
+
     
+
     XSync(disp, False);
-	UpdateBarIPC(disp, root);
-}
+    UpdateBarIPC(disp, root);
+
+} 
 
 
 
 void 
 RemoveWindowList(Display *disp, Window w, Window root)
 {
-	int ws_index = -1;
-	Client *found = FindClientByWindow(w, &ws_index);
-	
+    int ws_index = -1;
+    Client *found = FindClientByWindow(w, &ws_index);
 
 
-	if(found == NULL)
-		return;
+    if(found == NULL)
+        return;
 
 
 
-	if(found->next == found) {
-		workspaces[ws_index].list_Cl = NULL;
-	}
-	else {
-		found->prev->next = found->next;
-		found->next->prev = found->prev;
 
-		if(workspaces[ws_index].list_Cl == found) {
-			workspaces[ws_index].list_Cl = found->next;
-		}
+    if(found->next == found) {
+        workspaces[ws_index].list_Cl = NULL;
+    }
 
-		if (workspaces[ws_index].monitor_id != -1) {
+    else {
+        found->prev->next = found->next;
+        found->next->prev = found->prev;
+
+
+        if(workspaces[ws_index].list_Cl == found) {
+            workspaces[ws_index].list_Cl = found->next;
+        }
+
+
+        if (workspaces[ws_index].monitor_id != -1) {
             FocusWindow(disp, workspaces[ws_index].list_Cl->id);
         }
-	}
 
-	DEBUG_LOG("[-] window %lu removed (WS %d)\n", w, ws_index);
-	free(found);
+    }
 
-	Dwindle(disp, ws_index);
-	UpdateBarIPC(disp, root);
 
-}
+    DEBUG_LOG("[-] window %lu removed (WS %d)\n", w, ws_index);
+    free(found);
+
+    Dwindle(disp, ws_index);
+    UpdateBarIPC(disp, root);
+
+} 
 
 
 
@@ -766,25 +828,8 @@ Dwindle(Display *disp, int ws_index)
 void 
 UpdateCurrentMonitor(Display *disp, Window root)
 {
-	Window dummy_win;
-	int dummy_int;
-	unsigned int dummy_mask;
-	int mouse_x, mouse_y;
-	int target_monitor = 0;
 
-	XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x , &mouse_y , &dummy_int, &dummy_int, &dummy_mask);
-	
-	for(int i = 0; i< monitors_count; i++)
-	{
-		if (mouse_x >= monitors[i].x && mouse_x < (monitors[i].x + monitors[i].width) &&
-				mouse_y >= monitors[i].y && mouse_y < (monitors[i].y + monitors[i].height)) {
-			target_monitor = i;
-			break;
-		}
-
-	}
-
-
+	int target_monitor = GetMouseMonitor(disp, root);
 	int active_ws = monitors[target_monitor].current_ws;
 
 	if(workspaces[active_ws].monitor_id != target_monitor)
@@ -815,35 +860,29 @@ MoveWindowToMonitor(Display *disp, Window root, Window w)
     DEBUG_LOG("[ASH-WM] mv window %lu from Monitor %d (WS %d) to Monitor %d (WS %d)\n", 
            w, current_monitor, source_ws, target_monitor, ws_target);
 
-    XUnmapWindow(disp, found->id);
+    // 1. Sganciamo il client dal vecchio workspace usando l'helper sicuro (NO crash)
+    DetachClient(source_ws, found);
 
-    if (found->next == found) {
-        workspaces[source_ws].list_Cl = NULL; 
+    // Se il workspace di destinazione NON è attivo sul monitor target, nascondiamo la finestra.
+    // Usiamo XMoveWindow posizionandola fuori dallo schermo invece di XUnmapWindow,
+    // così evitiamo di scatenare l'evento UnmapNotify che distruggerebbe il client!
+    if (workspaces[ws_target].monitor_id == -1) {
+        XMoveWindow(disp, found->id, -2000, -2000);
     } else {
-        found->prev->next = found->next;
-        found->next->prev = found->prev;
-        if (workspaces[source_ws].list_Cl == found) {
-            workspaces[source_ws].list_Cl = found->next;
-        }
+        // Altrimenti, muoviamola preventivamente nell'area del monitor di destinazione
+        found->x = monitors[target_monitor].x + GAPS;
+        found->y = monitors[target_monitor].y + GAPS;
+        XMoveWindow(disp, found->id, found->x, found->y);
     }
 
-    if (workspaces[ws_target].list_Cl == NULL) {
-        workspaces[ws_target].list_Cl = found;
-        found->next = found;
-        found->prev = found;
-    } else {
-        Client *head = workspaces[ws_target].list_Cl;
-        Client *tail = head->prev;
-        
-        found->next = head;
-        found->prev = tail;
-        tail->next = found;
-        head->prev = found;
-    }
+    // 2. Agganciamo il client al nuovo workspace usando l'helper
+    AttachClient(ws_target, found);
 
+    // 3. Ricalcoliamo il layout per entrambi i workspace
     Dwindle(disp, ws_target);
     Dwindle(disp, source_ws);
 
+    // 4. Gestione del focus e del mouse
     if (monitors[target_monitor].current_ws == ws_target) {
         XMapWindow(disp, found->id); 
         XWarpPointer(disp, None, found->id, 0, 0, 0, 0, found->w / 2, found->h / 2);
@@ -876,23 +915,12 @@ GetXColor(Display *disp, unsigned long hex_color)
 
 
 void 
-CycleFocus(Display *disp, int direction) {
-    Window dummy_win;
-    int dummy_int;
-    unsigned int dummy_mask;
-    int mouse_x, mouse_y;
-    int mon_idx = 0;
+CycleFocus(Display *disp , Window root, int direction) {
 
-    XQueryPointer(disp, DefaultRootWindow(disp), &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
-    for (int i = 0; i < monitors_count; i++) {
-        if (mouse_x >= monitors[i].x && mouse_x < (monitors[i].x + monitors[i].width) &&
-            mouse_y >= monitors[i].y && mouse_y < (monitors[i].y + monitors[i].height)) {
-            mon_idx = i;
-            break;
-        }
-    }
 
+    int mon_idx = GetMouseMonitor(disp, root);
     int ws = monitors[mon_idx].current_ws; 
+	
     Client *head = workspaces[ws].list_Cl;
     if (head == NULL) return; 
 
@@ -991,22 +1019,14 @@ ToggleFullscreen(Display *disp, Window root) {
 
 
 void 
-SwapDwindleDirectional(Display *disp, int direction) { 
+SwapDwindleDirectional(Display *disp,Window root, int direction) { 
     Window focused_win;
     int revert_to;
     XGetInputFocus(disp, &focused_win, &revert_to);
     if (focused_win == None) return;
 
-    Window dummy_win; int dummy_int; unsigned int dummy_mask;
-    int mouse_x, mouse_y; int mon_idx = 0;
-    XQueryPointer(disp, DefaultRootWindow(disp), &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
-    for (int i = 0; i < monitors_count; i++) {
-        if (mouse_x >= monitors[i].x && mouse_x < (monitors[i].x + monitors[i].width) &&
-            mouse_y >= monitors[i].y && mouse_y < (monitors[i].y + monitors[i].height)) {
-            mon_idx = i; break;
-        }
-    }
 
+	int mon_idx = GetMouseMonitor(disp, root);
     int ws = monitors[mon_idx].current_ws;
     Client *head = workspaces[ws].list_Cl;
     
@@ -1324,11 +1344,11 @@ int main(int argc, char *argv[])
                                     break;
                                     
                                 case ACTION_FOCUS_NEXT:
-                                    CycleFocus(disp, 1);
+                                    CycleFocus(disp, root, 1);
                                     break;
                                     
                                 case ACTION_FOCUS_PREV:
-                                    CycleFocus(disp, -1);
+                                    CycleFocus(disp, root, -1);
                                     break;
                                     
                                 case ACTION_TOGGLE_FULLSCREEN:
@@ -1336,11 +1356,11 @@ int main(int argc, char *argv[])
                                     break;
 
                                 case ACTION_SWAP_NEXT:
-                                    SwapDwindleDirectional(disp, 1);
+                                    SwapDwindleDirectional(disp, root, 1);
                                     break;
                                     
                                 case ACTION_SWAP_PREV:
-                                    SwapDwindleDirectional(disp, -1);
+                                    SwapDwindleDirectional(disp, root, -1);
                                     break;
 
                                 case ACTION_TOGGLE_FLOATING:
