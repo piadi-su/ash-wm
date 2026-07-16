@@ -1,12 +1,9 @@
-```
-              .__                                
-_____    _____|  |__             __  _  _______  
-\__  \  /  ___/  |  \    ______  \ \/ \/ /     \ 
- / __ \_\___ \|   Y  \  /_____/   \     /  Y Y  \
-(____  /____  >___|  /             \/\_/|__|_|  /
-     \/     \/     \/                         \/  
+![logo](img/ashwm-logo.png)
 
-```
+---
+
+# ash-wm
+
 
 **ash-wm** is a suckless X11 window manager inspired by `dwm`.
 It follows its philosophy: to configure or change something, you edit the source and compile it.
@@ -22,7 +19,7 @@ It follows its philosophy: to configure or change something, you edit the source
 ## Features
 
 - ash-wm use Dwindle as it's main tyling layout
-- it commpact with is ~1600
+- it commpact with is ~1800 lines of code
 - uses just ~4mb of ram 
 
 
@@ -40,7 +37,7 @@ sudo make install
 
 ## DEMO
 
-![AshWM Demo](img/demo.gif)
+![AshWM Demo](img/old_demo.gif)
 
 (the gray thing on top is a bar i'm working on)
 ---
