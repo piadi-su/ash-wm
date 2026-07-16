@@ -11,7 +11,7 @@
 
 #include "config.h"
 
-#define VERSION 1.1
+#define VERSION 1.2
 
 //for debug purpuse
 #ifdef DEBUG
@@ -76,18 +76,17 @@ Monitors monitors[N_MONITORS];
 int monitors_count = {0};
 Workspace workspaces[WORKSPACES];
 Atom wm_delete_window;
-
-
+double global_mfact = 0.5;
 
 
 //IPC
 void UpdateBarIPC(Display *disp, Window root);
 int IsDock(Display *disp, Window w);
-Window GetFocusedWindow(Display *disp);
 
 //func use 
 Client* FindClientByWindow(Window w, int *out_ws);
 int GetMouseMonitor(Display *disp, Window root);
+Window GetFocusedWindow(Display *disp);
 
 //wm 
 
@@ -98,7 +97,7 @@ void FocusWindow(Display *disp, Window w);
 void AddWindowList(Display *disp, Window w, Window root);
 void ChangeWorkspace(Display *disp, Window root, int new_ws);
 void MoveToWorkspace(Display *disp, Window root, int ws_target);
-void RemoveWindowList(Display *disp, Window w, Window root);
+void RemoveWindowList(Display *disp, Window w, Window root); 
 void KillWindow(Display  *disp, Window root);
 void Dwindle(Display *disp, int ws_index);
 void UpdateCurrentMonitor(Display *disp, Window root);
@@ -107,8 +106,9 @@ unsigned long GetXColor(Display *disp, unsigned long hex_color);
 void CycleFocus(Display *disp, Window root, int direction);
 void ToggleFullscreen(Display *disp, Window root);
 void SwapDwindleDirectional(Display *disp, Window root , int direction);
-void ResizeFocusedWindow(Display *disp, Window root, int direction);
 void RaiseFloatingWindows(Display *disp, int ws_index);
+void ResizeActiveWindow(Display *disp, Window root, int direction, int amount);
+
 int XErrorHandlerImpl(Display *disp, XErrorEvent *ee);
 void sigchld(int unused);
 void CleanupWM(Display *disp, Window root);

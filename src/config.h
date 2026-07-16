@@ -13,10 +13,16 @@ typedef enum {
     ACTION_FOCUS_NEXT,
     ACTION_FOCUS_PREV,
     ACTION_TOGGLE_FULLSCREEN,
+    ACTION_TOGGLE_FLOATING,
+	ACTION_WORKSPACE,
+
     ACTION_SWAP_NEXT,
     ACTION_SWAP_PREV,
-    ACTION_TOGGLE_FLOATING,
-	ACTION_WORKSPACE
+
+	ACTION_RESIZE_H_DEC,   
+    ACTION_RESIZE_H_INC,   
+    ACTION_RESIZE_V_DEC,   
+    ACTION_RESIZE_V_INC
 } WMAction;
 
 typedef struct {
@@ -49,29 +55,31 @@ typedef struct {
 
 //MOD key
 #define MODIFIER Mod4Mask //win
-// #define MODIFIER Mod1Mask //alt
 
 
-
+//mod for moving window to workpace
 #define WS_MODIFIER ShiftMask
 
 
 
+//number of your monitors
 #define N_MONITORS 2
 
 
-
+//window gaps
 #define GAPS 6
 
 
-
+//window border width
 #define BORDER_WIDTH 2
-// #define COLOR_FOCUS   0x5294E2      
 
 
 #define COLOR_FOCUS   0xff0000
 #define COLOR_UNFOCUS 0x000000
 
+// pixel umount when resize window  
+#define RESIZE_PX_UP 30
+#define RESIZE_PX_DIM -30
 
 
 
@@ -82,6 +90,7 @@ static char *files_cmd[] = {"xclock", NULL};
 static char *rofi_cmd[] = {"rofi", "-show", "drun", NULL};
 
 
+
 static KeyBinds keys[] = {
     // MOD | KEY | CMD | WM ACTION | ARGS (if needed)
 	
@@ -90,16 +99,30 @@ static KeyBinds keys[] = {
     {MODIFIER, XK_g,      files_cmd, ACTION_NONE,            0},
     {MODIFIER, XK_d,      rofi_cmd,  ACTION_NONE,              0},
 
+
+
     {MODIFIER,            XK_q,      NULL, ACTION_KILL,              0},
     {MODIFIER|ShiftMask,  XK_m,      NULL, ACTION_MOVE_MONITOR,      0},
-    {MODIFIER,            XK_j,      NULL, ACTION_FOCUS_NEXT,        0},
-    {MODIFIER,            XK_k,      NULL, ACTION_FOCUS_PREV,        0},
+	
     {MODIFIER,            XK_f,      NULL, ACTION_TOGGLE_FULLSCREEN, 0},
-    {MODIFIER|ShiftMask,  XK_j,      NULL, ACTION_SWAP_NEXT,         0},
-    {MODIFIER|ShiftMask,  XK_k,      NULL, ACTION_SWAP_PREV,         0},
     {MODIFIER|ShiftMask,  XK_space,  NULL, ACTION_TOGGLE_FLOATING,   0},
 
-    // Workspacebinds from macro
+	//FOCUS WINDOW
+    {MODIFIER,            XK_j,      NULL, ACTION_FOCUS_NEXT,        0},
+    {MODIFIER,            XK_k,      NULL, ACTION_FOCUS_PREV,        0},
+
+	//MOVE WINDOW
+    {MODIFIER|ShiftMask,  XK_l,      NULL, ACTION_SWAP_NEXT,        0},
+    {MODIFIER|ShiftMask,  XK_k,      NULL, ACTION_SWAP_PREV,        0},
+
+	//RESIZE WINDOW
+	{MODIFIER|ControlMask, XK_h,     NULL, ACTION_RESIZE_H_DEC,     0},
+    {MODIFIER|ControlMask, XK_l,     NULL, ACTION_RESIZE_H_INC,     0},
+    {MODIFIER|ControlMask, XK_k,     NULL, ACTION_RESIZE_V_DEC,     0},
+    {MODIFIER|ControlMask, XK_j,     NULL, ACTION_RESIZE_V_INC,     0},
+
+
+    // Workspacebinds macro
     WORKSPACE_KEYS(XK_1, 0),
     WORKSPACE_KEYS(XK_2, 1),
     WORKSPACE_KEYS(XK_3, 2),

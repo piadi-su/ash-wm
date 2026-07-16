@@ -50,11 +50,14 @@ UpdateBarIPC(Display *disp, Window root)
             int real_ws = (m * WORKSPACES_X_MONITOR) + i;
             char ws_status = 'E'; // Empty         
             
-            if (real_ws == active_ws) {
-                ws_status = 'A'; // Active 
-            } else if (workspaces[real_ws].list_Cl != NULL) {
-                ws_status = 'O'; // Occupied 
-            }
+			if (real_ws == active_ws) 
+			{
+				ws_status = 'A'; // Active 
+			} 
+			else if (workspaces[real_ws].list_Cl != NULL) 
+			{
+				ws_status = 'O'; // Occupied 
+			}
             
             char buf[16];
             snprintf(buf, sizeof(buf), "%d:%c ", real_ws, ws_status);
@@ -190,19 +193,22 @@ AttachClient(int ws, Client *c)
 {
     if (c == NULL || ws < 0 || ws >= WORKSPACES) return;
 
-    if (workspaces[ws].list_Cl == NULL) {
-        c->next = c;
-        c->prev = c;
-        workspaces[ws].list_Cl = c;
-    } else {
-        Client *head = workspaces[ws].list_Cl;
-        Client *tail = head->prev;
+	if (workspaces[ws].list_Cl == NULL) 
+	{
+		c->next = c;
+		c->prev = c;
+		workspaces[ws].list_Cl = c;
+	}
+	else
+	{
+		Client *head = workspaces[ws].list_Cl;
+		Client *tail = head->prev;
 
-        tail->next = c;
-        c->prev = tail;
-        c->next = head;
-        head->prev = c;
-    }
+		tail->next = c;
+		c->prev = tail;
+		c->next = head;
+		head->prev = c;
+	}
 }
 
 void 
@@ -211,15 +217,18 @@ DetachClient(int ws, Client *c)
     if (c == NULL || ws < 0 || ws >= WORKSPACES) return;
     if (workspaces[ws].list_Cl == NULL) return;
 
-    if (c->next == c) {
-        workspaces[ws].list_Cl = NULL;
-    } else {
-        if (workspaces[ws].list_Cl == c) {
-            workspaces[ws].list_Cl = c->next;
-        }
-        c->prev->next = c->next;
-        c->next->prev = c->prev;
-    }
+	if (c->next == c) 
+	{
+		workspaces[ws].list_Cl = NULL;
+	}
+	else 
+	{
+		if (workspaces[ws].list_Cl == c) {
+			workspaces[ws].list_Cl = c->next;
+		}
+		c->prev->next = c->next;
+		c->next->prev = c->prev;
+	}
     
     c->next = NULL;
     c->prev = NULL;
@@ -258,12 +267,14 @@ FocusWindow(Display *disp, Window w) {
     if (curr == NULL) return;
 
     do {
-        XSetWindowBorderWidth(disp, curr->id, BORDER_WIDTH);
-        if (curr->id == w) {
-            XSetWindowBorder(disp, curr->id, GetXColor(disp, COLOR_FOCUS));
-        } else {
-            XSetWindowBorder(disp, curr->id, GetXColor(disp, COLOR_UNFOCUS));
-        }
+		XSetWindowBorderWidth(disp, curr->id, BORDER_WIDTH);
+		if (curr->id == w) {
+			XSetWindowBorder(disp, curr->id, GetXColor(disp, COLOR_FOCUS));
+		}
+		else
+		{
+			XSetWindowBorder(disp, curr->id, GetXColor(disp, COLOR_UNFOCUS));
+		}
         curr = curr->next;
     } while (curr != workspaces[target_ws].list_Cl);
 
@@ -378,9 +389,12 @@ ChangeWorkspace(Display *disp, Window root, int target_local_id)
     // show window in the new workspace
 	Dwindle(disp, new_ws);
 
-	if(workspaces[new_ws].list_Cl != NULL) {
+	if(workspaces[new_ws].list_Cl != NULL) 
+	{
 		FocusWindow(disp, workspaces[new_ws].list_Cl->id);
-	} else {
+	}
+	else 
+	{
 		XSetInputFocus(disp, root, RevertToParent, CurrentTime);
 	}
 
@@ -517,11 +531,13 @@ RemoveWindowList(Display *disp, Window w, Window root)
 
 
 
-    if(found->next == found) {
+    if(found->next == found) 
+	{
         workspaces[ws_index].list_Cl = NULL;
     }
 
-    else {
+    else 
+	{
         found->prev->next = found->next;
         found->next->prev = found->prev;
 
@@ -574,20 +590,22 @@ KillWindow(Display *disp, Window root)
         XFree(protocols);
     }
 
-    if (supporta_delete) {
-        XEvent ev;
-        ev.type = ClientMessage;
-        ev.xclient.window = focused_win;
-        ev.xclient.message_type = XInternAtom(disp, "WM_PROTOCOLS", False);
-        ev.xclient.format = 32;
-        ev.xclient.data.l[0] = wm_delete_window;
-        ev.xclient.data.l[1] = CurrentTime;
-        XSendEvent(disp, focused_win, False, NoEventMask, &ev);
-    } else {
+	if (supporta_delete) {
+		XEvent ev;
+		ev.type = ClientMessage;
+		ev.xclient.window = focused_win;
+		ev.xclient.message_type = XInternAtom(disp, "WM_PROTOCOLS", False);
+		ev.xclient.format = 32;
+		ev.xclient.data.l[0] = wm_delete_window;
+		ev.xclient.data.l[1] = CurrentTime;
+		XSendEvent(disp, focused_win, False, NoEventMask, &ev);
+	}
+	else
+	{
 
-        DEBUG_LOG("[ASH-WM] kill window(fallback): %lu\n", focused_win);
-        XDestroyWindow(disp, focused_win);
-    }
+		DEBUG_LOG("[ASH-WM] kill window(fallback): %lu\n", focused_win);
+		XDestroyWindow(disp, focused_win);
+	}
 }
 
 
@@ -631,19 +649,21 @@ Dwindle(Display *disp, int ws_index)
     if (fullscreen_client != NULL) {
         cursor = head;
         do {
-            if (cursor == fullscreen_client) {
-                cursor->x = monitors[mod_index].x;
-                cursor->y = monitors[mod_index].y;
-                cursor->w = monitors[mod_index].width;
-                cursor->h = monitors[mod_index].height;
+			if (cursor == fullscreen_client) {
+				cursor->x = monitors[mod_index].x;
+				cursor->y = monitors[mod_index].y;
+				cursor->w = monitors[mod_index].width;
+				cursor->h = monitors[mod_index].height;
 
-                XSetWindowBorderWidth(disp, cursor->id, 0);
-                XMoveResizeWindow(disp, cursor->id, cursor->x, cursor->y, cursor->w, cursor->h);
-                XMapWindow(disp, cursor->id);
-                XRaiseWindow(disp, cursor->id);
-            } else {
-                XUnmapWindow(disp, cursor->id);
-            }
+				XSetWindowBorderWidth(disp, cursor->id, 0);
+				XMoveResizeWindow(disp, cursor->id, cursor->x, cursor->y, cursor->w, cursor->h);
+				XMapWindow(disp, cursor->id);
+				XRaiseWindow(disp, cursor->id);
+			}
+			else 
+			{
+				XUnmapWindow(disp, cursor->id);
+			}
             cursor = cursor->next;
         } while(cursor != head);
         return; 
@@ -654,7 +674,7 @@ Dwindle(Display *disp, int ws_index)
     int mx = monitors[mod_index].x;
     int mw = monitors[mod_index].width;
 
-	unsigned long pad_top = 0;
+    unsigned long pad_top = 0;
     unsigned long pad_bottom = 0;
     unsigned long pad_left = 0;
     unsigned long pad_right = 0;
@@ -662,32 +682,29 @@ Dwindle(Display *disp, int ws_index)
     const unsigned int MIN_WIDTH = 30;
     const unsigned int MIN_HEIGHT = 30;
 
-	Window root_return, parent_return, *children;
+    Window root_return, parent_return, *children;
     unsigned int nchildren;
 
-	XGrabServer(disp); // Congela temporaneamente le modifiche di stato asincrone su X11
-	if (XQueryTree(disp, DefaultRootWindow(disp), &root_return, &parent_return, &children, &nchildren)) {
-		for (unsigned int i = 0; i < nchildren; i++) {
-			// Leggiamo se la finestra richiede spazio (barre di sistema, ecc.)
-			Strut s = GetWindowStrut(disp, children[i]);
+    XGrabServer(disp); 
+    if (XQueryTree(disp, DefaultRootWindow(disp), &root_return, &parent_return, &children, &nchildren)) {
+        for (unsigned int i = 0; i < nchildren; i++) {
+            Strut s = GetWindowStrut(disp, children[i]);
 
-			if (s.top > pad_top)       pad_top = s.top;
-			if (s.bottom > pad_bottom) pad_bottom = s.bottom;
-			if (s.left > pad_left)     pad_left = s.left;
-			if (s.right > pad_right)   pad_right = s.right;
-		}
-		if (children) XFree(children);
-	}
-	XUngrabServer(disp);
+            if (s.top > pad_top)       pad_top = s.top;
+            if (s.bottom > pad_bottom) pad_bottom = s.bottom;
+            if (s.left > pad_left)     pad_left = s.left;
+            if (s.right > pad_right)   pad_right = s.right;
+        }
+        if (children) XFree(children);
+    }
+    XUngrabServer(disp);
 
-	mx += pad_left;
+    mx += pad_left;
     mw -= (pad_left + pad_right);
     my += pad_top;
     mh -= (pad_top + pad_bottom);
 
-
-
-	// all floatig window
+    // all floating window
     if (count_ws == 0) {
         cursor = head;
         do {
@@ -700,7 +717,7 @@ Dwindle(Display *disp, int ws_index)
         return;
     }
 
-	// window in tl
+    // window in tl
     if(count_ws == 1)
     {
         cursor = head;
@@ -734,7 +751,7 @@ Dwindle(Display *disp, int ws_index)
         return;
     }
 
-	//more wm in tl
+    //more wm in tl
     cursor = head;
     int wx = mx;
     int wy = my;
@@ -766,7 +783,10 @@ Dwindle(Display *disp, int ws_index)
         {
             if(tiling_idx % 2 == 0)
             {
-                ww /= 2;
+                int master_w = (int)(ww * global_mfact);
+                int slave_w = ww - master_w;
+
+                ww = master_w;
                 if (ww < (int)MIN_WIDTH) ww = MIN_WIDTH; 
 
                 int target_w = ww - (GAPS * 2);
@@ -774,11 +794,16 @@ Dwindle(Display *disp, int ws_index)
                 cursor->y = wy + GAPS;
                 cursor->w = target_w < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)target_w;
                 cursor->h = (wh - (GAPS * 2)) < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)(wh - (GAPS * 2));
+                
                 wx += ww;
+                ww = slave_w;
             }
             else
             {
-                wh /= 2;
+                int master_h = (int)(wh * global_mfact);
+                int slave_h = wh - master_h;
+
+                wh = master_h;
                 if (wh < (int)MIN_HEIGHT) wh = MIN_HEIGHT;
 
                 int target_h = wh - (GAPS * 2);
@@ -786,7 +811,9 @@ Dwindle(Display *disp, int ws_index)
                 cursor->y = wy + GAPS;
                 cursor->w = (ww - (GAPS * 2)) < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)(ww - (GAPS * 2));
                 cursor->h = target_h < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)target_h;
+                
                 wy += wh;
+                wh = slave_h;
             }
         }
 
@@ -1002,14 +1029,13 @@ ToggleFullscreen(Display *disp, Window root) {
 
 
 void 
-SwapDwindleDirectional(Display *disp,Window root, int direction) { 
+SwapDwindleDirectional(Display *disp, Window root, int direction) { 
     Window focused_win;
     int revert_to;
     XGetInputFocus(disp, &focused_win, &revert_to);
-    if (focused_win == None) return;
+    if (focused_win == None || focused_win == root) return;
 
-
-	int mon_idx = GetMouseMonitor(disp, root);
+    int mon_idx = GetMouseMonitor(disp, root);
     int ws = monitors[mon_idx].current_ws;
     Client *head = workspaces[ws].list_Cl;
     
@@ -1027,21 +1053,30 @@ SwapDwindleDirectional(Display *disp,Window root, int direction) {
 
     if (!this_client || this_client->is_fullscreen) return;
 
-    Client *target_client = (direction == 1) ? this_client->next : this_client->prev;
+    Client *target_client = (direction > 0) ? this_client->next : this_client->prev;
 
     Window temp_id = this_client->id;
     int temp_fs = this_client->is_fullscreen;
+    int temp_floating = this_client->is_floating;
 
     this_client->id = target_client->id;
     this_client->is_fullscreen = target_client->is_fullscreen;
+    this_client->is_floating = target_client->is_floating;
 
     target_client->id = temp_id;
     target_client->is_fullscreen = temp_fs;
+    target_client->is_floating = temp_floating;
 
     Dwindle(disp, ws);
 
     XRaiseWindow(disp, target_client->id);
     XSetInputFocus(disp, target_client->id, RevertToParent, CurrentTime);
+    
+    XWindowAttributes wa;
+    if (XGetWindowAttributes(disp, target_client->id, &wa)) {
+        XWarpPointer(disp, None, target_client->id, 0, 0, 0, 0, wa.width / 2, wa.height / 2);
+    }
+
     XSync(disp, False);
 }
 
@@ -1064,6 +1099,58 @@ RaiseFloatingWindows(Display *disp, int ws_index)
     } while (cursor != head);
 }
 
+void 
+ResizeActiveWindow(Display *disp, Window root, int direction, int amount) {
+    Window focused_win;
+    int revert_to;
+    XGetInputFocus(disp, &focused_win, &revert_to);
+    if (focused_win == None || focused_win == root) return;
+
+    int mon_idx = GetMouseMonitor(disp, root);
+    int ws = monitors[mon_idx].current_ws;
+    Client *head = workspaces[ws].list_Cl;
+    if (head == NULL) return;
+
+    Client *curr = head;
+    Client *this_client = NULL;
+    do {
+        if (curr->id == focused_win) {
+            this_client = curr;
+            break;
+        }
+        curr = curr->next;
+    } while (curr != head);
+
+    if (!this_client || this_client->is_fullscreen) return;
+
+    if (this_client->is_floating) {
+        XWindowAttributes wa;
+        if (XGetWindowAttributes(disp, this_client->id, &wa)) {
+            int new_w = wa.width + (direction == 1 ? amount : 0);
+            int new_h = wa.height + (direction == 2 ? amount : 0);
+
+            if (new_w < 100) new_w = 100;
+            if (new_h < 100) new_h = 100;
+
+            XResizeWindow(disp, this_client->id, new_w, new_h);
+            this_client->w = new_w;
+            this_client->h = new_h;
+        }
+    } else {
+        if (direction == 1) { 
+            double delta = (amount > 0) ? 0.05 : -0.05;
+            global_mfact += delta;
+
+            if (global_mfact < 0.1) global_mfact = 0.1;
+            if (global_mfact > 0.9) global_mfact = 0.9;
+
+            Dwindle(disp, ws);
+        }
+    }
+
+    XSync(disp, False);
+}
+
 
 //----
 int
@@ -1071,8 +1158,8 @@ XErrorHandlerImpl(Display *disp, XErrorEvent *ee)
 {
 	(void)disp;
     if (ee->error_code == BadWindow ||
-        (ee->request_code == 12 && ee->error_code == BadMatch) || // ConfigureWindow BadMatch
-        (ee->request_code == 42 && ee->error_code == BadWindow))  // SetInputFocus BadWindow
+        (ee->request_code == 12 && ee->error_code == BadMatch) || 
+        (ee->request_code == 42 && ee->error_code == BadWindow))  
     {
         DEBUG_LOG("[ASH-WM] Error X11 safely.\n");
         return 0;
@@ -1344,6 +1431,21 @@ int main(int argc, char *argv[])
                                 case ACTION_SWAP_PREV:
                                     SwapDwindleDirectional(disp, root, -1);
                                     break;
+								
+									//addd
+								case ACTION_RESIZE_H_DEC:
+									ResizeActiveWindow(disp, root, 1, RESIZE_PX_DIM); 
+									break;
+								case ACTION_RESIZE_H_INC:
+									ResizeActiveWindow(disp, root, 1, RESIZE_PX_UP);  
+									break;
+								case ACTION_RESIZE_V_DEC:
+									ResizeActiveWindow(disp, root, 2, RESIZE_PX_DIM); 
+									break;
+								case ACTION_RESIZE_V_INC:
+									ResizeActiveWindow(disp, root, 2, RESIZE_PX_UP);  
+									break;
+
 
                                 case ACTION_TOGGLE_FLOATING:
                                     {
@@ -1635,15 +1737,11 @@ int main(int argc, char *argv[])
 					if (c != NULL && ws_idx != -1) {
 						int monitor_del_ws = workspaces[ws_idx].monitor_id;
 
-						// Se il workspace della finestra non è assegnato a nessun monitor attivo (-1),
-						// significa che è stato nascosto volontariamente dal WM. Ignoriamo l'evento!
 						if (monitor_del_ws == -1) {
 							break;
 						}
 					}
 
-					// Se l'unmap avviene sul workspace attivo, l'app si sta chiudendo o riducendo a icona.
-					// In questo caso la rimuoviamo in modo pulito.
 					RemoveWindowList(disp, Ev.xunmap.window, root);
 				}
 				break;
