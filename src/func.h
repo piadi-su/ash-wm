@@ -76,7 +76,9 @@ Monitors monitors[N_MONITORS];
 int monitors_count = {0};
 Workspace workspaces[WORKSPACES];
 Atom wm_delete_window;
+
 double global_mfact = 0.5;
+double global_vfact = 0.5;
 
 
 //IPC

@@ -781,40 +781,41 @@ Dwindle(Display *disp, int ws_index)
         }
         else
         {
-            if(tiling_idx % 2 == 0)
-            {
-                int master_w = (int)(ww * global_mfact);
-                int slave_w = ww - master_w;
+			if(tiling_idx % 2 == 0)
+			{
+				int master_w = (int)(ww * global_mfact);
+				int slave_w = ww - master_w;
 
-                ww = master_w;
-                if (ww < (int)MIN_WIDTH) ww = MIN_WIDTH; 
+				ww = master_w;
+				if (ww < (int)MIN_WIDTH) ww = MIN_WIDTH; 
 
-                int target_w = ww - (GAPS * 2);
-                cursor->x = wx + GAPS;
-                cursor->y = wy + GAPS;
-                cursor->w = target_w < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)target_w;
-                cursor->h = (wh - (GAPS * 2)) < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)(wh - (GAPS * 2));
-                
-                wx += ww;
-                ww = slave_w;
-            }
-            else
-            {
-                int master_h = (int)(wh * global_mfact);
-                int slave_h = wh - master_h;
+				int target_w = ww - (GAPS * 2);
+				cursor->x = wx + GAPS;
+				cursor->y = wy + GAPS;
+				cursor->w = target_w < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)target_w;
+				cursor->h = (wh - (GAPS * 2)) < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)(wh - (GAPS * 2));
 
-                wh = master_h;
-                if (wh < (int)MIN_HEIGHT) wh = MIN_HEIGHT;
+				wx += ww;
+				ww = slave_w;
+			}
+			else
+			{
+				int master_h = (int)(wh * global_vfact);
+				int slave_h = wh - master_h;
 
-                int target_h = wh - (GAPS * 2);
-                cursor->x = wx + GAPS;
-                cursor->y = wy + GAPS;
-                cursor->w = (ww - (GAPS * 2)) < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)(ww - (GAPS * 2));
-                cursor->h = target_h < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)target_h;
-                
-                wy += wh;
-                wh = slave_h;
-            }
+				wh = master_h;
+				if (wh < (int)MIN_HEIGHT) wh = MIN_HEIGHT;
+
+				int target_h = wh - (GAPS * 2);
+				cursor->x = wx + GAPS;
+				cursor->y = wy + GAPS;
+				cursor->w = (ww - (GAPS * 2)) < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)(ww - (GAPS * 2));
+				cursor->h = target_h < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)target_h;
+
+				wy += wh;
+				wh = slave_h;
+			}
+
         }
 
         if (cursor->x + (int)cursor->w > mx + mw) cursor->x = (mx + mw) - (int)cursor->w;
@@ -1101,54 +1102,62 @@ RaiseFloatingWindows(Display *disp, int ws_index)
 
 void 
 ResizeActiveWindow(Display *disp, Window root, int direction, int amount) {
-    Window focused_win;
-    int revert_to;
-    XGetInputFocus(disp, &focused_win, &revert_to);
-    if (focused_win == None || focused_win == root) return;
+	Window focused_win;
+	int revert_to;
+	XGetInputFocus(disp, &focused_win, &revert_to);
+	if (focused_win == None || focused_win == root) return;
 
-    int mon_idx = GetMouseMonitor(disp, root);
-    int ws = monitors[mon_idx].current_ws;
-    Client *head = workspaces[ws].list_Cl;
-    if (head == NULL) return;
+	int mon_idx = GetMouseMonitor(disp, root);
+	int ws = monitors[mon_idx].current_ws;
+	Client *head = workspaces[ws].list_Cl;
+	if (head == NULL) return;
 
-    Client *curr = head;
-    Client *this_client = NULL;
-    do {
-        if (curr->id == focused_win) {
-            this_client = curr;
-            break;
-        }
-        curr = curr->next;
-    } while (curr != head);
+	Client *curr = head;
+	Client *this_client = NULL;
+	do {
+		if (curr->id == focused_win) {
+			this_client = curr;
+			break;
+		}
+		curr = curr->next;
+	} while (curr != head);
 
-    if (!this_client || this_client->is_fullscreen) return;
+	if (!this_client || this_client->is_fullscreen) return;
 
-    if (this_client->is_floating) {
-        XWindowAttributes wa;
-        if (XGetWindowAttributes(disp, this_client->id, &wa)) {
-            int new_w = wa.width + (direction == 1 ? amount : 0);
-            int new_h = wa.height + (direction == 2 ? amount : 0);
+	if (this_client->is_floating) 
+	{
+		XWindowAttributes wa;
+		if (XGetWindowAttributes(disp, this_client->id, &wa)) {
+			int new_w = wa.width + (direction == 1 ? amount : 0);
+			int new_h = wa.height + (direction == 2 ? amount : 0);
 
-            if (new_w < 100) new_w = 100;
-            if (new_h < 100) new_h = 100;
+			if (new_w < 100) new_w = 100;
+			if (new_h < 100) new_h = 100;
 
-            XResizeWindow(disp, this_client->id, new_w, new_h);
-            this_client->w = new_w;
-            this_client->h = new_h;
-        }
-    } else {
-        if (direction == 1) { 
-            double delta = (amount > 0) ? 0.05 : -0.05;
+			XResizeWindow(disp, this_client->id, new_w, new_h);
+			this_client->w = new_w;
+			this_client->h = new_h;
+		}
+	} 
+	else 
+	{
+        double delta = (amount > 0) ? 0.05 : -0.05;
+
+        if (direction == 1) {
             global_mfact += delta;
-
             if (global_mfact < 0.1) global_mfact = 0.1;
             if (global_mfact > 0.9) global_mfact = 0.9;
-
-            Dwindle(disp, ws);
+        } 
+        else if (direction == 2) {
+            global_vfact += delta;
+            if (global_vfact < 0.1) global_vfact = 0.1;
+            if (global_vfact > 0.9) global_vfact = 0.9;
         }
+
+        Dwindle(disp, ws);
     }
 
-    XSync(disp, False);
+	XSync(disp, False);
 }
 
 
