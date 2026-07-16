@@ -1085,7 +1085,6 @@ void sigchld(int unused) {
         perror("ashwm: impossible SIGCHLD");
         exit(1);
     }
-    // Pulisce TUTTI i processi figli zombie in background in modo non bloccante
     while (waitpid(-1, NULL, WNOHANG) > 0);
 }
 
@@ -1105,7 +1104,7 @@ int main(int argc, char *argv[])
 	
     if (argc > 1 && strcmp(argv[1], "-v") == 0)
     {
-        printf("ashwm Version: %d\n", VERSION);
+        printf("ashwm Version: %.1f\n", VERSION);
 		return 0;
     }
 	
@@ -1197,7 +1196,7 @@ int main(int argc, char *argv[])
 			monitors[i].height = info[i].height;
 
 
-			DEBUG_LOG("[ASH-WM] Salvato Monitor %d: X=%d, Y=%d, W=%d, H=%d\n", 
+			DEBUG_LOG("[ASH-WM] saved Monitor %d: X=%d, Y=%d, W=%d, H=%d\n", 
                i, monitors[i].x, monitors[i].y, monitors[i].width, monitors[i].height);
 		}
 		XFree(info);
