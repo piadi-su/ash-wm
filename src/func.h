@@ -74,6 +74,7 @@ typedef struct{
 Monitors monitors[N_MONITORS];
 int monitors_count = {0};
 Workspace workspaces[WORKSPACES];
+Atom wm_delete_window;
 
 
 
@@ -99,5 +100,6 @@ void SwapDwindleDirectional(Display *disp, int direction);
 void ResizeFocusedWindow(Display *disp, Window root, int direction);
 void RaiseFloatingWindows(Display *disp, int ws_index);
 int XErrorHandlerImpl(Display *disp, XErrorEvent *ee);
+void sigchld(int unused);
 
 #endif

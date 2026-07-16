@@ -24,6 +24,7 @@
 #include <signal.h>
 #include <string.h>
 #include <stdio.h>
+#include <sys/wait.h>
 
 
 //my files
@@ -39,38 +40,41 @@
 void
 UpdateBarIPC(Display *disp, Window root)
 {
-    char status[128] = "";
+    char status[256] = ""; // Aumentato a 256 per contenere tutti i workspace
     
-	// find acrive monitor
+    // Trova il monitor attivo sotto il mouse
     Window dummy_win; int dummy_int; unsigned int dummy_mask;
-    int mouse_x, mouse_y; int mon_idx = 0;
+    int mouse_x, mouse_y; int active_mon_idx = 0;
     XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
     for (int i = 0; i < monitors_count; i++) {
         if (mouse_x >= monitors[i].x && mouse_x < (monitors[i].x + monitors[i].width) &&
             mouse_y >= monitors[i].y && mouse_y < (monitors[i].y + monitors[i].height)) {
-            mon_idx = i; break;
+            active_mon_idx = i; 
+            break;
         }
     }
-    int active_ws = monitors[mon_idx].current_ws;
+    int active_ws = monitors[active_mon_idx].current_ws;
 
-    for (int i = 0; i < WORKSPACES_X_MONITOR; i++) {
-        int real_ws = (mon_idx * WORKSPACES_X_MONITOR) + i;
-        char ws_status = 'E'; // Empty         
-        if (real_ws == active_ws) {
-            ws_status = 'A'; // Active 
-        } else if (workspaces[real_ws].list_Cl != NULL) {
-            ws_status = 'O'; // Occupied 
+    // Cicla su TUTTI i monitor e su tutti i loro workspace
+    for (int m = 0; m < monitors_count; m++) {
+        for (int i = 0; i < WORKSPACES_X_MONITOR; i++) {
+            int real_ws = (m * WORKSPACES_X_MONITOR) + i;
+            char ws_status = 'E'; // Empty         
+            
+            if (real_ws == active_ws) {
+                ws_status = 'A'; // Active 
+            } else if (workspaces[real_ws].list_Cl != NULL) {
+                ws_status = 'O'; // Occupied 
+            }
+            
+            char buf[16];
+            // Scriviamo il ID reale (0..19) così la barra sa esattamente a quale monitor appartiene!
+            snprintf(buf, sizeof(buf), "%d:%c ", real_ws, ws_status);
+            strcat(status, buf);
         }
-        
-        char buf[16];
-        snprintf(buf, sizeof(buf), "%d:%c ", i + 1, ws_status);
-        strcat(status, buf);
     }
 
-	// creating the atom
     Atom prop = XInternAtom(disp, "_ASHWM_WORKSPACES", False);
-    
-	//wirite string to the root window
     XChangeProperty(disp, root, prop, XA_STRING, 8, PropModeReplace, 
                     (unsigned char *)status, strlen(status));
     XFlush(disp);
@@ -492,20 +496,45 @@ RemoveWindowList(Display *disp, Window w, Window root)
 
 
 void
-KillWindow(Display  *disp, Window root)
+KillWindow(Display *disp, Window root)
 {
+    Window focused_win;
+    int revert_to;
 
-	Window focused_win;
-	int revert_to;
+    XGetInputFocus(disp, &focused_win, &revert_to);
 
-	XGetInputFocus(disp, &focused_win, &revert_to);
-
-	if (focused_win == None || focused_win == root)
+    if (focused_win == None || focused_win == root)
         return;
 
-    DEBUG_LOG("[ASH-WM] Uccido la finestra hardware: %lu\n", focused_win);
-    
-    XDestroyWindow(disp, focused_win);
+    DEBUG_LOG("[ASH-WM] trying closing window: %lu\n", focused_win);
+
+    Atom *protocols;
+    int n;
+    int supporta_delete = 0;
+
+    if (XGetWMProtocols(disp, focused_win, &protocols, &n)) {
+        while (!supporta_delete && n--) {
+            if (protocols[n] == wm_delete_window) {
+                supporta_delete = 1;
+            }
+        }
+        XFree(protocols);
+    }
+
+    if (supporta_delete) {
+        XEvent ev;
+        ev.type = ClientMessage;
+        ev.xclient.window = focused_win;
+        ev.xclient.message_type = XInternAtom(disp, "WM_PROTOCOLS", False);
+        ev.xclient.format = 32;
+        ev.xclient.data.l[0] = wm_delete_window;
+        ev.xclient.data.l[1] = CurrentTime;
+        XSendEvent(disp, focused_win, False, NoEventMask, &ev);
+    } else {
+
+        DEBUG_LOG("[ASH-WM] kill window(fallback): %lu\n", focused_win);
+        XDestroyWindow(disp, focused_win);
+    }
 }
 
 
@@ -1050,12 +1079,22 @@ XErrorHandlerImpl(Display *disp, XErrorEvent *ee)
 
 
 
+void sigchld(int unused) {
+	(void)unused;
+    if (signal(SIGCHLD, sigchld) == SIG_ERR) {
+        perror("ashwm: impossible SIGCHLD");
+        exit(1);
+    }
+    // Pulisce TUTTI i processi figli zombie in background in modo non bloccante
+    while (waitpid(-1, NULL, WNOHANG) > 0);
+}
 
 
 
 
 int main(int argc, char *argv[])
 {
+
 
     if (argc > 1 && strcmp(argv[1], "-h") == 0)
     {
@@ -1069,6 +1108,9 @@ int main(int argc, char *argv[])
         printf("ashwm Version: %d\n", VERSION);
 		return 0;
     }
+	
+	//test kill child process
+	sigchld(0);
 
 
 	XEvent Ev;
@@ -1087,6 +1129,11 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "error opening the display");
 		return 1;
 	}
+
+
+	//set atom for killing window
+	wm_delete_window = XInternAtom(disp, "WM_DELETE_WINDOW", False);
+
 
 	//error handler
 	XSetErrorHandler(XErrorHandlerImpl);
@@ -1110,6 +1157,7 @@ int main(int argc, char *argv[])
 	XSelectInput(disp, root, SubstructureRedirectMask | SubstructureNotifyMask | KeyPressMask | PointerMotionMask);
 
 	XSync(disp, False);
+
 
 	//read config.h binds
 	unsigned int modifiers[] = { 0, LockMask, Mod2Mask, LockMask | Mod2Mask };
@@ -1167,7 +1215,7 @@ int main(int argc, char *argv[])
 
 	
 
-
+	//test
 	//inizialize all 20 workspaces
 	for(int i = 0 ; i < WORKSPACES; i++)
 	{
@@ -1202,7 +1250,7 @@ int main(int argc, char *argv[])
 
 
 
-				case KeyPress:
+			case KeyPress:
                 clean_state = Ev.xkey.state & ~(LockMask | Mod2Mask);
 
                 for(int i = 0 ; i < num_keys; i++)
@@ -1212,12 +1260,21 @@ int main(int argc, char *argv[])
                     {
                         if(keys[i].cmd != NULL)
                         {
-                            if(fork() == 0)
-                            {
-                                if (disp) close(ConnectionNumber(disp)); 
-                                execvp(keys[i].cmd[0], keys[i].cmd);
-                                exit(0);
-                            }
+							if(fork() == 0)
+							{
+								if (setsid() == -1) {
+									exit(EXIT_FAILURE);
+								}
+
+								if (disp) {
+									close(ConnectionNumber(disp)); 
+								}
+
+								execvp(keys[i].cmd[0], keys[i].cmd);
+
+								perror("ashwm: execvp failed");
+								exit(EXIT_FAILURE);
+							}
                         }
                         else 
                         {    
