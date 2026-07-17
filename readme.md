@@ -42,7 +42,7 @@ sudo make install
 
 ---
 the bar on top is ashes, a bar especially made for ash-wm
-Link: (the link will be added when the repository goes public)
+Link: (https://github.com/piadi-su/ashes.git)
 
 pls report with an issue or even a PR if you find any bugs, thx
 
