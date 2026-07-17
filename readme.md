@@ -11,14 +11,12 @@ It follows its philosophy: to configure or change something, you edit the source
 
 ## dependencies
 ```txt
-- libx11
-- libxrender
-- libxcursor
+- libx11 libxrender libxcursor
 ```
 
 ## Features
 
-- "ash-wm uses Dwindle as its main tiling layout
+- ash-wm uses Dwindle as its main tiling layout
 - It is compact, with only is ~1800 lines of code
 - IPC and EWMH support
 - uses less than ~4mb of ram 

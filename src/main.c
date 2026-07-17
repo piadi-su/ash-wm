@@ -1412,10 +1412,8 @@ int main(int argc, char *argv[])
 									focused_win = None;
 									int revert_to;
 
-									// Chiediamo a X11 qual è la finestra attiva in questo millesimo di secondo
 									XGetInputFocus(disp, &focused_win, &revert_to);
 
-									// Se c'è una finestra effettivamente focalizzata (e non è il desktop/root)
 									if (focused_win != None && focused_win != root) {
 										MoveWindowToMonitor(disp, root, focused_win);
 									}
@@ -1461,15 +1459,9 @@ int main(int argc, char *argv[])
                                         Window focused_win; int rev;
                                         XGetInputFocus(disp, &focused_win, &rev);
                                         if (focused_win != None) {
-                                            Window dummy_win; int dummy_int; unsigned int dummy_mask;
-                                            int mouse_x, mouse_y; int mon_idx = 0;
-                                            XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
-                                            for (int m = 0; m < monitors_count; m++) {
-                                                if (mouse_x >= monitors[m].x && mouse_x < (monitors[m].x + monitors[m].width) &&
-                                                        mouse_y >= monitors[m].y && mouse_y < (monitors[m].y + monitors[m].height)) {
-                                                    mon_idx = m; break;
-                                                }
-                                            }
+
+											
+											int mon_idx = GetMouseMonitor(disp, root);
                                             int ws = monitors[mon_idx].current_ws;
 
                                             Client *curr = workspaces[ws].list_Cl;
@@ -1524,15 +1516,7 @@ int main(int argc, char *argv[])
 
 					mouse_start = Ev.xbutton;
 
-					Window dummy_win; int dummy_int; unsigned int dummy_mask;
-					int mouse_x, mouse_y; int mon_idx = 0;
-					XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
-					for (int m = 0; m < monitors_count; m++) {
-						if (mouse_x >= monitors[m].x && mouse_x < (monitors[m].x + monitors[m].width) &&
-								mouse_y >= monitors[m].y && mouse_y < (monitors[m].y + monitors[m].height)) {
-							mon_idx = m; break;
-						}
-					}
+					int mon_idx = GetMouseMonitor(disp, root);
 					int ws = monitors[mon_idx].current_ws;
 
 					if (Ev.xbutton.state & MODIFIER) {
@@ -1720,15 +1704,7 @@ int main(int argc, char *argv[])
 			case FocusIn:
 				// focusing the floating window
 				{
-					Window dummy_win; int dummy_int; unsigned int dummy_mask;
-					int mouse_x, mouse_y; int mon_idx = 0;
-					XQueryPointer(disp, root, &dummy_win, &dummy_win, &mouse_x, &mouse_y, &dummy_int, &dummy_int, &dummy_mask);
-					for (int m = 0; m < monitors_count; m++) {
-						if (mouse_x >= monitors[m].x && mouse_x < (monitors[m].x + monitors[m].width) &&
-								mouse_y >= monitors[m].y && mouse_y < (monitors[m].y + monitors[m].height)) {
-							mon_idx = m; break;
-						}
-					}
+					int mon_idx = GetMouseMonitor(disp, root);
 					int ws = monitors[mon_idx].current_ws;
 					RaiseFloatingWindows(disp, ws);
 				}
@@ -1754,10 +1730,6 @@ int main(int argc, char *argv[])
 					RemoveWindowList(disp, Ev.xunmap.window, root);
 				}
 				break;
-
-
-
-
 
 
 			default:

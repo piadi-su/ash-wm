@@ -112,7 +112,7 @@ static KeyBinds keys[] = {
     {MODIFIER,            XK_k,      NULL, ACTION_FOCUS_PREV,        0},
 
 	//MOVE WINDOW
-    {MODIFIER|ShiftMask,  XK_l,      NULL, ACTION_SWAP_NEXT,        0},
+    {MODIFIER|ShiftMask,  XK_j,      NULL, ACTION_SWAP_NEXT,        0},
     {MODIFIER|ShiftMask,  XK_k,      NULL, ACTION_SWAP_PREV,        0},
 
 	//RESIZE WINDOW
