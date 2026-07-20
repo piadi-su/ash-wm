@@ -110,6 +110,7 @@ void ToggleFullscreen(Display *disp, Window root);
 void SwapDwindleDirectional(Display *disp, Window root , int direction);
 void RaiseFloatingWindows(Display *disp, int ws_index);
 void ResizeActiveWindow(Display *disp, Window root, int direction, int amount);
+void CycleMonitorFocus(Display *disp, Window root, int direction);
 
 int XErrorHandlerImpl(Display *disp, XErrorEvent *ee);
 void sigchld(int unused);

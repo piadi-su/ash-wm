@@ -768,7 +768,7 @@ Dwindle(Display *disp, int ws_index)
         return;
     }
 
-    //more wm in tl
+	//more wm in tl (Split Alternativo / Lineare)
     cursor = head;
     int wx = mx;
     int wy = my;
@@ -798,41 +798,40 @@ Dwindle(Display *disp, int ws_index)
         }
         else
         {
-			if(tiling_idx % 2 == 0)
-			{
-				int master_w = (int)(ww * global_mfact);
-				int slave_w = ww - master_w;
+            if(ww >= wh) 
+            {
+                int master_w = (int)(ww * global_mfact);
+                int slave_w = ww - master_w;
 
-				ww = master_w;
-				if (ww < (int)MIN_WIDTH) ww = MIN_WIDTH; 
+                ww = master_w;
+                if (ww < (int)MIN_WIDTH) ww = MIN_WIDTH; 
 
-				int target_w = ww - (GAPS * 2);
-				cursor->x = wx + GAPS;
-				cursor->y = wy + GAPS;
-				cursor->w = target_w < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)target_w;
-				cursor->h = (wh - (GAPS * 2)) < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)(wh - (GAPS * 2));
+                int target_w = ww - (GAPS * 2);
+                cursor->x = wx + GAPS;
+                cursor->y = wy + GAPS;
+                cursor->w = target_w < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)target_w;
+                cursor->h = (wh - (GAPS * 2)) < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)(wh - (GAPS * 2));
 
-				wx += ww;
-				ww = slave_w;
-			}
-			else
-			{
-				int master_h = (int)(wh * global_vfact);
-				int slave_h = wh - master_h;
+                wx += ww;
+                ww = slave_w;
+            }
+            else
+            {
+                int master_h = (int)(wh * global_vfact);
+                int slave_h = wh - master_h;
 
-				wh = master_h;
-				if (wh < (int)MIN_HEIGHT) wh = MIN_HEIGHT;
+                wh = master_h;
+                if (wh < (int)MIN_HEIGHT) wh = MIN_HEIGHT;
 
-				int target_h = wh - (GAPS * 2);
-				cursor->x = wx + GAPS;
-				cursor->y = wy + GAPS;
-				cursor->w = (ww - (GAPS * 2)) < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)(ww - (GAPS * 2));
-				cursor->h = target_h < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)target_h;
+                int target_h = wh - (GAPS * 2);
+                cursor->x = wx + GAPS;
+                cursor->y = wy + GAPS;
+                cursor->w = (ww - (GAPS * 2)) < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)(ww - (GAPS * 2));
+                cursor->h = target_h < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)target_h;
 
-				wy += wh;
-				wh = slave_h;
-			}
-
+                wy += wh;
+                wh = slave_h;
+            }
         }
 
         if (cursor->x + (int)cursor->w > mx + mw) cursor->x = (mx + mw) - (int)cursor->w;
@@ -1175,6 +1174,34 @@ ResizeActiveWindow(Display *disp, Window root, int direction, int amount) {
     }
 
 	XSync(disp, False);
+}
+
+
+void 
+CycleMonitorFocus(Display *disp, Window root, int direction) {
+    if (monitors_count <= 1) return;
+
+    int current_monitor = GetMouseMonitor(disp, root);
+    // Calcola il prossimo monitor in modo circolare
+    int target_monitor = (current_monitor + direction + monitors_count) % monitors_count;
+    int target_ws = monitors[target_monitor].current_ws;
+
+    DEBUG_LOG("[ASH-WM] Switching focus to Monitor %d (WS %d)\n", target_monitor, target_ws);
+
+    // Sposta il mouse al centro del monitor target
+    int target_x = monitors[target_monitor].x + (monitors[target_monitor].width / 2);
+    int target_y = monitors[target_monitor].y + (monitors[target_monitor].height / 2);
+    XWarpPointer(disp, None, root, 0, 0, 0, 0, target_x, target_y);
+
+    // Se ci sono finestre nel nuovo workspace, dai il focus alla prima, altrimenti alla root
+    if (workspaces[target_ws].list_Cl != NULL) {
+        FocusWindow(disp, workspaces[target_ws].list_Cl->id);
+    } else {
+        XSetInputFocus(disp, root, RevertToParent, CurrentTime);
+    }
+    
+    XSync(disp, False);
+    UpdateBarIPC(disp, root);
 }
 
 
@@ -1542,6 +1569,13 @@ int main(int argc, char *argv[])
 									break;
 								case ACTION_RESIZE_V_INC:
 									ResizeActiveWindow(disp, root, 2, RESIZE_PX_UP);  
+									break;
+
+								case ACTION_MONITOR_NEXT:
+									CycleMonitorFocus(disp, root, 1);
+									break;
+								case ACTION_MONITOR_PREV:
+									CycleMonitorFocus(disp, root, -1);
 									break;
 
 								case ACTION_TOGGLE_FLOATING:
