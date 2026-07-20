@@ -319,25 +319,38 @@ AddWindowList(Display *disp, Window w, Window root)
     int target_monitor = GetMouseMonitor(disp, root); 
     int active_ws = monitors[target_monitor].current_ws;
 
-    // =================================================================
-    // FIX POP-UP / BROWSER DIALOGS (Usa new_window e target_monitor)
-    // =================================================================
-    Window transient_for = None;
-    XGetTransientForHint(disp, w, &transient_for);
+	Window transient_for = None;
+	XGetTransientForHint(disp, w, &transient_for);
 
-    if (transient_for != None) {
-        // È un pop-up o un gestore file aperto dal browser: lo forziamo floating
-        new_window->is_floating = 1;
-        
-        // Copiamo le dimensioni reali ereditate dalla finestra X11
-        new_window->w = wa.width;
-        new_window->h = wa.height;
+	int is_dialog = 0;
+	Atom actual_type;
+	int actual_format;
+	unsigned long nitems, bytes_after;
+	unsigned char *prop = NULL;
+	Atom net_wm_type = XInternAtom(disp, "_NET_WM_WINDOW_TYPE", False);
+	Atom net_wm_dialog = XInternAtom(disp, "_NET_WM_WINDOW_TYPE_DIALOG", False);
 
-        // Lo posizioniamo centrato sul monitor attuale per comodità
-        new_window->x = monitors[target_monitor].x + (monitors[target_monitor].width / 2) - (new_window->w / 2);
-        new_window->y = monitors[target_monitor].y + (monitors[target_monitor].height / 2) - (new_window->h / 2);
-    }
-    // =================================================================
+	if (XGetWindowProperty(disp, w, net_wm_type, 0, 32, False, XA_ATOM,
+				&actual_type, &actual_format, &nitems, &bytes_after, &prop) == Success && prop) {
+		Atom *atoms = (Atom *)prop;
+		for (unsigned long i = 0; i < nitems; i++) {
+			if (atoms[i] == net_wm_dialog) {
+				is_dialog = 1;
+				break;
+			}
+		}
+		XFree(prop);
+	}
+
+	if (transient_for != None || is_dialog) {
+		new_window->is_floating = 1;
+		new_window->w = wa.width > 100 ? wa.width : 800;
+		new_window->h = wa.height > 100 ? wa.height : 600;
+		new_window->x = monitors[target_monitor].x + (monitors[target_monitor].width / 2) - (new_window->w / 2);
+		new_window->y = monitors[target_monitor].y + (monitors[target_monitor].height / 2) - (new_window->h / 2);
+
+		XMoveResizeWindow(disp, w, new_window->x, new_window->y, new_window->w, new_window->h);
+	}
 
     DEBUG_LOG("[ASH-WM] window %lu spowned on Monitor %d -> saved in Workspace %d\n", 
             w, target_monitor, active_ws);
