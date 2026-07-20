@@ -70,7 +70,7 @@ typedef struct {
 
 
 //window gaps
-#define GAPS 6
+#define GAPS 0
 
 
 //window border width
@@ -81,8 +81,8 @@ typedef struct {
 #define COLOR_UNFOCUS 0x000000
 
 // pixel umount when resize window  
-#define RESIZE_PX_UP 30
-#define RESIZE_PX_DIM -30
+#define RESIZE_PX_UP 10
+#define RESIZE_PX_DIM -10
 
 
 

@@ -700,7 +700,7 @@ Dwindle(Display *disp, int ws_index)
     if (XQueryTree(disp, root_return = RootWindow(disp, DefaultScreen(disp)), &root_return, &parent_return, &children, &nchildren)) {
         for (unsigned int i = 0; i < nchildren; i++) {
 			XWindowAttributes wa;
-			// Consideriamo solo i dock che sono effettivamente visibili a schermo
+			
 			if (XGetWindowAttributes(disp, children[i], &wa) && wa.map_state == IsViewable) {
 				Strut s = GetWindowStrut(disp, children[i]);
 				if (s.top > pad_top)       pad_top = s.top;
@@ -735,25 +735,25 @@ Dwindle(Display *disp, int ws_index)
     }
 
     // window in tl
-    if(count_ws == 1)
-    {
-        cursor = head;
-        do {
-            if (!cursor->is_floating && !cursor->is_fullscreen){
-                int target_w = mw - (GAPS * 2);
-                int target_h = mh - (GAPS * 2);
+	if(count_ws == 1)
+	{
+		cursor = head;
+		do {
+			if (!cursor->is_floating && !cursor->is_fullscreen){
+				int target_w = mw - (GAPS * 2) - (BORDER_WIDTH * 2);
+				int target_h = mh - (GAPS * 2) - (BORDER_WIDTH * 2);
 
-                cursor->x = mx + GAPS;
-                cursor->y = my + GAPS;
-                cursor->w = target_w < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)target_w;
-                cursor->h = target_h < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)target_h;
+				cursor->x = mx + GAPS;
+				cursor->y = my + GAPS;
+				cursor->w = target_w < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)target_w;
+				cursor->h = target_h < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)target_h;
 
-                XSetWindowBorderWidth(disp, cursor->id, BORDER_WIDTH);
-                XMoveResizeWindow(disp, cursor->id, cursor->x, cursor->y, cursor->w, cursor->h);
-                XMapWindow(disp, cursor->id); 
-            }
-            cursor = cursor->next;
-        } while(cursor != head);
+				XSetWindowBorderWidth(disp, cursor->id, BORDER_WIDTH);
+				XMoveResizeWindow(disp, cursor->id, cursor->x, cursor->y, cursor->w, cursor->h);
+				XMapWindow(disp, cursor->id); 
+			}
+			cursor = cursor->next;
+		} while(cursor != head);
 
         cursor = head;
         do {
@@ -768,7 +768,7 @@ Dwindle(Display *disp, int ws_index)
         return;
     }
 
-	//more wm in tl (Split Alternativo / Lineare)
+	//more wm in tl 
     cursor = head;
     int wx = mx;
     int wy = my;
@@ -782,57 +782,60 @@ Dwindle(Display *disp, int ws_index)
             continue;
         }
 
-        XSetWindowBorderWidth(disp, cursor->id, BORDER_WIDTH);
+		XSetWindowBorderWidth(disp, cursor->id, BORDER_WIDTH); 
 
-        if(tiling_idx == count_ws - 1)
-        {
-            int target_x = wx + GAPS;
-            int target_y = wy + GAPS;
-            int target_w = ww - (GAPS * 2);
-            int target_h = wh - (GAPS * 2);
+		if(tiling_idx == count_ws - 1) 
+		{
+			int target_x = wx + GAPS; 
+			int target_y = wy + GAPS; 
+									  
+			int target_w = ww - (GAPS * 2) - (BORDER_WIDTH * 2);
+			int target_h = wh - (GAPS * 2) - (BORDER_WIDTH * 2);
 
-            cursor->x = target_x;
-            cursor->y = target_y;
-            cursor->w = target_w < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)target_w;
-            cursor->h = target_h < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)target_h;
-        }
-        else
-        {
-            if(ww >= wh) 
-            {
-                int master_w = (int)(ww * global_mfact);
-                int slave_w = ww - master_w;
+			cursor->x = target_x; 
+			cursor->y = target_y; 
+			cursor->w = target_w < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)target_w; 
+			cursor->h = target_h < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)target_h;
+		}
+		else 
+		{
+			if(ww >= wh) 
+			{
+				int master_w = (int)(ww * global_mfact);
+				int slave_w = ww - master_w; 
 
-                ww = master_w;
-                if (ww < (int)MIN_WIDTH) ww = MIN_WIDTH; 
+				ww = master_w; 
+				if (ww < (int)MIN_WIDTH) ww = MIN_WIDTH; 
 
-                int target_w = ww - (GAPS * 2);
-                cursor->x = wx + GAPS;
-                cursor->y = wy + GAPS;
-                cursor->w = target_w < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)target_w;
-                cursor->h = (wh - (GAPS * 2)) < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)(wh - (GAPS * 2));
+				cursor->x = wx + GAPS; 
+				cursor->y = wy + GAPS; 
+									   
+				int target_w = ww - (GAPS * 2) - (BORDER_WIDTH * 2);
+				cursor->w = target_w < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)target_w;
+				cursor->h = (wh - (GAPS * 2) - (BORDER_WIDTH * 2)) < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)(wh - (GAPS * 2) - (BORDER_WIDTH * 2));
 
-                wx += ww;
-                ww = slave_w;
-            }
-            else
-            {
-                int master_h = (int)(wh * global_vfact);
-                int slave_h = wh - master_h;
+				wx += ww; 
+				ww = slave_w; 
+			}
+			else 
+			{
+				int master_h = (int)(wh * global_vfact); 
+				int slave_h = wh - master_h; 
 
-                wh = master_h;
-                if (wh < (int)MIN_HEIGHT) wh = MIN_HEIGHT;
+				wh = master_h; 
+				if (wh < (int)MIN_HEIGHT) wh = MIN_HEIGHT; 
 
-                int target_h = wh - (GAPS * 2);
-                cursor->x = wx + GAPS;
-                cursor->y = wy + GAPS;
-                cursor->w = (ww - (GAPS * 2)) < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)(ww - (GAPS * 2));
-                cursor->h = target_h < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)target_h;
+				cursor->x = wx + GAPS; 
+				cursor->y = wy + GAPS; 
+									   
+				int target_h = wh - (GAPS * 2) - (BORDER_WIDTH * 2);
+				cursor->w = (ww - (GAPS * 2) - (BORDER_WIDTH * 2)) < (int)MIN_WIDTH ? MIN_WIDTH : (unsigned int)(ww - (GAPS * 2) - (BORDER_WIDTH * 2));
+				cursor->h = target_h < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)target_h;
 
-                wy += wh;
-                wh = slave_h;
-            }
-        }
+				wy += wh; 
+				wh = slave_h; 
+			}
+		}
 
         if (cursor->x + (int)cursor->w > mx + mw) cursor->x = (mx + mw) - (int)cursor->w;
         if (cursor->y + (int)cursor->h > my + mh) cursor->y = (my + mh) - (int)cursor->h;
@@ -1182,18 +1185,15 @@ CycleMonitorFocus(Display *disp, Window root, int direction) {
     if (monitors_count <= 1) return;
 
     int current_monitor = GetMouseMonitor(disp, root);
-    // Calcola il prossimo monitor in modo circolare
     int target_monitor = (current_monitor + direction + monitors_count) % monitors_count;
     int target_ws = monitors[target_monitor].current_ws;
 
     DEBUG_LOG("[ASH-WM] Switching focus to Monitor %d (WS %d)\n", target_monitor, target_ws);
 
-    // Sposta il mouse al centro del monitor target
     int target_x = monitors[target_monitor].x + (monitors[target_monitor].width / 2);
     int target_y = monitors[target_monitor].y + (monitors[target_monitor].height / 2);
     XWarpPointer(disp, None, root, 0, 0, 0, 0, target_x, target_y);
 
-    // Se ci sono finestre nel nuovo workspace, dai il focus alla prima, altrimenti alla root
     if (workspaces[target_ws].list_Cl != NULL) {
         FocusWindow(disp, workspaces[target_ws].list_Cl->id);
     } else {
@@ -1413,9 +1413,6 @@ int main(int argc, char *argv[])
 				FocusWindow(disp, Ev.xmaprequest.window);
 				break;
 
-				// ==========================================
-				// FIX INTERNAZIONALE: GESTIONE CONTEXT/CONFIGUREREQUEST
-				// ==========================================
 			case ConfigureRequest:
 				{
 					XConfigureRequestEvent *cre = &Ev.xconfigurerequest;
@@ -1439,7 +1436,7 @@ int main(int argc, char *argv[])
 						wc.stack_mode = cre->detail;
 						XConfigureWindow(disp, cre->window, cre->value_mask, &wc);
 					} else {
-						// Se la finestra non è floating, permettiamo solo configurazioni di sistema standard
+
 						wc.x = cre->x;
 						wc.y = cre->y;
 						wc.width = cre->width;
@@ -1452,12 +1449,8 @@ int main(int argc, char *argv[])
 				}
 				break;
 
-				// ==========================================
-				// FIX INTERNAZIONALE: FULLSCREEN NATIVO VIA CLIENTMESSAGE
-				// ==========================================
 			case ClientMessage:
 				{
-					// Inizializzazione locale degli atomi per evitare errori di scoping o variabili non dichiarate
 					Atom local_wm_state = XInternAtom(disp, "_NET_WM_STATE", False);
 					Atom local_wm_fullscreen = XInternAtom(disp, "_NET_WM_STATE_FULLSCREEN", False);
 
@@ -1482,7 +1475,6 @@ int main(int argc, char *argv[])
 									ToggleFullscreen(disp, root);
 								}
 
-								// Risposta Broadcast EWMH conforme
 								XEvent xev;
 								xev.type = ClientMessage;
 								xev.xclient.window = c->id;
