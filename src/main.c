@@ -267,14 +267,16 @@ FocusWindow(Display *disp, Window w) {
     if (curr == NULL) return;
 
     do {
-		XSetWindowBorderWidth(disp, curr->id, BORDER_WIDTH);
-		if (curr->id == w) {
-			XSetWindowBorder(disp, curr->id, GetXColor(disp, COLOR_FOCUS));
-		}
-		else
-		{
-			XSetWindowBorder(disp, curr->id, GetXColor(disp, COLOR_UNFOCUS));
-		}
+        if (curr->is_fullscreen) {
+            XSetWindowBorderWidth(disp, curr->id, 0);
+        } else {
+            XSetWindowBorderWidth(disp, curr->id, BORDER_WIDTH);
+            if (curr->id == w) {
+                XSetWindowBorder(disp, curr->id, GetXColor(disp, COLOR_FOCUS));
+            } else {
+                XSetWindowBorder(disp, curr->id, GetXColor(disp, COLOR_UNFOCUS));
+            }
+        }
         curr = curr->next;
     } while (curr != workspaces[target_ws].list_Cl);
 
