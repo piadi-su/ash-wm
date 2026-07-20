@@ -542,9 +542,6 @@ RemoveWindowList(Display *disp, Window w, Window root)
     if(found == NULL)
         return;
 
-
-
-
     if(found->next == found) 
 	{
         workspaces[ws_index].list_Cl = NULL;
@@ -654,7 +651,6 @@ Dwindle(Display *disp, int ws_index)
 	{
 		cursor = head;
 		do {
-			// Sostituisci XUnmapWindow con questo per non far sparire/killare i programmi
 			XMoveWindow(disp, cursor->id, -32000, -32000);
 			cursor = cursor->next;
 		} while(cursor != head);
@@ -1532,7 +1528,6 @@ int main(int argc, char *argv[])
 					int mon_idx = GetMouseMonitor(disp, root);
 					int ws = monitors[mon_idx].current_ws;
 
-					// Gestione originale del click con tasto MOD per il floating manuale
 					if (Ev.xbutton.state & MODIFIER) {
 						Client *h = workspaces[ws].list_Cl;
 						if (h != NULL) {
@@ -1716,7 +1711,6 @@ int main(int argc, char *argv[])
 					Client *c = FindClientByWindow(Ev.xcrossing.window, &ws);
 
 					if (c) {
-						// Controlla cosa è attualmente focalizzato
 						Window focused_win;
 						int revert_to;
 						XGetInputFocus(disp, &focused_win, &revert_to);
@@ -1724,14 +1718,10 @@ int main(int argc, char *argv[])
 						int active_ws = -1;
 						Client *active_c = FindClientByWindow(focused_win, &active_ws);
 
-						// Se hai una finestra floating attiva in primo piano ed entri col mouse
-						// in una zona dove sotto c'è un'ALTRA finestra floating, ignora il cambio.
-						// Rimarrai ancorato a quella sopra finché non sposti il mouse fuori o clicchi.
 						if (active_c && active_c->is_floating && c->is_floating && active_c->id != c->id) {
 							break;
 						}
 
-						// Altrimenti, focus normale al passaggio del mouse
 						FocusWindow(disp, Ev.xcrossing.window);
 					}
 				}

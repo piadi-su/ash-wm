@@ -50,4 +50,4 @@ pls report with an issue or even a PR if you find any bugs, thx
 
 ## License
 
-Released under the MIT License.
+Released under the GPLv3 (or later) License.
