@@ -298,68 +298,69 @@ FocusWindow(Display *disp, Window w) {
 void 
 AddWindowList(Display *disp, Window w, Window root)
 {
+    XWindowAttributes wa;
+    XGetWindowAttributes(disp, w, &wa);
 
-	XWindowAttributes wa;
-	XGetWindowAttributes(disp, w, &wa);
+    // see if window is made for bypass the wm
+    if (wa.override_redirect || IsDock(disp, w)) {
+        XSelectInput(disp, w, StructureNotifyMask);
+        XMapWindow(disp, w); 
+        return;
+    }
 
+    Client *new_window = calloc(1, sizeof(Client));
+    if (new_window == NULL)
+        return;
 
-	// see if window is made for bypass the wm
-	if (wa.override_redirect || IsDock(disp, w)) {
-		XSelectInput(disp, w, StructureNotifyMask);
-		XMapWindow(disp, w); 
-		return;
+    // add window id to struct
+    new_window->id = w;
+    new_window->monitor_id = 0;
 
-	}
+    int target_monitor = GetMouseMonitor(disp, root); 
+    int active_ws = monitors[target_monitor].current_ws;
 
+    // =================================================================
+    // FIX POP-UP / BROWSER DIALOGS (Usa new_window e target_monitor)
+    // =================================================================
+    Window transient_for = None;
+    XGetTransientForHint(disp, w, &transient_for);
 
-	Client *new_window = calloc(1, sizeof(Client));
-	if (new_window == NULL)
-		return;
+    if (transient_for != None) {
+        // È un pop-up o un gestore file aperto dal browser: lo forziamo floating
+        new_window->is_floating = 1;
+        
+        // Copiamo le dimensioni reali ereditate dalla finestra X11
+        new_window->w = wa.width;
+        new_window->h = wa.height;
 
+        // Lo posizioniamo centrato sul monitor attuale per comodità
+        new_window->x = monitors[target_monitor].x + (monitors[target_monitor].width / 2) - (new_window->w / 2);
+        new_window->y = monitors[target_monitor].y + (monitors[target_monitor].height / 2) - (new_window->h / 2);
+    }
+    // =================================================================
 
+    DEBUG_LOG("[ASH-WM] window %lu spowned on Monitor %d -> saved in Workspace %d\n", 
+            w, target_monitor, active_ws);
 
-	//add window id to struct
-	new_window->id = w;
-	new_window->monitor_id = 0;
+    XSelectInput(disp, w, EnterWindowMask | PropertyChangeMask);
 
+    // window as prev and next 
+    if (workspaces[active_ws].list_Cl == NULL) {
+        workspaces[active_ws].list_Cl = new_window;
+        workspaces[active_ws].list_Cl->next = workspaces[active_ws].list_Cl;
+        workspaces[active_ws].list_Cl->prev = workspaces[active_ws].list_Cl;
+    }
+    // circle ds
+    else {
+        Client *head = workspaces[active_ws].list_Cl;
+        new_window->next = head;
+        new_window->prev = head->prev;
+        head->prev->next = new_window;
+        head->prev = new_window;
+    }
 
-
-	int target_monitor = GetMouseMonitor(disp, root); 
-	int active_ws = monitors[target_monitor].current_ws;
-
-
-
-	DEBUG_LOG("[ASH-WM] window %lu spowned on Monitor %d -> saved in Workspace %d\n", 
-			w, target_monitor, active_ws);
-
-
-	XSelectInput(disp, w, EnterWindowMask | PropertyChangeMask);
-
-
-	// window as prev and next 
-
-	if (workspaces[active_ws].list_Cl == NULL) {
-		workspaces[active_ws].list_Cl = new_window;
-		workspaces[active_ws].list_Cl->next = workspaces[active_ws].list_Cl;
-		workspaces[active_ws].list_Cl->prev = workspaces[active_ws].list_Cl;
-	}
-
-
-	// circle ds
-
-	else {
-		Client *head = workspaces[active_ws].list_Cl;
-		new_window->next = head;
-		new_window->prev = head->prev;
-		head->prev->next = new_window;
-		head->prev = new_window;
-	}
-
-
-
-	Dwindle(disp, active_ws);
-	UpdateBarIPC(disp, root);
-
+    Dwindle(disp, active_ws);
+    UpdateBarIPC(disp, root);
 } 
 
 
@@ -634,17 +635,18 @@ Dwindle(Display *disp, int ws_index)
         cursor = cursor->next;
     } while(cursor != head);
 
-    int mod_index = workspaces[ws_index].monitor_id;
-    
-    if(mod_index == -1)
-    {
-        cursor = head;
-        do {
-            XUnmapWindow(disp, cursor->id);
-            cursor = cursor->next;
-        } while(cursor != head);
-        return;
-    }
+	int mod_index = workspaces[ws_index].monitor_id;
+
+	if(mod_index == -1)
+	{
+		cursor = head;
+		do {
+			// Sostituisci XUnmapWindow con questo per non far sparire/killare i programmi
+			XMoveWindow(disp, cursor->id, -32000, -32000);
+			cursor = cursor->next;
+		} while(cursor != head);
+		return;
+	}
 
     if (fullscreen_client != NULL) {
         cursor = head;
@@ -881,13 +883,13 @@ MoveWindowToMonitor(Display *disp, Window root, Window w)
 
     DetachClient(source_ws, found);
 
-    if (workspaces[ws_target].monitor_id == -1) {
-        XMoveWindow(disp, found->id, -2000, -2000);
-    } else {
-        found->x = monitors[target_monitor].x + GAPS;
-        found->y = monitors[target_monitor].y + GAPS;
-        XMoveWindow(disp, found->id, found->x, found->y);
-    }
+	if (workspaces[ws_target].monitor_id == -1) {
+		XMoveWindow(disp, found->id, -32000, -32000);
+	} else {
+		found->x = monitors[target_monitor].x + GAPS;
+		found->y = monitors[target_monitor].y + GAPS;
+		XMoveWindow(disp, found->id, found->x, found->y);
+	}
 
     AttachClient(ws_target, found);
 
@@ -1504,21 +1506,20 @@ int main(int argc, char *argv[])
 
 
 			case ButtonPress:
-
 				click_win = Ev.xbutton.subwindow;
 
-                if (IsDock(disp, click_win)) {
-                    break; 
-                }
+				if (IsDock(disp, click_win)) {
+					break; 
+				}
 
 				if (Ev.xbutton.subwindow != None) {
 					XGetWindowAttributes(disp, Ev.xbutton.subwindow, &mouse_attr);
-
 					mouse_start = Ev.xbutton;
 
 					int mon_idx = GetMouseMonitor(disp, root);
 					int ws = monitors[mon_idx].current_ws;
 
+					// Gestione originale del click con tasto MOD per il floating manuale
 					if (Ev.xbutton.state & MODIFIER) {
 						Client *h = workspaces[ws].list_Cl;
 						if (h != NULL) {
@@ -1534,12 +1535,21 @@ int main(int argc, char *argv[])
 						Dwindle(disp, ws);
 					}
 
+					// AGGIUNTA DAILY: Mette a fuoco e porta in primo piano se è floating
 					FocusWindow(disp, Ev.xbutton.subwindow);
+					int target_ws = -1;
+					Client *c_click = FindClientByWindow(Ev.xbutton.subwindow, &target_ws);
+					if (c_click && c_click->is_floating) {
+						XRaiseWindow(disp, c_click->id);
+					}
+				} else {
+					if (Ev.xbutton.window != root) {
+						FocusWindow(disp, Ev.xbutton.window);
+					}
 				}
 
 				XAllowEvents(disp, ReplayPointer, CurrentTime);
 				break;
-
 			case MotionNotify:
 
 				if (IsDock(disp, mouse_start.subwindow)) {
@@ -1685,18 +1695,32 @@ int main(int argc, char *argv[])
 
 			//mouse movement
 			case EnterNotify:
-
-
 				if (Ev.xcrossing.mode != NotifyNormal || Ev.xcrossing.detail == NotifyInferior)
 					break;
 
-				UpdateCurrentMonitor(disp, root);
+				if (Ev.xcrossing.window != root) {
+					int ws = -1;
+					Client *c = FindClientByWindow(Ev.xcrossing.window, &ws);
 
-				XWindowAttributes wa;
-				XGetWindowAttributes(disp, Ev.xcrossing.window, &wa);
-				if (wa.map_state == IsViewable) {
-					DEBUG_LOG("[ASH-WM] Il mouse è entrato nella finestra %lu. Cambio focus.\n", Ev.xcrossing.window);
-					FocusWindow(disp, Ev.xcrossing.window);
+					if (c) {
+						// Controlla cosa è attualmente focalizzato
+						Window focused_win;
+						int revert_to;
+						XGetInputFocus(disp, &focused_win, &revert_to);
+
+						int active_ws = -1;
+						Client *active_c = FindClientByWindow(focused_win, &active_ws);
+
+						// Se hai una finestra floating attiva in primo piano ed entri col mouse
+						// in una zona dove sotto c'è un'ALTRA finestra floating, ignora il cambio.
+						// Rimarrai ancorato a quella sopra finché non sposti il mouse fuori o clicchi.
+						if (active_c && active_c->is_floating && c->is_floating && active_c->id != c->id) {
+							break;
+						}
+
+						// Altrimenti, focus normale al passaggio del mouse
+						FocusWindow(disp, Ev.xcrossing.window);
+					}
 				}
 				break;
 
