@@ -651,7 +651,7 @@ Dwindle(Display *disp, int ws_index)
 	{
 		cursor = head;
 		do {
-			XMoveWindow(disp, cursor->id, -32000, -32000);
+			XUnmapWindow(disp, cursor->id);
 			cursor = cursor->next;
 		} while(cursor != head);
 		return;
@@ -693,20 +693,26 @@ Dwindle(Display *disp, int ws_index)
     const unsigned int MIN_WIDTH = 30;
     const unsigned int MIN_HEIGHT = 30;
 
-    Window root_return, parent_return, *children;
-    unsigned int nchildren;
+    Window root_return, parent_return, *children = NULL;
+    unsigned int nchildren = 0;
 
     XGrabServer(disp); 
-    if (XQueryTree(disp, DefaultRootWindow(disp), &root_return, &parent_return, &children, &nchildren)) {
+    if (XQueryTree(disp, root_return = RootWindow(disp, DefaultScreen(disp)), &root_return, &parent_return, &children, &nchildren)) {
         for (unsigned int i = 0; i < nchildren; i++) {
-            Strut s = GetWindowStrut(disp, children[i]);
-
-            if (s.top > pad_top)       pad_top = s.top;
-            if (s.bottom > pad_bottom) pad_bottom = s.bottom;
-            if (s.left > pad_left)     pad_left = s.left;
-            if (s.right > pad_right)   pad_right = s.right;
+			XWindowAttributes wa;
+			// Consideriamo solo i dock che sono effettivamente visibili a schermo
+			if (XGetWindowAttributes(disp, children[i], &wa) && wa.map_state == IsViewable) {
+				Strut s = GetWindowStrut(disp, children[i]);
+				if (s.top > pad_top)       pad_top = s.top;
+				if (s.bottom > pad_bottom) pad_bottom = s.bottom;
+				if (s.left > pad_left)     pad_left = s.left;
+				if (s.right > pad_right)   pad_right = s.right;
+			}
         }
-        if (children) XFree(children);
+        if (children != NULL) {
+			XFree(children);
+			children = NULL;
+		}
     }
     XUngrabServer(disp);
 
