@@ -48,6 +48,7 @@ typedef struct Client {
 
     int is_floating;   // 1 mouse, 0 tiling
     int is_fullscreen; // 1 if full screen
+	float split_ratio; 
 
 
     int x, y; 
