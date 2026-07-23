@@ -29,7 +29,9 @@
 
 //my files
 #include "config.h"
-#include  "func.h"
+#include "func.h"
+#include "icccm.h"
+#include "ewmh.h"
 
 
 
@@ -577,48 +579,34 @@ RemoveWindowList(Display *disp, Window w, Window root)
 
 
 
-void
-KillWindow(Display *disp, Window root)
-{
-    Window focused_win;
-    int revert_to;
-
-    XGetInputFocus(disp, &focused_win, &revert_to);
-
-    if (focused_win == None || focused_win == root)
-        return;
-
-    DEBUG_LOG("[ASH-WM] trying closing window: %lu\n", focused_win);
+void KillWindow(Display *disp, Window root) {
+    Window focused_win = GetFocusedWindow(disp);
+    if (focused_win == None || focused_win == root) return;
 
     Atom *protocols;
-    int n;
-    int supporta_delete = 0;
+    int n, supporta_delete = 0;
 
     if (XGetWMProtocols(disp, focused_win, &protocols, &n)) {
         while (!supporta_delete && n--) {
-            if (protocols[n] == wm_delete_window) {
+            if (protocols[n] == icccm.wm_delete_window) {
                 supporta_delete = 1;
             }
         }
         XFree(protocols);
     }
 
-	if (supporta_delete) {
-		XEvent ev;
-		ev.type = ClientMessage;
-		ev.xclient.window = focused_win;
-		ev.xclient.message_type = XInternAtom(disp, "WM_PROTOCOLS", False);
-		ev.xclient.format = 32;
-		ev.xclient.data.l[0] = wm_delete_window;
-		ev.xclient.data.l[1] = CurrentTime;
-		XSendEvent(disp, focused_win, False, NoEventMask, &ev);
-	}
-	else
-	{
-
-		DEBUG_LOG("[ASH-WM] kill window(fallback): %lu\n", focused_win);
-		XDestroyWindow(disp, focused_win);
-	}
+    if (supporta_delete) {
+        XEvent ev = {0};
+        ev.type = ClientMessage;
+        ev.xclient.window = focused_win;
+        ev.xclient.message_type = icccm.wm_protocols;
+        ev.xclient.format = 32;
+        ev.xclient.data.l[0] = icccm.wm_delete_window;
+        ev.xclient.data.l[1] = CurrentTime;
+        XSendEvent(disp, focused_win, False, NoEventMask, &ev);
+    } else {
+        XDestroyWindow(disp, focused_win);
+    }
 }
 
 
@@ -751,6 +739,9 @@ Dwindle(Display *disp, int ws_index)
 				cursor->h = target_h < (int)MIN_HEIGHT ? MIN_HEIGHT : (unsigned int)target_h;
 
 				XSetWindowBorderWidth(disp, cursor->id, BORDER_WIDTH);
+
+				ApplyNormalHints(disp, cursor->id, &cursor->x, &cursor->y, &cursor->w, &cursor->h);
+
 				XMoveResizeWindow(disp, cursor->id, cursor->x, cursor->y, cursor->w, cursor->h);
 				XMapWindow(disp, cursor->id); 
 			}
@@ -844,6 +835,8 @@ Dwindle(Display *disp, int ws_index)
         if (cursor->x < mx) cursor->x = mx;
         if (cursor->y < my) cursor->y = my;
 
+		ApplyNormalHints(disp, cursor->id, &cursor->x, &cursor->y, &cursor->w, &cursor->h);
+
         XMoveResizeWindow(disp, cursor->id, cursor->x, cursor->y, cursor->w, cursor->h);
         XMapWindow(disp, cursor->id); 
         
@@ -855,6 +848,9 @@ Dwindle(Display *disp, int ws_index)
     do {
         if (cursor->is_floating) {
             XSetWindowBorderWidth(disp, cursor->id, BORDER_WIDTH);
+
+			ApplyNormalHints(disp, cursor->id, &cursor->x, &cursor->y, &cursor->w, &cursor->h);
+
             XMoveResizeWindow(disp, cursor->id, cursor->x, cursor->y, cursor->w, cursor->h);
             XMapWindow(disp, cursor->id);
             XRaiseWindow(disp, cursor->id); 
@@ -1027,12 +1023,14 @@ ToggleFullscreen(Display *disp, Window root) {
         found->h = monitors[mon].height;
 
         found->is_fullscreen = 1;
+		SetWindowState(disp, found->id, ewmh.net_wm_state_fullscreen, 1);
         
         XSetWindowBorderWidth(disp, found->id, 0);
         XMoveResizeWindow(disp, found->id, found->x, found->y, found->w, found->h);
         XRaiseWindow(disp, found->id);
     } else {
         found->is_fullscreen = 0;
+		SetWindowState(disp, found->id, ewmh.net_wm_state_fullscreen, 1);
         XSetWindowBorderWidth(disp, found->id, BORDER_WIDTH);
         
         if (!found->is_floating) {
@@ -1293,8 +1291,6 @@ int main(int argc, char *argv[])
 	}
 
 
-	//set atom for killing window
-	wm_delete_window = XInternAtom(disp, "WM_DELETE_WINDOW", False);
 
 
 	//error handler
@@ -1305,6 +1301,10 @@ int main(int argc, char *argv[])
 
 	//create root window/desktop
 	Window root = RootWindow(disp, sc);
+
+	//set atom for killing window
+	InitICCCM(disp);
+	InitEWMH(disp, root);
 
 	//for the cursor 
 	Cursor cursor = XcursorLibraryLoadCursor(disp, "left_ptr");
@@ -1451,47 +1451,47 @@ int main(int argc, char *argv[])
 				}
 				break;
 
-			case ClientMessage:
-				{
-					Atom local_wm_state = XInternAtom(disp, "_NET_WM_STATE", False);
-					Atom local_wm_fullscreen = XInternAtom(disp, "_NET_WM_STATE_FULLSCREEN", False);
-
-					if (Ev.xclient.message_type == local_wm_state) {
-						int ws_idx = -1;
-						Client *c = FindClientByWindow(Ev.xclient.window, &ws_idx);
-
-						if (c) {
-							long action = Ev.xclient.data.l[0];
-							Atom prop1 = (Atom)Ev.xclient.data.l[1];
-							Atom prop2 = (Atom)Ev.xclient.data.l[2];
-
-							if (prop1 == local_wm_fullscreen || prop2 == local_wm_fullscreen) {
-								int want_fullscreen = c->is_fullscreen;
-
-								if (action == 1)      want_fullscreen = 1; // _NET_WM_STATE_ADD
-								else if (action == 0) want_fullscreen = 0; // _NET_WM_STATE_REMOVE
-								else if (action == 2) want_fullscreen = !c->is_fullscreen; // _NET_WM_STATE_TOGGLE
-
-								if (c->is_fullscreen != want_fullscreen) {
-									FocusWindow(disp, c->id);
-									ToggleFullscreen(disp, root);
-								}
-
-								XEvent xev;
-								xev.type = ClientMessage;
-								xev.xclient.window = c->id;
-								xev.xclient.message_type = local_wm_state;
-								xev.xclient.format = 32;
-								xev.xclient.data.l[0] = want_fullscreen ? 1 : 0;
-								xev.xclient.data.l[1] = local_wm_fullscreen;
-								xev.xclient.data.l[2] = 0;
-								XSendEvent(disp, root, False, SubstructureNotifyMask | SubstructureRedirectMask, &xev);
-								XFlush(disp);
-							}
-						}
-					}
-				}
-				break;
+			// case ClientMessage:
+			// 	{
+			// 		Atom local_wm_state = XInternAtom(disp, "_NET_WM_STATE", False);
+			// 		Atom local_wm_fullscreen = XInternAtom(disp, "_NET_WM_STATE_FULLSCREEN", False);
+			//
+			// 		if (Ev.xclient.message_type == local_wm_state) {
+			// 			int ws_idx = -1;
+			// 			Client *c = FindClientByWindow(Ev.xclient.window, &ws_idx);
+			//
+			// 			if (c) {
+			// 				long action = Ev.xclient.data.l[0];
+			// 				Atom prop1 = (Atom)Ev.xclient.data.l[1];
+			// 				Atom prop2 = (Atom)Ev.xclient.data.l[2];
+			//
+			// 				if (prop1 == local_wm_fullscreen || prop2 == local_wm_fullscreen) {
+			// 					int want_fullscreen = c->is_fullscreen;
+			//
+			// 					if (action == 1)      want_fullscreen = 1; // _NET_WM_STATE_ADD
+			// 					else if (action == 0) want_fullscreen = 0; // _NET_WM_STATE_REMOVE
+			// 					else if (action == 2) want_fullscreen = !c->is_fullscreen; // _NET_WM_STATE_TOGGLE
+			//
+			// 					if (c->is_fullscreen != want_fullscreen) {
+			// 						FocusWindow(disp, c->id);
+			// 						ToggleFullscreen(disp, root);
+			// 					}
+			//
+			// 					XEvent xev;
+			// 					xev.type = ClientMessage;
+			// 					xev.xclient.window = c->id;
+			// 					xev.xclient.message_type = local_wm_state;
+			// 					xev.xclient.format = 32;
+			// 					xev.xclient.data.l[0] = want_fullscreen ? 1 : 0;
+			// 					xev.xclient.data.l[1] = local_wm_fullscreen;
+			// 					xev.xclient.data.l[2] = 0;
+			// 					XSendEvent(disp, root, False, SubstructureNotifyMask | SubstructureRedirectMask, &xev);
+			// 					XFlush(disp);
+			// 				}
+			// 			}
+			// 		}
+			// 	}
+			// 	break;
 
 			case KeyPress:
 				clean_state = Ev.xkey.state & ~(LockMask | Mod2Mask);
@@ -1828,6 +1828,32 @@ int main(int argc, char *argv[])
 						}
 					}
 					RemoveWindowList(disp, Ev.xunmap.window, root);
+				}
+				break;
+
+			case ClientMessage:
+				if (Ev.xclient.message_type == ewmh.net_wm_state) {
+					int ws_idx = -1;
+					Client *c = FindClientByWindow(Ev.xclient.window, &ws_idx);
+
+					if (c) {
+						long action = Ev.xclient.data.l[0];
+						Atom prop1 = (Atom)Ev.xclient.data.l[1];
+						Atom prop2 = (Atom)Ev.xclient.data.l[2];
+
+						if (prop1 == ewmh.net_wm_state_fullscreen || prop2 == ewmh.net_wm_state_fullscreen) {
+							int want_fullscreen = c->is_fullscreen;
+
+							if (action == 1)      want_fullscreen = 1; // _NET_WM_STATE_ADD
+							else if (action == 0) want_fullscreen = 0; // _NET_WM_STATE_REMOVE
+							else if (action == 2) want_fullscreen = !c->is_fullscreen; // _NET_WM_STATE_TOGGLE
+
+							if (c->is_fullscreen != want_fullscreen) {
+								FocusWindow(disp, c->id);
+								ToggleFullscreen(disp, root);
+							}
+						}
+					}
 				}
 				break;
 

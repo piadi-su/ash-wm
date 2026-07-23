@@ -4,6 +4,8 @@ project(ashwm C)
 
 add_executable(ashwm 
 	src/main.c
+	src/ewmh.c
+	src/icccm.c
 )
 
 
