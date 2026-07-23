@@ -51,9 +51,10 @@ double global_vfact = 0.5;
 void
 UpdateBarIPC(Display *disp, Window root)
 {
-    char status[256] = "";     
+    char status[1024] = "";     
+    size_t offset = 0;
 
-	int active_mon_idx = GetMouseMonitor(disp, root);
+    int active_mon_idx = GetMouseMonitor(disp, root);
     int active_ws = monitors[active_mon_idx].current_ws;
 
     for (int m = 0; m < monitors_count; m++) {
@@ -61,74 +62,82 @@ UpdateBarIPC(Display *disp, Window root)
             int real_ws = (m * WORKSPACES_X_MONITOR) + i;
             char ws_status = 'E'; // Empty         
             
-			if (real_ws == active_ws) 
-			{
-				ws_status = 'A'; // Active 
-			} 
-			else if (workspaces[real_ws].list_Cl != NULL) 
-			{
-				ws_status = 'O'; // Occupied 
-			}
+            if (real_ws == active_ws) 
+            {
+                ws_status = 'A'; // Active 
+            } 
+            else if (workspaces[real_ws].list_Cl != NULL) 
+            {
+                ws_status = 'O'; // Occupied 
+            }
             
-            char buf[16];
-            snprintf(buf, sizeof(buf), "%d:%c ", real_ws, ws_status);
-            strcat(status, buf);
+            if (offset < sizeof(status)) {
+                int written = snprintf(status + offset, sizeof(status) - offset, "%d:%c ", real_ws, ws_status);
+                if (written > 0) {
+                    offset += written;
+                }
+            }
         }
     }
 
     Atom prop = XInternAtom(disp, "_ASHWM_WORKSPACES", False);
     XChangeProperty(disp, root, prop, XA_STRING, 8, PropModeReplace, 
-                    (unsigned char *)status, strlen(status));
+                    (unsigned char *)status, offset);
     XFlush(disp);
 }
 
 //EWMH
-Strut GetWindowStrut(Display *disp, Window w) {
+Strut
+GetWindowStrut(Display *disp, Window w)
+{
     Strut s = {0, 0, 0, 0};
     Atom actual_type;
     int actual_format;
     unsigned long nitems, bytes_after;
     unsigned char *data = NULL;
 
-	//try with new standard
-    Atom prop = XInternAtom(disp, "_NET_WM_STRUT_PARTIAL", True);
-    if (prop == None) {
-        prop = XInternAtom(disp, "_NET_WM_STRUT", True);
+    Atom net_strut_partial = XInternAtom(disp, "_NET_WM_STRUT_PARTIAL", False);
+    Atom net_strut         = XInternAtom(disp, "_NET_WM_STRUT", False);
+
+    int status = XGetWindowProperty(disp, w, net_strut_partial, 0, 4, False, XA_CARDINAL,
+                                    &actual_type, &actual_format, &nitems, &bytes_after, &data);
+
+    if (status != Success || data == NULL || nitems < 4) {
+        if (data) XFree(data);
+        data = NULL;
+        status = XGetWindowProperty(disp, w, net_strut, 0, 4, False, XA_CARDINAL,
+                                    &actual_type, &actual_format, &nitems, &bytes_after, &data);
     }
 
-    if (prop != None) {
-		//ask x for the bar props
-        if (XGetWindowProperty(disp, w, prop, 0, 4, False, XA_CARDINAL,
-                               &actual_type, &actual_format, &nitems, &bytes_after,
-                               &data) == Success && data != NULL) {
-            
-            if (nitems >= 4) {
-                unsigned long *values = (unsigned long *)data;
-                s.left   = values[0];
-                s.right  = values[1];
-                s.top    = values[2];
-                s.bottom = values[3];
-            }
-            XFree(data);
+    if (status == Success && data != NULL) {
+        if (nitems >= 4) {
+            unsigned long *values = (unsigned long *)data;
+            s.left   = values[0];
+            s.right  = values[1];
+            s.top    = values[2];
+            s.bottom = values[3];
         }
+        XFree(data);
     }
+
     return s;
 }
 
 int 
-IsDock(Display *disp, Window w) {
+IsDock(Display *disp, Window w)
+{
     Atom actual_type;
     int actual_format;
     unsigned long nitems, bytes_after;
     unsigned char *prop = NULL;
     int is_dock = 0;
 
-    Atom net_wm_window_type = XInternAtom(disp, "_NET_WM_WINDOW_TYPE", False);
+    Atom net_wm_window_type      = XInternAtom(disp, "_NET_WM_WINDOW_TYPE", False);
     Atom net_wm_window_type_dock = XInternAtom(disp, "_NET_WM_WINDOW_TYPE_DOCK", False);
 
     if (XGetWindowProperty(disp, w, net_wm_window_type, 0, 32, False, XA_ATOM,
                            &actual_type, &actual_format, &nitems, &bytes_after, &prop) == Success) {
-        if (prop) {
+        if (prop != NULL) {
             Atom *atoms = (Atom *)prop;
             for (unsigned long i = 0; i < nitems; i++) {
                 if (atoms[i] == net_wm_window_type_dock) {
