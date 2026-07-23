@@ -11,7 +11,7 @@
 
 #include "config.h"
 
-#define VERSION 1.2
+#define VERSION 1.3
 
 //for debug purpuse
 #ifdef DEBUG
