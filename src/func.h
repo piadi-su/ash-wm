@@ -72,13 +72,13 @@ typedef struct{
 }Workspace ;
 
 
-Monitors monitors[N_MONITORS];
-int monitors_count = {0};
-Workspace workspaces[WORKSPACES];
-Atom wm_delete_window;
+extern Monitors monitors[N_MONITORS];
+extern int monitors_count;
+extern Workspace workspaces[WORKSPACES];
+extern Atom wm_delete_window;
 
-double global_mfact = 0.5;
-double global_vfact = 0.5;
+extern double global_mfact;
+extern double global_vfact;
 
 
 //IPC

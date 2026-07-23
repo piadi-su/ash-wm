@@ -34,6 +34,15 @@
 #include "ewmh.h"
 
 
+//define of all gloabal var
+Monitors monitors[N_MONITORS];
+int monitors_count = 0;
+Workspace workspaces[WORKSPACES];
+Atom wm_delete_window;
+
+double global_mfact = 0.55;
+double global_vfact = 0.50;
+
 
 
 //-----------------------------//
@@ -378,6 +387,7 @@ AddWindowList(Display *disp, Window w, Window root)
 
     Dwindle(disp, active_ws);
     UpdateBarIPC(disp, root);
+	UpdateClientList(disp, root);
 } 
 
 
@@ -418,6 +428,7 @@ ChangeWorkspace(Display *disp, Window root, int target_local_id)
 
     XSync(disp, False);
 	UpdateBarIPC(disp, root);
+	UpdateClientList(disp, root);
 }
 
 
@@ -1044,10 +1055,8 @@ void ToggleFullscreen(Display *disp, Window root) {
         });
 
     } else {
-        // --- ESCI DAL FULLSCREEN ---
         found->is_fullscreen = 0;
         
-        // CORREZIONE: usiamo 0 per RIMUOVERE lo stato
         SetWindowState(disp, found->id, ewmh.net_wm_state_fullscreen, 0); 
         
         XSetWindowBorderWidth(disp, found->id, BORDER_WIDTH);
@@ -1062,7 +1071,6 @@ void ToggleFullscreen(Display *disp, Window root) {
             XMoveResizeWindow(disp, found->id, found->x, found->y, found->w, found->h);
         }
 
-        // CORREZIONE: Invia ConfigureNotify a Firefox per forzare il refresh di YT
         XSendEvent(disp, found->id, False, StructureNotifyMask, (XEvent *)&(XConfigureEvent){
             .type = ConfigureNotify,
             .display = disp,
@@ -1317,6 +1325,7 @@ int main(int argc, char *argv[])
 
 	Window click_win;
 	Window focused_win;
+
 
 
 	Display *disp = XOpenDisplay(NULL);

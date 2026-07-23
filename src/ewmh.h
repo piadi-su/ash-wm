@@ -27,5 +27,6 @@ extern EWMHAtoms ewmh;
 void InitEWMH(Display *disp, Window root);
 void UpdateEWMHSupported(Display *disp, Window root);
 void SetWindowState(Display *disp, Window w, Atom state, int action);
+void UpdateClientList(Display *disp, Window root);
 
 #endif

@@ -21,6 +21,7 @@ target_link_libraries(ashwm PRIVATE
 	Xcursor
 )
 
+
 install(TARGETS ashwm
     RUNTIME DESTINATION bin
 )

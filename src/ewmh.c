@@ -1,6 +1,10 @@
-#include "ewmh.h"
 #include <X11/Xatom.h>
 #include <string.h>
+
+//my includes
+#include "ewmh.h"
+#include "func.h"
+
 
 EWMHAtoms ewmh;
 
@@ -103,4 +107,36 @@ void SetWindowState(Display *disp, Window w, Atom state, int action) {
     }
 
     if (prop) XFree(prop);
+}
+
+
+void UpdateClientList(Display *disp, Window root) {
+    // Allocazione temporanea per raccogliere tutte le finestre aperte
+    // (Puoi usare un numero massimo ragionevole o allocazione dinamica)
+    Window clients[256];
+    int count = 0;
+
+    // 1. Raccogliamo tutte le finestre da tutti i workspace per _NET_CLIENT_LIST
+    for (int i = 0; i < WORKSPACES; i++) {
+        Client *curr = workspaces[i].list_Cl;
+        if (curr != NULL) {
+            do {
+                if (count < 256) {
+                    clients[count++] = curr->id;
+                }
+                curr = curr->next;
+            } while (curr != workspaces[i].list_Cl);
+        }
+    }
+
+    // Aggiorniamo _NET_CLIENT_LIST sulla Root Window
+    XChangeProperty(disp, root, ewmh.net_client_list, XA_WINDOW, 32,
+                    PropModeReplace, (unsigned char *)clients, count);
+
+    // 2. Per _NET_CLIENT_LIST_STACKING:
+    // In un WM minimale come AshWM, l'ordine di stacking corrisponde indicativamente
+    // all'ordine in cui sono disposte nel layout (con le floating in cima).
+    // Mandiamo la stessa lista o riordinata per garantire che Picom sappia cosa c'è a schermo.
+    XChangeProperty(disp, root, ewmh.net_client_list_stacking, XA_WINDOW, 32,
+                    PropModeReplace, (unsigned char *)clients, count);
 }
