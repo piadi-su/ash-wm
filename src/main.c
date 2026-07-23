@@ -982,8 +982,7 @@ CycleFocus(Display *disp , Window root, int direction) {
 
 
 
-void 
-ToggleFullscreen(Display *disp, Window root) {
+void ToggleFullscreen(Display *disp, Window root) {
     Window focused_win;
     int revert_to;
     XGetInputFocus(disp, &focused_win, &revert_to);
@@ -1011,7 +1010,7 @@ ToggleFullscreen(Display *disp, Window root) {
     int mon = workspaces[ws].monitor_id;
 
     if (!found->is_fullscreen) {
-		// save gemetry before go full screnn
+        // --- ENTRA IN FULLSCREEN ---
         found->old_x = found->x;
         found->old_y = found->y;
         found->old_w = found->w;
@@ -1023,14 +1022,34 @@ ToggleFullscreen(Display *disp, Window root) {
         found->h = monitors[mon].height;
 
         found->is_fullscreen = 1;
-		SetWindowState(disp, found->id, ewmh.net_wm_state_fullscreen, 1);
+        SetWindowState(disp, found->id, ewmh.net_wm_state_fullscreen, 1);
         
         XSetWindowBorderWidth(disp, found->id, 0);
         XMoveResizeWindow(disp, found->id, found->x, found->y, found->w, found->h);
         XRaiseWindow(disp, found->id);
+
+        // Notifichiamo la nuova dimensione (fullscreen)
+        XSendEvent(disp, found->id, False, StructureNotifyMask, (XEvent *)&(XConfigureEvent){
+            .type = ConfigureNotify,
+            .display = disp,
+            .event = found->id,
+            .window = found->id,
+            .x = found->x,
+            .y = found->y,
+            .width = found->w,
+            .height = found->h,
+            .border_width = 0,
+            .above = None,
+            .override_redirect = False
+        });
+
     } else {
+        // --- ESCI DAL FULLSCREEN ---
         found->is_fullscreen = 0;
-		SetWindowState(disp, found->id, ewmh.net_wm_state_fullscreen, 1);
+        
+        // CORREZIONE: usiamo 0 per RIMUOVERE lo stato
+        SetWindowState(disp, found->id, ewmh.net_wm_state_fullscreen, 0); 
+        
         XSetWindowBorderWidth(disp, found->id, BORDER_WIDTH);
         
         if (!found->is_floating) {
@@ -1042,7 +1061,23 @@ ToggleFullscreen(Display *disp, Window root) {
             found->h = found->old_h;
             XMoveResizeWindow(disp, found->id, found->x, found->y, found->w, found->h);
         }
+
+        // CORREZIONE: Invia ConfigureNotify a Firefox per forzare il refresh di YT
+        XSendEvent(disp, found->id, False, StructureNotifyMask, (XEvent *)&(XConfigureEvent){
+            .type = ConfigureNotify,
+            .display = disp,
+            .event = found->id,
+            .window = found->id,
+            .x = found->x,
+            .y = found->y,
+            .width = found->w,
+            .height = found->h,
+            .border_width = BORDER_WIDTH,
+            .above = None,
+            .override_redirect = False
+        });
     }
+
     XSync(disp, False);
 }
 
