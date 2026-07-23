@@ -95,7 +95,7 @@ Window GetFocusedWindow(Display *disp);
 void AttachClient(int ws, Client *c);
 void DetachClient(int ws, Client *c);
 
-void FocusWindow(Display *disp, Window w);
+void FocusWindow(Display *disp, Window w, Window root);
 void AddWindowList(Display *disp, Window w, Window root);
 void ChangeWorkspace(Display *disp, Window root, int new_ws);
 void MoveToWorkspace(Display *disp, Window root, int ws_target);

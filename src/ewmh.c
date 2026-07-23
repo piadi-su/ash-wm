@@ -26,16 +26,15 @@ void InitEWMH(Display *disp, Window root) {
     ewmh.net_wm_window_type_dialog= XInternAtom(disp, "_NET_WM_WINDOW_TYPE_DIALOG", False);
     ewmh.net_workarea             = XInternAtom(disp, "_NET_WORKAREA", False);
 
-    // Creiamo la finestra fittizia per _NET_SUPPORTING_WM_CHECK (Priorità #10)
     Window check_win = XCreateSimpleWindow(disp, root, 0, 0, 1, 1, 0, 0, 0);
     
-    // Assegniamo il nome al WM (_NET_WM_NAME - Priorità #11)
+	// assign wm name
     XChangeProperty(disp, check_win, ewmh.net_wm_name, XInternAtom(disp, "UTF8_STRING", False), 8,
                     PropModeReplace, (unsigned char *)"ashwm", 5);
     XChangeProperty(disp, check_win, ewmh.net_supporting_wm_check, XA_WINDOW, 32,
                     PropModeReplace, (unsigned char *)&check_win, 1);
     
-    // Impostiamo la stessa proprietà sulla Root Window
+	// assign proprietis on root
     XChangeProperty(disp, root, ewmh.net_supporting_wm_check, XA_WINDOW, 32,
                     PropModeReplace, (unsigned char *)&check_win, 1);
     XChangeProperty(disp, root, ewmh.net_wm_name, XInternAtom(disp, "UTF8_STRING", False), 8,
@@ -44,7 +43,7 @@ void InitEWMH(Display *disp, Window root) {
     UpdateEWMHSupported(disp, root);
 }
 
-// Registra la lista degli atom supportati (_NET_SUPPORTED - Priorità #2)
+// all ATOM supported 
 void UpdateEWMHSupported(Display *disp, Window root) {
     Atom net_atoms[] = {
         ewmh.net_supported,
@@ -70,7 +69,7 @@ void UpdateEWMHSupported(Display *disp, Window root) {
 }
 
 void SetWindowState(Display *disp, Window w, Atom state, int action) {
-    // action: 1 = add, 0 = remove
+
     Atom actual_type;
     int actual_format;
     unsigned long nitems, bytes_after;
@@ -90,11 +89,11 @@ void SetWindowState(Display *disp, Window w, Atom state, int action) {
     }
 
     if (action && !found) {
-        // Aggiunge lo stato se non c'era
+
         XChangeProperty(disp, w, ewmh.net_wm_state, XA_ATOM, 32,
                         PropModeAppend, (unsigned char *)&state, 1);
     } else if (!action && found) {
-        // Rimuove lo stato se c'era
+
         Atom new_atoms[1024];
         int count = 0;
         for (unsigned long i = 0; i < nitems; i++) {
@@ -111,12 +110,9 @@ void SetWindowState(Display *disp, Window w, Atom state, int action) {
 
 
 void UpdateClientList(Display *disp, Window root) {
-    // Allocazione temporanea per raccogliere tutte le finestre aperte
-    // (Puoi usare un numero massimo ragionevole o allocazione dinamica)
     Window clients[256];
     int count = 0;
 
-    // 1. Raccogliamo tutte le finestre da tutti i workspace per _NET_CLIENT_LIST
     for (int i = 0; i < WORKSPACES; i++) {
         Client *curr = workspaces[i].list_Cl;
         if (curr != NULL) {
@@ -129,14 +125,26 @@ void UpdateClientList(Display *disp, Window root) {
         }
     }
 
-    // Aggiorniamo _NET_CLIENT_LIST sulla Root Window
     XChangeProperty(disp, root, ewmh.net_client_list, XA_WINDOW, 32,
                     PropModeReplace, (unsigned char *)clients, count);
 
-    // 2. Per _NET_CLIENT_LIST_STACKING:
-    // In un WM minimale come AshWM, l'ordine di stacking corrisponde indicativamente
-    // all'ordine in cui sono disposte nel layout (con le floating in cima).
-    // Mandiamo la stessa lista o riordinata per garantire che Picom sappia cosa c'è a schermo.
     XChangeProperty(disp, root, ewmh.net_client_list_stacking, XA_WINDOW, 32,
                     PropModeReplace, (unsigned char *)clients, count);
+}
+
+void UpdateActiveWindow(Display *disp, Window root, Window active_win) {
+    XChangeProperty(disp, root, ewmh.net_active_window, XA_WINDOW, 32,
+                    PropModeReplace, (unsigned char *)&active_win, 1);
+}
+
+void UpdateCurrentDesktop(Display *disp, Window root, int current_ws) {
+    long ws = current_ws;
+    XChangeProperty(disp, root, ewmh.net_current_desktop, XA_CARDINAL, 32,
+                    PropModeReplace, (unsigned char *)&ws, 1);
+}
+
+void UpdateClientDesktop(Display *disp, Window client_win, int ws_index) {
+    long ws = ws_index;
+    XChangeProperty(disp, client_win, ewmh.net_wm_desktop, XA_CARDINAL, 32,
+                    PropModeReplace, (unsigned char *)&ws, 1);
 }

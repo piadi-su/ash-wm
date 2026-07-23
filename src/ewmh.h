@@ -29,4 +29,8 @@ void UpdateEWMHSupported(Display *disp, Window root);
 void SetWindowState(Display *disp, Window w, Atom state, int action);
 void UpdateClientList(Display *disp, Window root);
 
+void UpdateActiveWindow(Display *disp, Window root, Window active_win);
+void UpdateCurrentDesktop(Display *disp, Window root, int current_ws);
+void UpdateClientDesktop(Display *disp, Window client_win, int ws_index);
+
 #endif

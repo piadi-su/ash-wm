@@ -40,8 +40,8 @@ int monitors_count = 0;
 Workspace workspaces[WORKSPACES];
 Atom wm_delete_window;
 
-double global_mfact = 0.55;
-double global_vfact = 0.50;
+double global_mfact = 0.5;
+double global_vfact = 0.5;
 
 
 
@@ -249,7 +249,7 @@ DetachClient(int ws, Client *c)
 
 //func to change worksapce focus
 void 
-FocusWindow(Display *disp, Window w) {
+FocusWindow(Display *disp, Window w, Window root) {
     if (w == None) return;
 
     if (IsDock(disp, w)) {
@@ -291,6 +291,7 @@ FocusWindow(Display *disp, Window w) {
         curr = curr->next;
     } while (curr != workspaces[target_ws].list_Cl);
 
+	UpdateActiveWindow(disp, root, w);
     XFlush(disp);
 }
 
@@ -324,6 +325,8 @@ AddWindowList(Display *disp, Window w, Window root)
     Client *new_window = calloc(1, sizeof(Client));
     if (new_window == NULL)
         return;
+
+
 
     // add window id to struct
     new_window->id = w;
@@ -388,6 +391,7 @@ AddWindowList(Display *disp, Window w, Window root)
     Dwindle(disp, active_ws);
     UpdateBarIPC(disp, root);
 	UpdateClientList(disp, root);
+	UpdateClientDesktop(disp, w, active_ws);
 } 
 
 
@@ -419,7 +423,7 @@ ChangeWorkspace(Display *disp, Window root, int target_local_id)
 
 	if(workspaces[new_ws].list_Cl != NULL) 
 	{
-		FocusWindow(disp, workspaces[new_ws].list_Cl->id);
+		FocusWindow(disp, workspaces[new_ws].list_Cl->id, root);
 	}
 	else 
 	{
@@ -429,6 +433,7 @@ ChangeWorkspace(Display *disp, Window root, int target_local_id)
     XSync(disp, False);
 	UpdateBarIPC(disp, root);
 	UpdateClientList(disp, root);
+	UpdateCurrentDesktop(disp, root, new_ws);
 }
 
 
@@ -524,12 +529,12 @@ MoveToWorkspace(Display *disp, Window root, int target_local_id) {
 
 	if(workspaces[ws_target].monitor_id != -1) 
 	{
-		FocusWindow(disp, found->id);
+		FocusWindow(disp, found->id, root);
 	} 
 	else 
 	{
 		if (workspaces[source_ws].list_Cl != NULL) {
-			FocusWindow(disp, workspaces[source_ws].list_Cl->id);
+			FocusWindow(disp, workspaces[source_ws].list_Cl->id, root);
 		} 
 		else 
 		{
@@ -542,6 +547,7 @@ MoveToWorkspace(Display *disp, Window root, int target_local_id) {
 
     XSync(disp, False);
     UpdateBarIPC(disp, root);
+	UpdateClientDesktop(disp, focused_win, ws_target);
 
 } 
 
@@ -574,7 +580,7 @@ RemoveWindowList(Display *disp, Window w, Window root)
 
 
         if (workspaces[ws_index].monitor_id != -1) {
-            FocusWindow(disp, workspaces[ws_index].list_Cl->id);
+            FocusWindow(disp, workspaces[ws_index].list_Cl->id, root);
         }
 
     }
@@ -925,16 +931,17 @@ MoveWindowToMonitor(Display *disp, Window root, Window w)
     if (monitors[target_monitor].current_ws == ws_target) {
         XMapWindow(disp, found->id); 
         XWarpPointer(disp, None, found->id, 0, 0, 0, 0, found->w / 2, found->h / 2);
-        FocusWindow(disp, found->id);
+        FocusWindow(disp, found->id, root);
     } else {
         if (workspaces[source_ws].list_Cl != NULL) {
-            FocusWindow(disp, workspaces[source_ws].list_Cl->id);
+            FocusWindow(disp, workspaces[source_ws].list_Cl->id, root);
         } else {
             XSetInputFocus(disp, root, RevertToParent, CurrentTime);
         }
     }
 
     XSync(disp, False);
+	UpdateClientDesktop(disp, w, ws_target);
 }
 
 
@@ -979,14 +986,14 @@ CycleFocus(Display *disp , Window root, int direction) {
     } while (curr != head);
 
     if (target == NULL) {
-        FocusWindow(disp, head->id);
+        FocusWindow(disp, head->id, root);
         return;
     }
 
     Client *next_node = (direction == 1) ? target->next : target->prev;
 
     if (next_node != NULL) {
-        FocusWindow(disp, next_node->id);
+        FocusWindow(disp, next_node->id, root);
 		RaiseFloatingWindows(disp, ws);
     }
 }
@@ -1238,7 +1245,7 @@ CycleMonitorFocus(Display *disp, Window root, int direction) {
     XWarpPointer(disp, None, root, 0, 0, 0, 0, target_x, target_y);
 
     if (workspaces[target_ws].list_Cl != NULL) {
-        FocusWindow(disp, workspaces[target_ws].list_Cl->id);
+        FocusWindow(disp, workspaces[target_ws].list_Cl->id, root);
     } else {
         XSetInputFocus(disp, root, RevertToParent, CurrentTime);
     }
@@ -1456,7 +1463,7 @@ int main(int argc, char *argv[])
 			case MapRequest:	 
 				AddWindowList(disp, Ev.xmaprequest.window, root );
 				DEBUG_LOG("[+] new window id: %lu\n", Ev.xmaprequest.window);
-				FocusWindow(disp, Ev.xmaprequest.window);
+				FocusWindow(disp, Ev.xmaprequest.window, root);
 				break;
 
 			case ConfigureRequest:
@@ -1517,7 +1524,7 @@ int main(int argc, char *argv[])
 			// 					else if (action == 2) want_fullscreen = !c->is_fullscreen; // _NET_WM_STATE_TOGGLE
 			//
 			// 					if (c->is_fullscreen != want_fullscreen) {
-			// 						FocusWindow(disp, c->id);
+			// 						FocusWindow(disp, c->id, root);
 			// 						ToggleFullscreen(disp, root);
 			// 					}
 			//
@@ -1686,7 +1693,7 @@ int main(int argc, char *argv[])
 						Dwindle(disp, ws);
 					}
 
-					FocusWindow(disp, Ev.xbutton.subwindow);
+					FocusWindow(disp, Ev.xbutton.subwindow, root);
 					int target_ws = -1;
 					Client *c_click = FindClientByWindow(Ev.xbutton.subwindow, &target_ws);
 					if (c_click && c_click->is_floating) {
@@ -1694,7 +1701,7 @@ int main(int argc, char *argv[])
 					}
 				} else {
 					if (Ev.xbutton.window != root) {
-						FocusWindow(disp, Ev.xbutton.window);
+						FocusWindow(disp, Ev.xbutton.window, root);
 					}
 				}
 				XAllowEvents(disp, ReplayPointer, CurrentTime);
@@ -1819,7 +1826,7 @@ int main(int argc, char *argv[])
 						found_client->h = final_attr.height;
 
 						Dwindle(disp, ws);
-						FocusWindow(disp, found_client->id);
+						FocusWindow(disp, found_client->id, root);
 					}
 					mouse_start.subwindow = None; 
 				}
@@ -1844,7 +1851,7 @@ int main(int argc, char *argv[])
 						if (active_c && active_c->is_floating && c->is_floating && active_c->id != c->id) {
 							break;
 						}
-						FocusWindow(disp, Ev.xcrossing.window);
+						FocusWindow(disp, Ev.xcrossing.window, root);
 					}
 				}
 				break;
@@ -1893,7 +1900,7 @@ int main(int argc, char *argv[])
 							else if (action == 2) want_fullscreen = !c->is_fullscreen; // _NET_WM_STATE_TOGGLE
 
 							if (c->is_fullscreen != want_fullscreen) {
-								FocusWindow(disp, c->id);
+								FocusWindow(disp, c->id, root);
 								ToggleFullscreen(disp, root);
 							}
 						}
