@@ -72,9 +72,13 @@ UpdateBarIPC(Display *disp, Window root)
             }
             
             if (offset < sizeof(status)) {
-                int written = snprintf(status + offset, sizeof(status) - offset, "%d:%c ", real_ws, ws_status);
-                if (written > 0) {
+                int space_left = sizeof(status) - offset;
+                int written = snprintf(status + offset, space_left, "%d:%c ", real_ws, ws_status);
+                
+                if (written > 0 && written < space_left) {
                     offset += written;
+                } else {
+                    break; 
                 }
             }
         }
