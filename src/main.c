@@ -522,39 +522,33 @@ RemoveWindowList(Display *disp, Window w, Window root)
     int ws_index = -1;
     Client *found = FindClientByWindow(w, &ws_index);
 
-
-    if(found == NULL)
+    if (found == NULL)
         return;
 
-    if(found->next == found) 
-	{
+    if (found->next == found) {
         workspaces[ws_index].list_Cl = NULL;
-    }
-
-    else 
-	{
+    } else {
         found->prev->next = found->next;
         found->next->prev = found->prev;
 
-
-        if(workspaces[ws_index].list_Cl == found) {
+        if (workspaces[ws_index].list_Cl == found) {
             workspaces[ws_index].list_Cl = found->next;
         }
-
-
-        if (workspaces[ws_index].monitor_id != -1) {
-            FocusWindow(disp, workspaces[ws_index].list_Cl->id, root);
-        }
-
     }
-
 
     DEBUG_LOG("[-] window %lu removed (WS %d)\n", w, ws_index);
     free(found);
 
+    if (workspaces[ws_index].monitor_id != -1) {
+        if (workspaces[ws_index].list_Cl != NULL) {
+            FocusWindow(disp, workspaces[ws_index].list_Cl->id, root);
+        } else {
+            XSetInputFocus(disp, root, RevertToParent, CurrentTime);
+        }
+    }
+
     Dwindle(disp, ws_index);
     UpdateBarIPC(disp, root);
-
 } 
 
 
