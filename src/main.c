@@ -1,5 +1,5 @@
 /*
- * ashwm is a simple x11 tyling window manger
+ * ashwm is a simple x11 tiling window manger
  * inspired by dwm 
  *
  * code start write date 08/07/2026
@@ -450,114 +450,64 @@ ChangeWorkspace(Display *disp, Window root, int target_local_id)
 //move to worksapce
 void 
 MoveToWorkspace(Display *disp, Window root, int target_local_id) {
-
     Window focused_win;
     int revert_to;
 
     XGetInputFocus(disp, &focused_win, &revert_to);
-
-    if(focused_win == None || focused_win == root) return;
-
+    if (focused_win == None || focused_win == root) return;
 
     int source_ws = -1;
     Client *cursor = NULL;
     Client *found = NULL;
 
-    for(int i = 0; i < WORKSPACES; i++) {
+    for (int i = 0; i < WORKSPACES; i++) {
         cursor = workspaces[i].list_Cl;
-        if(cursor != NULL) {
+        if (cursor != NULL) {
             do {
-                if(cursor->id == focused_win) {
+                if (cursor->id == focused_win) {
                     source_ws = i;
                     found = cursor;
                     break;
                 }
                 cursor = cursor->next;
-            } while(cursor != workspaces[i].list_Cl);
+            } while (cursor != workspaces[i].list_Cl);
         }
-        if(source_ws != -1) break;
+        if (source_ws != -1) break;
     }
 
-    if(source_ws == -1) return;
-
+    if (source_ws == -1) return;
 
     int target_monitor = GetMouseMonitor(disp, root);
-
     int ws_target = (target_monitor * WORKSPACES_X_MONITOR) + (target_local_id % WORKSPACES_X_MONITOR);
 
-    if(source_ws == ws_target) return;
+    if (source_ws == ws_target) return;
 
     DEBUG_LOG("[ASH-WM] mv window %lu from WS %d to WS %d (Monitor %d)\n", focused_win, source_ws, ws_target, target_monitor);
 
-	if(found->next == found) {
-		workspaces[source_ws].list_Cl = NULL;
-	}
-	else
-	{
-		found->prev->next = found->next;
-		found->next->prev = found->prev;
-		
-		if(workspaces[source_ws].list_Cl == found) {
-			workspaces[source_ws].list_Cl = found->next;
-		}
-
-    }
+    DetachClient(source_ws, found);
 
     found->x = monitors[target_monitor].x + GAPS;
     found->y = monitors[target_monitor].y + GAPS;
     XMoveWindow(disp, focused_win, found->x, found->y);
 
-
-
-
-	if(workspaces[ws_target].list_Cl == NULL) 
-	{
-
-		workspaces[ws_target].list_Cl = found;
-		found->next = found;
-		found->prev = found;
-
-	} 
-	else
-	{
-		Client *head = workspaces[ws_target].list_Cl;
-		Client *tail = head->prev;
-
-		found->next = head;
-		found->prev = tail;
-		tail->next = found;
-		head->prev = found;
-
-	}
-
+    AttachClient(ws_target, found);
 
     Dwindle(disp, ws_target);
     Dwindle(disp, source_ws);
-    XSync(disp, False);
 
+    if (workspaces[ws_target].monitor_id != -1) {
+        FocusWindow(disp, found->id, root);
+    } else {
+        if (workspaces[source_ws].list_Cl != NULL) {
+            FocusWindow(disp, workspaces[source_ws].list_Cl->id, root);
+        } else {
+            XSetInputFocus(disp, root, RevertToParent, CurrentTime);
+        }
+    }
 
-	if(workspaces[ws_target].monitor_id != -1) 
-	{
-		FocusWindow(disp, found->id, root);
-	} 
-	else 
-	{
-		if (workspaces[source_ws].list_Cl != NULL) {
-			FocusWindow(disp, workspaces[source_ws].list_Cl->id, root);
-		} 
-		else 
-		{
-			XSetInputFocus(disp, root, RevertToParent, CurrentTime);
-		}
-
-	}
-
-    
-
-    XSync(disp, False);
     UpdateBarIPC(disp, root);
-	UpdateClientDesktop(disp, focused_win, ws_target);
-
+    UpdateClientDesktop(disp, focused_win, ws_target);
+    XSync(disp, False);
 } 
 
 
@@ -709,14 +659,16 @@ Dwindle(Display *disp, int ws_index)
     const unsigned int MIN_WIDTH = 30;
     const unsigned int MIN_HEIGHT = 30;
 
-    Window root_return, parent_return, *children = NULL;
-    unsigned int nchildren = 0;
+	Window root_return, parent_return, *children = NULL;
+	unsigned int nchildren = 0;
 
-    XGrabServer(disp); 
-    if (XQueryTree(disp, root_return = RootWindow(disp, DefaultScreen(disp)), &root_return, &parent_return, &children, &nchildren)) {
-        for (unsigned int i = 0; i < nchildren; i++) {
+	XGrabServer(disp); 
+
+	Window root_win = RootWindow(disp, DefaultScreen(disp));
+	if (XQueryTree(disp, root_win, &root_return, &parent_return, &children, &nchildren)) {
+		for (unsigned int i = 0; i < nchildren; i++) {
 			XWindowAttributes wa;
-			
+
 			if (XGetWindowAttributes(disp, children[i], &wa) && wa.map_state == IsViewable) {
 				Strut s = GetWindowStrut(disp, children[i]);
 				if (s.top > pad_top)       pad_top = s.top;
@@ -724,13 +676,16 @@ Dwindle(Display *disp, int ws_index)
 				if (s.left > pad_left)     pad_left = s.left;
 				if (s.right > pad_right)   pad_right = s.right;
 			}
-        }
-        if (children != NULL) {
-			XFree(children);
-			children = NULL;
 		}
-    }
-    XUngrabServer(disp);
+	}
+
+	if (children != NULL) {
+		XFree(children);
+		children = NULL;
+	}
+
+	XUngrabServer(disp); 
+	XFlush(disp);
 
     mx += pad_left;
     mw -= (pad_left + pad_right);
@@ -1511,47 +1466,6 @@ int main(int argc, char *argv[])
 				}
 				break;
 
-			// case ClientMessage:
-			// 	{
-			// 		Atom local_wm_state = XInternAtom(disp, "_NET_WM_STATE", False);
-			// 		Atom local_wm_fullscreen = XInternAtom(disp, "_NET_WM_STATE_FULLSCREEN", False);
-			//
-			// 		if (Ev.xclient.message_type == local_wm_state) {
-			// 			int ws_idx = -1;
-			// 			Client *c = FindClientByWindow(Ev.xclient.window, &ws_idx);
-			//
-			// 			if (c) {
-			// 				long action = Ev.xclient.data.l[0];
-			// 				Atom prop1 = (Atom)Ev.xclient.data.l[1];
-			// 				Atom prop2 = (Atom)Ev.xclient.data.l[2];
-			//
-			// 				if (prop1 == local_wm_fullscreen || prop2 == local_wm_fullscreen) {
-			// 					int want_fullscreen = c->is_fullscreen;
-			//
-			// 					if (action == 1)      want_fullscreen = 1; // _NET_WM_STATE_ADD
-			// 					else if (action == 0) want_fullscreen = 0; // _NET_WM_STATE_REMOVE
-			// 					else if (action == 2) want_fullscreen = !c->is_fullscreen; // _NET_WM_STATE_TOGGLE
-			//
-			// 					if (c->is_fullscreen != want_fullscreen) {
-			// 						FocusWindow(disp, c->id, root);
-			// 						ToggleFullscreen(disp, root);
-			// 					}
-			//
-			// 					XEvent xev;
-			// 					xev.type = ClientMessage;
-			// 					xev.xclient.window = c->id;
-			// 					xev.xclient.message_type = local_wm_state;
-			// 					xev.xclient.format = 32;
-			// 					xev.xclient.data.l[0] = want_fullscreen ? 1 : 0;
-			// 					xev.xclient.data.l[1] = local_wm_fullscreen;
-			// 					xev.xclient.data.l[2] = 0;
-			// 					XSendEvent(disp, root, False, SubstructureNotifyMask | SubstructureRedirectMask, &xev);
-			// 					XFlush(disp);
-			// 				}
-			// 			}
-			// 		}
-			// 	}
-			// 	break;
 
 			case KeyPress:
 				clean_state = Ev.xkey.state & ~(LockMask | Mod2Mask);
