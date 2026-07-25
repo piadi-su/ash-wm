@@ -719,7 +719,7 @@ Dwindle(Display *disp, int ws_index)
 
 				XSetWindowBorderWidth(disp, cursor->id, BORDER_WIDTH);
 
-				ApplyNormalHints(disp, cursor->id, &cursor->x, &cursor->y, &cursor->w, &cursor->h);
+				ApplyNormalHints(disp, cursor->id, &cursor->w, &cursor->h);
 
 				XMoveResizeWindow(disp, cursor->id, cursor->x, cursor->y, cursor->w, cursor->h);
 				XMapWindow(disp, cursor->id); 
@@ -814,7 +814,7 @@ Dwindle(Display *disp, int ws_index)
         if (cursor->x < mx) cursor->x = mx;
         if (cursor->y < my) cursor->y = my;
 
-		ApplyNormalHints(disp, cursor->id, &cursor->x, &cursor->y, &cursor->w, &cursor->h);
+		ApplyNormalHints(disp, cursor->id, &cursor->w, &cursor->h);
 
         XMoveResizeWindow(disp, cursor->id, cursor->x, cursor->y, cursor->w, cursor->h);
         XMapWindow(disp, cursor->id); 
@@ -828,7 +828,7 @@ Dwindle(Display *disp, int ws_index)
         if (cursor->is_floating) {
             XSetWindowBorderWidth(disp, cursor->id, BORDER_WIDTH);
 
-			ApplyNormalHints(disp, cursor->id, &cursor->x, &cursor->y, &cursor->w, &cursor->h);
+			ApplyNormalHints(disp, cursor->id, &cursor->w, &cursor->h);
 
             XMoveResizeWindow(disp, cursor->id, cursor->x, cursor->y, cursor->w, cursor->h);
             XMapWindow(disp, cursor->id);
@@ -1460,6 +1460,21 @@ int main(int argc, char *argv[])
 						wc.stack_mode = cre->detail;
 						XConfigureWindow(disp, cre->window, cre->value_mask, &wc);
 					}
+
+					//frame work intensive app test
+					XSendEvent(disp, cre->window, False, StructureNotifyMask, (XEvent *)&(XConfigureEvent){
+							.type = ConfigureNotify,
+							.display = disp,
+							.event = cre->window,
+							.window = cre->window,
+							.x = cre->x,
+							.y = cre->y,
+							.width = cre->width,
+							.height = cre->height,
+							.border_width = cre->border_width,
+							.above = None,
+							.override_redirect = False
+							});
 				}
 				break;
 

@@ -10,7 +10,7 @@ void InitICCCM(Display *disp) {
     icccm.wm_change_state  = XInternAtom(disp, "WM_CHANGE_STATE", False);
 }
 
-void ApplyNormalHints(Display *disp, Window w, int *x, int *y, unsigned int *w_out, unsigned int *h_out) {
+void ApplyNormalHints(Display *disp, Window w, unsigned int *w_out, unsigned int *h_out) {
     XSizeHints hints;
     long supplied;
 

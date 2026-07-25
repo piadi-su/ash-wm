@@ -15,6 +15,6 @@ typedef struct {
 extern ICCCMAtoms icccm;
 
 void InitICCCM(Display *disp);
-void ApplyNormalHints(Display *disp, Window w, int *x, int *y, unsigned int *w_out, unsigned int *h_out);
+void ApplyNormalHints(Display *disp, Window w, unsigned int *w_out, unsigned int *h_out);
 
 #endif
