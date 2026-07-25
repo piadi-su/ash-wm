@@ -1,5 +1,4 @@
 #include "icccm.h"
-#include <stdio.h>
 
 ICCCMAtoms icccm;
 

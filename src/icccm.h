@@ -4,7 +4,6 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-// Struttura per memorizzare gli Atom ICCCM globali
 typedef struct {
     Atom wm_protocols;
     Atom wm_delete_window;

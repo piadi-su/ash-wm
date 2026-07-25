@@ -5,7 +5,7 @@
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 
-// command wnum
+// command enum
 typedef enum {
     ACTION_NONE = 0,
     ACTION_KILL,
@@ -57,7 +57,7 @@ typedef struct {
 
 
 //MOD key
-#define MODIFIER Mod4Mask //win
+#define MODIFIER Mod4Mask 
 
 
 //mod for moving window to workpace

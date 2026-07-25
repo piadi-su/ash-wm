@@ -962,7 +962,8 @@ CycleFocus(Display *disp , Window root, int direction) {
 
 
 
-void ToggleFullscreen(Display *disp, Window root) {
+void 
+ToggleFullscreen(Display *disp, Window root) {
     Window focused_win;
     int revert_to;
     XGetInputFocus(disp, &focused_win, &revert_to);
@@ -990,7 +991,7 @@ void ToggleFullscreen(Display *disp, Window root) {
     int mon = workspaces[ws].monitor_id;
 
     if (!found->is_fullscreen) {
-        // --- ENTRA IN FULLSCREEN ---
+
         found->old_x = found->x;
         found->old_y = found->y;
         found->old_w = found->w;
@@ -1008,7 +1009,6 @@ void ToggleFullscreen(Display *disp, Window root) {
         XMoveResizeWindow(disp, found->id, found->x, found->y, found->w, found->h);
         XRaiseWindow(disp, found->id);
 
-        // Notifichiamo la nuova dimensione (fullscreen)
         XSendEvent(disp, found->id, False, StructureNotifyMask, (XEvent *)&(XConfigureEvent){
             .type = ConfigureNotify,
             .display = disp,
@@ -1400,7 +1400,7 @@ int main(int argc, char *argv[])
 	
 	for(int i = 0 ; i < monitors_count; i++)
 	{
-		int start_ws = i * WORKSPACES_X_MONITOR; // Monitor 0 -> WS 0 | Monitor 1 -> WS 10
+		int start_ws = i * WORKSPACES_X_MONITOR; // es. Monitor 0 -> WS 0 | Monitor 1 -> WS 10 
 		monitors[i].current_ws = start_ws;
 		workspaces[start_ws].monitor_id = i;
 	}
@@ -1435,7 +1435,6 @@ int main(int argc, char *argv[])
 					int ws_idx = -1;
 					Client *c = FindClientByWindow(cre->window, &ws_idx);
 
-					// Se la finestra è gestita dal WM ed è floating (o è un pop-up), assecondiamo la geometria
 					if (c && c->is_floating) {
 						if (cre->value_mask & CWX)      c->x = cre->x;
 						if (cre->value_mask & CWY)      c->y = cre->y;
