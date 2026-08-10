@@ -1461,20 +1461,6 @@ int main(int argc, char *argv[])
 						XConfigureWindow(disp, cre->window, cre->value_mask, &wc);
 					}
 
-					//frame work intensive app test
-					XSendEvent(disp, cre->window, False, StructureNotifyMask, (XEvent *)&(XConfigureEvent){
-							.type = ConfigureNotify,
-							.display = disp,
-							.event = cre->window,
-							.window = cre->window,
-							.x = cre->x,
-							.y = cre->y,
-							.width = cre->width,
-							.height = cre->height,
-							.border_width = cre->border_width,
-							.above = None,
-							.override_redirect = False
-							});
 				}
 				break;
 

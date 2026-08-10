@@ -36,7 +36,8 @@ sudo make install
 
 ## DEMO
 
-![AshWM Demo](img/demo.gif)
+![AshWM Demo](img/demo_repo1.png)
+![AshWM Demo](img/demo_repo2.png)
 
 ---
 the bar on top is ashes, a bar especially made for ash-wm
